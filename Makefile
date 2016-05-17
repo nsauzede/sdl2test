@@ -1,6 +1,7 @@
 TARGET=main.exe
 
-SDL2CONFIG=sdl2-config
+#SDL2CONFIG=sdl2-config
+SDL2CONFIG=sdl-config
 
 CXXFLAGS=-Wall -Werror
 #CXXFLAGS=-Wextra
@@ -11,6 +12,18 @@ CXXFLAGS+=`$(SDL2CONFIG) --cflags`
 
 WINDOWS=1
 STATIC=1
+
+SDLV=$(shell )
+
+ifeq ($(shell $(SDL2CONFIG) --version | cut -f 1 -d "."),1)
+USE_SDL1=1
+else
+USE_SDL1=
+endif
+
+ifdef USE_SDL1
+CXXFLAGS+=-DSDL1
+endif
 
 ifdef STATIC
 LDLIBS+=`$(SDL2CONFIG) --static-libs` -static
