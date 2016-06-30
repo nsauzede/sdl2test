@@ -26,7 +26,7 @@ int main( int argc, char *argv[]) {
 #ifdef SDL1
 	screen = SDL_SetVideoMode( w, h, bpp, 0);
 #else
-	SDL_CreateWindowAndRenderer( 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP, &sdlWindow, &sdlRenderer);
+	SDL_CreateWindowAndRenderer( w, h, 0, &sdlWindow, &sdlRenderer);
 	screen = SDL_CreateRGBSurface(0, w, h, bpp,
                                         0x00FF0000,
                                         0x0000FF00,
