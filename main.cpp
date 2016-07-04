@@ -48,6 +48,20 @@ int main( int argc, char *argv[]) {
 				break;
 			}
 		}
+#ifdef SDL1
+		SDL_Rect rect;
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = w;
+		rect.h = h;
+		Uint32 col = SDL_MapRGB( screen->format, 128, 0, 0);
+		SDL_FillRect( screen, &rect, col);
+		SDL_UpdateRect( screen, 0, 0, 0, 0);
+#else
+		SDL_SetRenderDrawColor( sdlRenderer, 128, 0, 0, 255);
+		SDL_RenderClear( sdlRenderer);
+		SDL_RenderPresent( sdlRenderer);
+#endif
 		SDL_Delay( 500);
 	}
 	std::cout << "bye" << std::endl;
