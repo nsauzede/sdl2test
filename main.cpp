@@ -19,7 +19,7 @@ int main( int argc, char *argv[]) {
 #else
 	SDL_Window *sdlWindow = 0;
 	SDL_Renderer *sdlRenderer = 0;
-//	SDL_Texture *sdlTexture = 0;
+	SDL_Texture *sdlTexture = 0;
 #endif
 
 	SDL_Init( SDL_INIT_VIDEO);
@@ -32,7 +32,7 @@ int main( int argc, char *argv[]) {
                                         0x0000FF00,
                                         0x000000FF,
                                         0xFF000000);
-//	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
 #endif
 	if (!screen) {
 		std::cout << "failed to init SDL" << std::endl;
@@ -48,7 +48,8 @@ int main( int argc, char *argv[]) {
 				break;
 			}
 		}
-#ifdef SDL1
+		if (quit)
+			break;
 		SDL_Rect rect;
 		rect.x = 0;
 		rect.y = 0;
@@ -56,10 +57,12 @@ int main( int argc, char *argv[]) {
 		rect.h = h;
 		Uint32 col = SDL_MapRGB( screen->format, 128, 0, 0);
 		SDL_FillRect( screen, &rect, col);
+#ifdef SDL1
 		SDL_UpdateRect( screen, 0, 0, 0, 0);
 #else
-		SDL_SetRenderDrawColor( sdlRenderer, 128, 0, 0, 255);
+		SDL_UpdateTexture( sdlTexture, NULL, screen->pixels, screen->pitch);
 		SDL_RenderClear( sdlRenderer);
+		SDL_RenderCopy( sdlRenderer, sdlTexture, NULL, NULL);
 		SDL_RenderPresent( sdlRenderer);
 #endif
 		SDL_Delay( 500);
