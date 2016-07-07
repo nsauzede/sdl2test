@@ -1,4 +1,4 @@
-TARGET=main.exe
+TARGET=main_cpp.exe main_c.exe
 
 CXXFLAGS=-Wall -Werror
 CXXFLAGS+=-Wextra
@@ -9,11 +9,12 @@ CXXFLAGS+=-I.
 
 include sdl.mak
 ifeq ($(SDL_VER),1)
-CXXFLAGS+=-DSDL1
+SDL_FLAGS+=-DSDL1
 else
-CXXFLAGS+=-DSDL2
+SDL_FLAGS+=-DSDL2
 endif
 
+CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
 LDLIBS+=$(SDL_LIBS)
 
