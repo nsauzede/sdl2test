@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 
-int main() {
+int main( int argc, char *argv[]) {
 #ifdef SDL1
 #define SDLV 1
 #else
