@@ -4,7 +4,19 @@
 
 #include "CSDL.h"
 
-int main() {
+int main( int argc, char *argv[]) {
+	int help = 0;
+	int arg = 1;
+	while (arg < argc) {
+		if (!strcmp( argv[arg], "--help")){
+			help = 1;
+		}
+		arg++;
+	}
+	if (help) {
+		printf( "TODO: write help\n");
+		exit( 0);
+	}
 #ifdef SDL1
 #define SDLV 1
 #else
@@ -12,10 +24,7 @@ int main() {
 #endif
 	std::cout << "hello SDL " << SDLV << std::endl;
 	CSDL sdl;
-	if (sdl.Init()) {
-		std::cout << "failed to init SDL" << std::endl;
-		exit( 1);
-	}
+	sdl.Init();
 	int quit = 0;
 	while (!quit) {
 		if (sdl.Poll()) {
