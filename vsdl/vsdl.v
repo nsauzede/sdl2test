@@ -1,0 +1,86 @@
+// Copyright(C) 2019 Nicolas Sauzede. All rights reserved.
+// Use of this source code is governed by an MIT license
+// that can be found in the LICENSE_v file.
+
+module vsdl
+
+#flag linux -lSDL2
+#flag -I/usr/include/SDL2 -D_REENTRANT
+#include <SDL.h>
+
+import const (
+        SDL_INIT_VIDEO
+
+        SDL_PIXELFORMAT_ARGB8888
+        SDL_TEXTUREACCESS_STREAMING
+
+        SDL_QUIT
+        SDL_KEYDOWN
+
+        SDLK_ESCAPE
+
+        NULL
+)
+
+fn C.SDL_Init(flags u32) int
+fn C.SDL_CreateWindowAndRenderer(w int, h int, flags u32, window voidptr, renderer voidptr) int
+fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) *SdlSurface
+fn C.SDL_CreateTexture(renderer voidptr, format u32, access int, w int, h int) voidptr
+fn C.SDL_MapRGB(format voidptr, r u8, g u8, b u8) u32
+fn C.SDL_PollEvent(voidptr) int
+
+type SdlScancode int    // TODO define the real enum here
+type SdlKeycode i32
+type SdlRect SdlRect
+
+struct SdlQuitEvent {
+        _type u32
+        timestamp u32
+}
+struct SdlKeysym {
+pub:
+        scancode SdlScancode
+        sym SdlKeycode
+        mod u16
+        unused u32
+}
+struct SdlKeyboardEvent {
+pub:
+        _type u32
+        timestamp u32
+        windowid u32
+        state u8
+        repeat u8
+        padding2 u8
+        padding3 u8
+        keysym SdlKeysym
+}
+union SdlEventU {
+pub:
+        _type u32
+        quit SdlQuitEvent
+        key SdlKeyboardEvent
+}
+type SdlEvent SdlEventU
+struct SdlRect {
+pub:
+        x int
+        y int
+        w int
+        h int
+}
+struct SdlSurface {
+pub:
+        flags u32
+        format voidptr
+        w int
+        h int
+        pitch int
+        pixels voidptr
+        userdata voidptr
+        locked int
+        lock_data voidptr
+        clip_rect SdlRect
+        map voidptr
+        refcount int
+}
