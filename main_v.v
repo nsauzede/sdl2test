@@ -75,11 +75,13 @@ fn main() {
 //                tcol := [u8(0), u8(0), u8(0), u8(0)]
                 tcol := SdlColor {u8(3), u8(2), u8(1), u8(0)}
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', tcol)
-                tsurf := C.extTTF_RenderText_Solid(font,'Hello SDL_ttf', &tcol)
+                tsurf := voidptr(0)
+                C.extTTF_RenderText_Solid(font,'Hello SDL_ttf V !', &tcol, &tsurf)
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', 0)
-                println('tsurf=$tsurf')
+//                println('tsurf=$tsurf')
+//                println('tsurf=' + $tsurf')
                 ttext := C.SDL_CreateTextureFromSurface(sdl_renderer, tsurf)
-                println('ttext=$ttext')
+//                println('ttext=$ttext')
                 texw := 0
                 texh := 0
                 C.SDL_QueryTexture(ttext, 0, 0, &texw, &texh)

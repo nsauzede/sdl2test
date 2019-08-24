@@ -15,8 +15,8 @@ fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32
 fn C.SDL_CreateTexture(renderer voidptr, format u32, access int, w int, h int) voidptr
 fn C.SDL_MapRGB(format voidptr, r u8, g u8, b u8) u32
 fn C.SDL_PollEvent(voidptr) int
-fn C.extTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor) *SdlSurface
-fn C.toto()
+//fn C.extTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor, ret **SdlSurface)
+//fn C.toto()
 
 //fn C.TTF_Quit()
 //fn C.TTF_OpenFont(a byteptr, b int) voidptr
