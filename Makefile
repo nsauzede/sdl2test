@@ -1,9 +1,10 @@
 TARGET:=
 TARGET+=main_cpp.exe
 TARGET+=main_c.exe
-#TARGET+=main_v.exe
+TARGET+=main_v.exe
 
-CXXFLAGS=-Wall -Werror
+CFLAGS:=
+CXXFLAGS:=-Wall -Werror
 CXXFLAGS+=-Wextra
 
 CXXFLAGS+=-g -O0
@@ -12,7 +13,7 @@ CXXFLAGS+=-I.
 
 V:=./v/v
 VFLAGS:=-debug -show_c_cmd
-VCFLAGS:=-std=gnu11 -w
+VCFLAGS:=-std=gnu11 -w -g -O0
 
 all: SDL_CHECK $(TARGET)
 
@@ -25,13 +26,13 @@ endif
 
 CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
-LDLIBS+=$(SDL_LIBS)
+LDLIBS+=$(SDL_LIBS) -lSDL2_ttf vsdlext.o
 
 $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
-%.exe: %.o
+%.exe: %.o | vsdlext.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 main_v.o: CFLAGS+=$(VCFLAGS)
@@ -40,7 +41,7 @@ main_v.o: CFLAGS+=$(VCFLAGS)
 	$(V) -o $@ $(VFLAGS) $^
 
 clean:
-	$(RM) $(TARGET) *.o
+	$(RM) $(TARGET) *.o *_v.c
 
 clobber: clean
 	$(RM) *~ *.exe fns.txt

@@ -7,20 +7,7 @@ module vsdl
 #flag linux -lSDL2
 #flag -I/usr/include/SDL2 -D_REENTRANT
 #include <SDL.h>
-
-import const (
-        SDL_INIT_VIDEO
-
-        SDL_PIXELFORMAT_ARGB8888
-        SDL_TEXTUREACCESS_STREAMING
-
-        SDL_QUIT
-        SDL_KEYDOWN
-
-        SDLK_ESCAPE
-
-        NULL
-)
+#include <SDL_ttf.h>
 
 fn C.SDL_Init(flags u32) int
 fn C.SDL_CreateWindowAndRenderer(w int, h int, flags u32, window voidptr, renderer voidptr) int
@@ -28,10 +15,37 @@ fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32
 fn C.SDL_CreateTexture(renderer voidptr, format u32, access int, w int, h int) voidptr
 fn C.SDL_MapRGB(format voidptr, r u8, g u8, b u8) u32
 fn C.SDL_PollEvent(voidptr) int
+fn C.extTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor) *SdlSurface
+fn C.toto()
+
+//fn C.TTF_Quit()
+//fn C.TTF_OpenFont(a byteptr, b int) voidptr
+//type SdlColor struct
+
+struct SdlColor{
+pub:
+        r u8
+        g u8
+        b u8
+        a u8
+}
+
+//fn C.TTF_RenderText_Solid(voidptr, voidptr, voidptr) voidptr
+/*
+struct SdlColor {
+//pub:
+        r u8
+        g u8
+        b u8
+        a u8
+}
+//type SdlColor SdlColor
+*/
 
 type SdlScancode int    // TODO define the real enum here
 type SdlKeycode i32
 type SdlRect SdlRect
+type SdlColor SdlColor
 
 struct SdlQuitEvent {
         _type u32
@@ -68,6 +82,13 @@ pub:
         y int
         w int
         h int
+}
+struct SdlColor0 {
+pub:
+        r u8
+        g u8
+        b u8
+        a u8
 }
 struct SdlSurface {
 pub:
