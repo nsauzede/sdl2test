@@ -26,14 +26,17 @@ endif
 
 CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
-LDLIBS+=$(SDL_LIBS) -lSDL2_ttf vsdlext.o
+LDLIBS+=$(SDL_LIBS) -lSDL2_ttf vsdlstub.o
 
 $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
-%.exe: %.o | vsdlext.o
+%.exe: %.o | vsdlstub.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+vsdlstub.o: vsdl/vsdlstub.c
+	$(CC) -c -o $@ $(CFLAGS) $^
 
 main_v.o: CFLAGS+=$(VCFLAGS)
 %.c: %.v

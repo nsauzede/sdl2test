@@ -18,6 +18,8 @@ fn C.SDL_PollEvent(voidptr) int
 //fn C.extTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor, ret **SdlSurface)
 //fn C.toto()
 
+//fn C.TTF_RenderText_Solid(voidptr, voidptr, SdlColor) voidptr
+
 //fn C.TTF_Quit()
 //fn C.TTF_OpenFont(a byteptr, b int) voidptr
 //type SdlColor struct

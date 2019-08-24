@@ -6,8 +6,8 @@ import vsdl
 type atexit_func_t fn ()
 fn C.atexit(atexit_func_t)
 
-fn C.TTF_Quit()
-fn C.TTF_RenderText_Solid(voidptr, voidptr, SdlColor) voidptr
+//fn C.TTF_Quit()
+//fn C.TTF_RenderText_Solid(voidptr, voidptr, SdlColor) voidptr
 
 fn main() {
         println('hello SDL 2 [v]\n')
@@ -21,9 +21,9 @@ fn main() {
         C.TTF_Init()
         C.atexit(C.TTF_Quit)
         font := C.TTF_OpenFont('RobotoMono-Regular.ttf', 16)
-        println('font=$font')
+//        println('font=$font')
         C.SDL_CreateWindowAndRenderer(w, h, 0, &sdl_window, &sdl_renderer)
-        println('renderer=$sdl_renderer')
+//        println('renderer=$sdl_renderer')
         screen := C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
         sdl_texture := C.SDL_CreateTexture(sdl_renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
         mut quit := false
@@ -76,7 +76,7 @@ fn main() {
                 tcol := SdlColor {u8(3), u8(2), u8(1), u8(0)}
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', tcol)
                 tsurf := voidptr(0)
-                C.extTTF_RenderText_Solid(font,'Hello SDL_ttf V !', &tcol, &tsurf)
+                C.stubTTF_RenderText_Solid(font,'Hello SDL_ttf V !', &tcol, &tsurf)
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', 0)
 //                println('tsurf=$tsurf')
 //                println('tsurf=' + $tsurf')
