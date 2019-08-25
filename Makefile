@@ -2,6 +2,7 @@ TARGET:=
 TARGET+=main_cpp.exe
 TARGET+=main_c.exe
 TARGET+=main_v.exe
+TARGET+=tetris_v.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -28,6 +29,10 @@ CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
 LDLIBS+=$(SDL_LIBS) -lSDL2_ttf vsdlstub.o
 
+CFLAGS+=-pthread
+CXXFLAGS+=-pthread
+LDFLAGS+=-pthread
+
 $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
@@ -36,9 +41,10 @@ $(V):
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 vsdlstub.o: vsdl/vsdlstub.c
-	$(CC) -c -o $@ $(CFLAGS) $^
+	$(CC) -c -o $@ $(CFLAGS) -g $^
 
 main_v.o: CFLAGS+=$(VCFLAGS)
+tetris_v.o: CFLAGS+=$(VCFLAGS)
 %.c: %.v
 	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^

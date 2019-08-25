@@ -9,6 +9,13 @@ fn C.atexit(atexit_func_t)
 //fn C.TTF_Quit()
 //fn C.TTF_RenderText_Solid(voidptr, voidptr, SdlColor) voidptr
 
+const (
+        Colors = [
+                SdlColor{u8(255), u8(255), u8(255), u8(0)},
+                SdlColor{u8(255), u8(0), u8(0), u8(0)}
+        ]
+)
+
 fn main() {
         println('hello SDL 2 [v]\n')
         w := 200
@@ -54,7 +61,8 @@ fn main() {
                 C.SDL_FillRect(screen, &rect, col)
 
                 rect = SdlRect {ballx, bally, balld, balld}
-                col = C.SDL_MapRGB(screen.format, 255, 0, 0)
+//                col = C.SDL_MapRGB(screen.format, 255, 0, 0)
+                col = C.SDL_MapRGB(screen.format, Colors[1].r, Colors[1].g, Colors[1].b)
                 C.SDL_FillRect(screen, &rect, col)
                 ballx += balldir
                 if balldir == 1 {
@@ -75,8 +83,10 @@ fn main() {
 //                tcol := [u8(0), u8(0), u8(0), u8(0)]
                 tcol := SdlColor {u8(3), u8(2), u8(1), u8(0)}
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', tcol)
-                tsurf := voidptr(0)
+                tsurf := *voidptr(0xdeadbeef)
+//                println('tsurf=$tsurf')
                 C.stubTTF_RenderText_Solid(font,'Hello SDL_ttf V !', &tcol, &tsurf)
+//                println('tsurf=$tsurf')
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', 0)
 //                println('tsurf=$tsurf')
 //                println('tsurf=' + $tsurf')

@@ -48,6 +48,7 @@ type SdlScancode int    // TODO define the real enum here
 type SdlKeycode i32
 type SdlRect SdlRect
 type SdlColor SdlColor
+type SdlSurface SdlSurface
 
 struct SdlQuitEvent {
         _type u32
