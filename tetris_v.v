@@ -2,6 +2,8 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
+// Ported to SDL2 V wrapper by Nicolas Sauzede 2019
+
 import rand
 import time
 import math

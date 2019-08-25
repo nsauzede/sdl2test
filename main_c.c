@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
 	font = TTF_OpenFont("RobotoMono-Regular.ttf", 16);
 #endif
 	int quit = 0;
+	int ballx = 0, bally = h / 2, balld = 10, balldir = 1;
 	while (!quit) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -64,12 +65,30 @@ int main(int argc, char *argv[]) {
 		if (quit)
 			break;
 		SDL_Rect rect;
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = w;
-		rect.h = h;
+               rect.x = 0;
+               rect.y = 0;
+               rect.w = w;
+               rect.h = h;
 		Uint32 col = SDL_MapRGB(screen->format, 255, 255, 255);
 		SDL_FillRect(screen, &rect, col);
+
+		rect.x = ballx;
+		rect.y = bally;
+		rect.w = balld;
+		rect.h = balld;
+		col = SDL_MapRGB(screen->format, 255, 0, 0);
+		SDL_FillRect(screen, &rect, col);
+		ballx += balldir;
+		if (balldir == 1) {
+			if (ballx >= w - balld) {
+				balldir = -1;
+			}
+		} else {
+			if (ballx <= 0) {
+				balldir = 1;
+			}
+		}
+
 #ifdef SDL1
 		SDL_UpdateRect(screen, 0, 0, 0, 0);
 #else
@@ -90,7 +109,7 @@ int main(int argc, char *argv[]) {
 		}
 		SDL_RenderPresent(sdlRenderer);
 #endif
-		SDL_Delay(500);
+		SDL_Delay(10);
 	}
 #ifdef SDL2
 	if (font) {
