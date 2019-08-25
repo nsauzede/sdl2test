@@ -108,3 +108,19 @@ pub:
         map voidptr
         refcount int
 }
+
+type SdlAudioFormat u16
+type SdlAudioCallback_t fn(userdata voidptr, stream *u8, len int)
+struct SdlAudioSpec {
+pub:
+mut:
+        freq int
+        format SdlAudioFormat
+        channels u8
+        silence u8
+        samples u16
+        size u32
+        callback SdlAudioCallback_t
+        userdata voidptr
+}
+type SdlAudioSpec SdlAudioSpec
