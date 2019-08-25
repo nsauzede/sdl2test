@@ -1,9 +1,11 @@
 TARGET:=
 TARGET+=main_cpp.exe
 TARGET+=main_c.exe
-#TARGET+=main_v.exe
+TARGET+=main_v.exe
+TARGET+=tetris_v.exe
 
-CXXFLAGS=-Wall -Werror
+CFLAGS:=
+CXXFLAGS:=-Wall -Werror
 CXXFLAGS+=-Wextra
 
 CXXFLAGS+=-g -O0
@@ -12,7 +14,7 @@ CXXFLAGS+=-I.
 
 V:=./v/v
 VFLAGS:=-debug -show_c_cmd
-VCFLAGS:=-std=gnu11 -w
+VCFLAGS:=-std=gnu11 -w -g -O0
 
 all: SDL_CHECK $(TARGET)
 
@@ -25,22 +27,30 @@ endif
 
 CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
-LDLIBS+=$(SDL_LIBS)
+LDLIBS+=$(SDL_LIBS) -lSDL2_ttf vsdlstub.o
+
+CFLAGS+=-pthread
+CXXFLAGS+=-pthread
+LDFLAGS+=-pthread
 
 $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
-%.exe: %.o
+%.exe: %.o | vsdlstub.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
+vsdlstub.o: vsdl/vsdlstub.c
+	$(CC) -c -o $@ $(CFLAGS) -g $^
+
 main_v.o: CFLAGS+=$(VCFLAGS)
+tetris_v.o: CFLAGS+=$(VCFLAGS)
 %.c: %.v
 	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^
 
 clean:
-	$(RM) $(TARGET) *.o
+	$(RM) $(TARGET) *.o *_v.c
 
 clobber: clean
 	$(RM) *~ *.exe fns.txt
