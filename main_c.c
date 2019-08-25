@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 #endif
 
         AudioCtx actx;
-        SDL_zero(actx.wav_spec);
+        SDL_zero(actx);
         if( SDL_LoadWAV(soundpath, &actx.wav_spec, &actx.wav_buffer, &actx.wav_length) == NULL ){
                 printf("couldn't load wav\n");
                 return 1;
@@ -87,8 +87,6 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
                 exit(-1);
         }
-        /* Start playing */
-        SDL_PauseAudio(0);
 
 	int quit = 0;
 	int ballx = 0, bally = h / 2, balld = 10, balldir = 1;
@@ -129,6 +127,8 @@ int main(int argc, char *argv[]) {
         // trigger sound restart
         actx.audio_pos = actx.wav_buffer; // copy sound buffer
         actx.audio_len = actx.wav_length; // copy file length
+        /* Start playing */
+        SDL_PauseAudio(0);
 			}
 		} else {
 			if (ballx <= 0) {
@@ -136,6 +136,8 @@ int main(int argc, char *argv[]) {
         // trigger sound restart
         actx.audio_pos = actx.wav_buffer; // copy sound buffer
         actx.audio_len = actx.wav_length; // copy file length
+        /* Start playing */
+        SDL_PauseAudio(0);
 			}
 		}
 

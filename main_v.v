@@ -15,6 +15,27 @@ const (
                 SdlColor{u8(255), u8(0), u8(0), u8(0)}
         ]
 )
+struct AudioContext {
+mut:
+//        audio_pos *u8
+        audio_pos voidptr
+        audio_len u32
+        wav_spec SdlAudioSpec
+        wav_buffer *u8
+        wav_length u32
+}
+
+fn acb(userdata voidptr, stream *u8, _len int) {
+        mut ctx := &AudioContext(userdata)
+        println('acb!!! wav_buffer=${ctx.wav_buffer} audio_len=${ctx.audio_len}')
+        if ctx.audio_len == u32(0) { return }
+        mut len := u32(_len)
+        if len > ctx.audio_len { len = ctx.audio_len }
+        C.memcpy(stream, ctx.audio_pos, len)
+//      ctx.audio_pos = voidptr(u64(ctx.audio_pos) + u64(len))
+        ctx.audio_pos += len
+        ctx.audio_len -= len
+}
 
 fn main() {
         println('hello SDL 2 [v]\n')
@@ -23,7 +44,7 @@ fn main() {
         bpp := 32
         sdl_window := *voidptr(0)
         sdl_renderer := *voidptr(0)
-        C.SDL_Init(C.SDL_INIT_VIDEO)
+        C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
         C.atexit(C.SDL_Quit)
         C.TTF_Init()
         C.atexit(C.TTF_Quit)
@@ -33,6 +54,16 @@ fn main() {
 //        println('renderer=$sdl_renderer')
         screen := C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
         sdl_texture := C.SDL_CreateTexture(sdl_renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
+        mut actx := AudioContext{}
+        C.SDL_zero(actx)
+        C.SDL_LoadWAV('sounds/door2.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
+        println('got wav_buffer=${actx.wav_buffer}')
+        actx.wav_spec.callback = acb
+        actx.wav_spec.userdata = &actx
+        if C.SDL_OpenAudio(&actx.wav_spec, 0) < 0 {
+                println('couldn\'t open audio')
+                return
+        }
         mut quit := false
         mut ballx := 0
         bally := h / 2
@@ -68,10 +99,16 @@ fn main() {
                 if balldir == 1 {
                         if ballx >= w - balld {
                                 balldir = -1
+                                actx.audio_pos = actx.wav_buffer
+                                actx.audio_len = actx.wav_length
+                                C.SDL_PauseAudio(0)
                         }
                 } else {
                         if ballx <= 0 {
                                 balldir = 1
+                                actx.audio_pos = actx.wav_buffer
+                                actx.audio_len = actx.wav_length
+                                C.SDL_PauseAudio(0)
                         }
                 }
 
@@ -103,7 +140,11 @@ fn main() {
                 C.SDL_RenderPresent(sdl_renderer)
                 C.SDL_Delay(10)
         }
-        if font != voidptr(0) {
+        if isnil(font) {
                 C.TTF_CloseFont(font)
+        }
+        C.SDL_CloseAudio()
+        if voidptr(actx.wav_buffer) != voidptr(0) {
+                C.SDL_FreeWAV(actx.wav_buffer)
         }
 }
