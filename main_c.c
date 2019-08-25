@@ -6,6 +6,30 @@
 #include <SDL_ttf.h>
 #endif
 
+typedef struct AudioCtx_s {
+        // dynamic
+        Uint8 *audio_pos; // current pointer to the audio buffer to be played
+        Uint32 audio_len; // remaining length of the sample we have to play
+        // static at load
+        SDL_AudioSpec wav_spec; // the specs of our piece of music
+        Uint8 *wav_buffer; // buffer containing our audio file
+        Uint32 wav_length; // length of our sample
+} AudioCtx;
+
+void my_audio_callback(void *userdata, Uint8 *stream, int len) {
+        AudioCtx *ctx = userdata;
+        if (ctx->audio_len ==0)
+                return;
+
+        len = ( len > ctx->audio_len ? ctx->audio_len : len );
+        SDL_memset(stream, 0, len);
+        //SDL_memcpy (stream, audio_pos, len);                                  //
+        SDL_MixAudio(stream, ctx->audio_pos, len, SDL_MIX_MAXVOLUME);// mix from on
+
+        ctx->audio_pos += len;
+        ctx->audio_len -= len;
+}
+
 int main(int argc, char *argv[]) {
 #ifdef SDL1
 #define SDLV 1
@@ -13,6 +37,7 @@ int main(int argc, char *argv[]) {
 #define SDLV 2
 #endif
 	printf("hello SDL %d\n", SDLV);
+	char *soundpath = "sounds/door2.wav";
 	int w = 200;
 	int h = 400;
 	int bpp = 32;
@@ -25,7 +50,7 @@ int main(int argc, char *argv[]) {
 	TTF_Font *font = 0;
 #endif
 
-	SDL_Init(SDL_INIT_VIDEO);
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return 1;
 #ifdef SDL1
 	screen = SDL_SetVideoMode(w, h, bpp, 0);
 #else
@@ -34,7 +59,7 @@ int main(int argc, char *argv[]) {
 	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
 #endif
 	if (!screen) {
-		printf("failed to init SDL\n");
+		printf("failed to init SDL screen\n");
 		exit(1);
 	}
 	atexit(SDL_Quit);
@@ -46,6 +71,25 @@ int main(int argc, char *argv[]) {
 	atexit(TTF_Quit);
 	font = TTF_OpenFont("RobotoMono-Regular.ttf", 16);
 #endif
+
+        AudioCtx actx;
+        SDL_zero(actx.wav_spec);
+        if( SDL_LoadWAV(soundpath, &actx.wav_spec, &actx.wav_buffer, &actx.wav_length) == NULL ){
+                printf("couldn't load wav\n");
+                return 1;
+        }
+        // set the callback function
+        actx.wav_spec.callback = my_audio_callback;
+        actx.wav_spec.userdata = &actx;
+
+        /* Open the audio device */
+        if ( SDL_OpenAudio(&actx.wav_spec, NULL) < 0 ){
+                fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
+                exit(-1);
+        }
+        /* Start playing */
+        SDL_PauseAudio(0);
+
 	int quit = 0;
 	int ballx = 0, bally = h / 2, balld = 10, balldir = 1;
 	while (!quit) {
@@ -82,10 +126,16 @@ int main(int argc, char *argv[]) {
 		if (balldir == 1) {
 			if (ballx >= w - balld) {
 				balldir = -1;
+        // trigger sound restart
+        actx.audio_pos = actx.wav_buffer; // copy sound buffer
+        actx.audio_len = actx.wav_length; // copy file length
 			}
 		} else {
 			if (ballx <= 0) {
 				balldir = 1;
+        // trigger sound restart
+        actx.audio_pos = actx.wav_buffer; // copy sound buffer
+        actx.audio_len = actx.wav_length; // copy file length
 			}
 		}
 
@@ -116,6 +166,9 @@ int main(int argc, char *argv[]) {
 		TTF_CloseFont(font);
 	}
 #endif
+        // shut everything audio down
+        SDL_CloseAudio();
+        SDL_FreeWAV(actx.wav_buffer);
 	printf("bye\n");
 
 	return 0;
