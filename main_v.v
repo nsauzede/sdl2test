@@ -23,11 +23,13 @@ mut:
         wav_spec SdlAudioSpec
         wav_buffer *u8
         wav_length u32
+        wav2_buffer *u8
+        wav2_length u32
 }
 
 fn acb(userdata voidptr, stream *u8, _len int) {
         mut ctx := &AudioContext(userdata)
-        println('acb!!! wav_buffer=${ctx.wav_buffer} audio_len=${ctx.audio_len}')
+//        println('acb!!! wav_buffer=${ctx.wav_buffer} audio_len=${ctx.audio_len}')
         if ctx.audio_len == u32(0) { return }
         mut len := u32(_len)
         if len > ctx.audio_len { len = ctx.audio_len }
@@ -57,7 +59,8 @@ fn main() {
         mut actx := AudioContext{}
         C.SDL_zero(actx)
         C.SDL_LoadWAV('sounds/door2.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
-        println('got wav_buffer=${actx.wav_buffer}')
+//        println('got wav_buffer=${actx.wav_buffer}')
+        C.SDL_LoadWAV('sounds/door1.wav', &actx.wav_spec, &actx.wav2_buffer, &actx.wav2_length)
         actx.wav_spec.callback = acb
         actx.wav_spec.userdata = &actx
         if C.SDL_OpenAudio(&actx.wav_spec, 0) < 0 {
@@ -68,19 +71,25 @@ fn main() {
         mut ballx := 0
         bally := h / 2
         balld := 10
-        mut balldir := 1
+        ballm := 1
+        mut balldir := ballm
         for !quit {
                 ev := SdlEvent{}
                 for !!C.SDL_PollEvent(&ev) {
-                        if int(ev._type) == C.SDL_QUIT {          // TODO no integral promotion ????
-                                quit = true
-                                break
-                        }
-                        if int(ev._type) == C.SDL_KEYDOWN {
-                                if int(ev.key.keysym.sym) == C.SDLK_ESCAPE {      // ditto
+                        switch int(ev._type) {
+                                case C.SDL_QUIT:
                                         quit = true
                                         break
-                                }
+                                case C.SDL_KEYDOWN:
+                                        switch int(ev.key.keysym.sym) {
+                                                case C.SDLK_ESCAPE:
+                                                        quit = true
+                                                        break
+                                                case C.SDLK_SPACE:
+                                                        actx.audio_pos = actx.wav2_buffer
+                                                        actx.audio_len = actx.wav2_length
+                                                        C.SDL_PauseAudio(0)
+                                        }
                         }
                 }
                 if quit {
@@ -96,16 +105,28 @@ fn main() {
                 col = C.SDL_MapRGB(screen.format, Colors[1].r, Colors[1].g, Colors[1].b)
                 C.SDL_FillRect(screen, &rect, col)
                 ballx += balldir
-                if balldir == 1 {
-                        if ballx >= w - balld {
-                                balldir = -1
+                if balldir == ballm {
+                        if ballx == w - balld * 4 {
+//                                println('+1WAV =>')
+                                actx.audio_pos = actx.wav2_buffer
+                                actx.audio_len = actx.wav2_length
+                                C.SDL_PauseAudio(0)
+                        } else if ballx >= w - balld {
+//                                println('+1WAV <= -1')
+                                balldir = -ballm
                                 actx.audio_pos = actx.wav_buffer
                                 actx.audio_len = actx.wav_length
                                 C.SDL_PauseAudio(0)
                         }
                 } else {
-                        if ballx <= 0 {
-                                balldir = 1
+                        if ballx == balld * 4 {
+//                                println('-1WAV2 <=')
+                                actx.audio_pos = actx.wav2_buffer
+                                actx.audio_len = actx.wav2_length
+                                C.SDL_PauseAudio(0)
+                        } else if ballx <= 0 {
+//                                println('-1WAV => 1')
+                                balldir = ballm
                                 actx.audio_pos = actx.wav_buffer
                                 actx.audio_len = actx.wav_length
                                 C.SDL_PauseAudio(0)
