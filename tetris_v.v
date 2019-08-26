@@ -209,7 +209,7 @@ fn main() {
 		if game.should_close {
 			break
 		}
-		game.sleep()
+		C.SDL_Delay(20)         // short delay between redraw
 	}
 	if game.font != voidptr(0) {
 		C.TTF_CloseFont(game.font)
@@ -231,10 +231,6 @@ fn (g &Game) draw_scene() {
 	g.draw_score()
 
 	C.SDL_RenderPresent(g.sdl.renderer)
-}
-
-fn (g &Game) sleep() {
-	C.SDL_Delay(TimerPeriod)
 }
 
 fn (g mut Game) init_game() {
@@ -275,7 +271,7 @@ fn (g mut Game) run() {
 			g.move_tetro()
 			g.delete_completed_lines()
 		}
-		time.sleep_ms(TimerPeriod)
+		time.sleep_ms(TimerPeriod)      // medium delay between game step
 	}
 }
 
