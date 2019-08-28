@@ -85,14 +85,30 @@ enum GameState {
         paused running gameover
 }
 
+struct AudioContext {
+mut:
+//        audio_pos *u8
+        audio_pos voidptr
+        audio_len u32
+        wav_spec SdlAudioSpec
+        wav_buffer *u8
+        wav_length u32
+        wav2_buffer *u8
+        wav2_length u32
+}
+
 struct SdlContext {
 mut:
+//      VIDEO
 	w int
 	h int
 	window          voidptr
 	renderer        voidptr
 	screen          *SdlSurface
 	texture         voidptr
+//      AUDIO
+//        actx *AudioContext
+        actx AudioContext
 }
 
 struct Game {
@@ -127,28 +143,97 @@ mut:
 	font            voidptr
 }
 
-type atexit_func_t fn ()
-fn C.atexit(atexit_func_t)
-
+fn acb(userdata voidptr, stream *u8, _len int) {
+        mut ctx := &AudioContext(userdata)
+//        println('acb!!! ctx=$ctx buf=${ctx.wav_buffer} pos=${ctx.audio_pos} len=${ctx.audio_len}')
+        C.memset(stream, 0, _len)
+        if ctx.audio_len == u32(0) {
+                return
+        }
+        mut len := u32(_len)
+        if len > ctx.audio_len { len = ctx.audio_len }
+        C.memcpy(stream, ctx.audio_pos, len)
+        ctx.audio_pos += len
+        ctx.audio_len -= len
+}
+/*
 fn new_sdl_context(w int, h int, title string) SdlContext {
-	C.SDL_Init(C.SDL_INIT_VIDEO)
+	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
 	C.atexit(C.SDL_Quit)
 	C.TTF_Init()
 	C.atexit(C.TTF_Quit)
-	mut sdl := SdlContext{w:w, h:h}
+//	mut sdl := SdlContext{actx:0}
+	mut sdl := SdlContext{}
+	C.SDL_zero(sdl)
 	bpp := 32
 	C.SDL_CreateWindowAndRenderer(w, h, 0, &sdl.window, &sdl.renderer)
 	C.SDL_SetWindowTitle(sdl.window, title.str)
+	sdl.w = w
+	sdl.h = h
 	sdl.screen = C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
 	sdl.texture = C.SDL_CreateTexture(sdl.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
+	
+        C.SDL_LoadWAV('sounds/block.wav', &sdl.actx.wav_spec, &sdl.actx.wav_buffer, &sdl.actx.wav_length)
+        C.SDL_LoadWAV('sounds/line.wav', &sdl.actx.wav_spec, &sdl.actx.wav2_buffer, &sdl.actx.wav2_length)
+        sdl.actx.wav_spec.callback = acb
+        sdl.actx.wav_spec.userdata = &sdl.actx
+        sdl.actx.audio_len = u32(0)
+        sdl.actx.audio_pos = voidptr(0)
+        println('SDL Context=${&sdl}')
+        println('Audio Context=${&sdl.actx}')
+        println('audio pos=${sdl.actx.audio_pos}')
+        println('audio len=${sdl.actx.audio_len}')
+        if C.SDL_OpenAudio(&sdl.actx.wav_spec, 0) < 0 {
+                println('couldn\'t open audio')
+        } else {
+                C.SDL_PauseAudio(0)
+        }
 	return sdl
+}
+*/
+fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
+	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
+	C.atexit(C.SDL_Quit)
+	C.TTF_Init()
+	C.atexit(C.TTF_Quit)
+//	mut sdl := SdlContext{actx:0}
+//	mut sdl := SdlContext{}
+	bpp := 32
+	C.SDL_CreateWindowAndRenderer(w, h, 0, &sdl.window, &sdl.renderer)
+	C.SDL_SetWindowTitle(sdl.window, title.str)
+	sdl.w = w
+	sdl.h = h
+	sdl.screen = C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
+	sdl.texture = C.SDL_CreateTexture(sdl.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
+	
+        C.SDL_LoadWAV('sounds/block.wav', &sdl.actx.wav_spec, &sdl.actx.wav_buffer, &sdl.actx.wav_length)
+        C.SDL_LoadWAV('sounds/line.wav', &sdl.actx.wav_spec, &sdl.actx.wav2_buffer, &sdl.actx.wav2_length)
+        sdl.actx.wav_spec.callback = acb
+        sdl.actx.wav_spec.userdata = &sdl.actx
+        sdl.actx.audio_len = u32(0)
+        sdl.actx.audio_pos = voidptr(0)
+        println('SDL Context=${&sdl}')
+        println('Audio Context=${&sdl.actx}')
+        println('audio pos=${sdl.actx.audio_pos}')
+        println('audio len=${sdl.actx.audio_len}')
+        if C.SDL_OpenAudio(&sdl.actx.wav_spec, 0) < 0 {
+                println('couldn\'t open audio')
+        } else {
+                C.SDL_PauseAudio(0)
+        }
+//	return sdl
 }
 
 fn main() {
+/*
 	mut game := &Game{
-		sdl: new_sdl_context(WinWidth, WinHeight, Title)
-		font: C.TTF_OpenFont(FontName.str, TextSize)
+//		sdl: new_sdl_context(WinWidth, WinHeight, Title)
+		font: voidptr(0)
 	}
+*/
+	mut game := &Game{}
+	game.sdl.set_sdl_context(WinWidth, WinHeight, Title)
+	game.font = C.TTF_OpenFont(FontName.str, TextSize)
 	game.init_game()
 	go game.run() // Run the game loop in a new thread
 	for {
@@ -293,6 +378,9 @@ fn (g mut Game) move_tetro() {
 			// Drop it and generate a new one
 			g.drop_tetro()
 			g.generate_tetro()
+			g.sdl.actx.audio_pos = g.sdl.actx.wav_buffer
+			g.sdl.actx.audio_len = g.sdl.actx.wav_length
+//			println('----------------------Click')
 			return
 		}
 	}
@@ -328,6 +416,8 @@ fn (g mut Game) delete_completed_line(y int) {
 			return
 		}
 	}
+	g.sdl.actx.audio_pos = g.sdl.actx.wav2_buffer
+	g.sdl.actx.audio_len = g.sdl.actx.wav2_length
 	g.score += 10
 	// Move everything down by 1 position
 	for yy := y - 1; yy >= 1; yy-- {

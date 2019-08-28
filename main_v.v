@@ -15,6 +15,7 @@ const (
                 SdlColor{u8(255), u8(0), u8(0), u8(0)}
         ]
 )
+
 struct AudioContext {
 mut:
 //        audio_pos *u8
@@ -30,7 +31,10 @@ mut:
 fn acb(userdata voidptr, stream *u8, _len int) {
         mut ctx := &AudioContext(userdata)
 //        println('acb!!! wav_buffer=${ctx.wav_buffer} audio_len=${ctx.audio_len}')
-        if ctx.audio_len == u32(0) { return }
+        if ctx.audio_len == u32(0) {
+                C.memset(stream, 0, _len)
+                return
+        }
         mut len := u32(_len)
         if len > ctx.audio_len { len = ctx.audio_len }
         C.memcpy(stream, ctx.audio_pos, len)
@@ -58,7 +62,8 @@ fn main() {
         sdl_texture := C.SDL_CreateTexture(sdl_renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
         mut actx := AudioContext{}
         C.SDL_zero(actx)
-        C.SDL_LoadWAV('sounds/door2.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
+//        C.SDL_LoadWAV('sounds/door2.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
+        C.SDL_LoadWAV('sounds/block.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
 //        println('got wav_buffer=${actx.wav_buffer}')
         C.SDL_LoadWAV('sounds/door1.wav', &actx.wav_spec, &actx.wav2_buffer, &actx.wav2_length)
         actx.wav_spec.callback = acb
@@ -109,7 +114,7 @@ fn main() {
                         if ballx == w - balld * 4 {
 //                                println('+1WAV =>')
                                 actx.audio_pos = actx.wav2_buffer
-                                actx.audio_len = actx.wav2_length
+//                                actx.audio_len = actx.wav2_length
                                 C.SDL_PauseAudio(0)
                         } else if ballx >= w - balld {
 //                                println('+1WAV <= -1')
@@ -122,7 +127,7 @@ fn main() {
                         if ballx == balld * 4 {
 //                                println('-1WAV2 <=')
                                 actx.audio_pos = actx.wav2_buffer
-                                actx.audio_len = actx.wav2_length
+//                                actx.audio_len = actx.wav2_length
                                 C.SDL_PauseAudio(0)
                         } else if ballx <= 0 {
 //                                println('-1WAV => 1')
