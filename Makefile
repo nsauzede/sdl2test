@@ -1,6 +1,7 @@
 TARGET:=
 TARGET+=main_cpp.exe
 TARGET+=main_c.exe
+TARGET+=mainmix_c.exe
 TARGET+=main_v.exe
 TARGET+=tetris_v.exe
 
@@ -37,6 +38,7 @@ $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
+mainmix_c.exe: LDLIBS+=-lSDL2_mixer
 %.exe: %.o | vsdlstub.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
