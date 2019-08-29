@@ -137,6 +137,8 @@ mut:
 	tetros_cache []Block
 	// Index of the current tetro. Refers to its color.
 	tetro_idx    int
+	// Index of the next tetro. Refers to its color.
+	tetro_next    int
 	// Index of the rotation (0-3)
 	rotation_idx int
 	// SDL2 context for drawing
@@ -398,11 +400,18 @@ fn (g mut Game) delete_completed_line(y int) int {
 	return 1
 }
 
+// Draw a rand tetro index
+fn (g mut Game) rand_tetro() int {
+	cur := g.tetro_next
+	g.tetro_next = rand.next(BTetros.len)
+	return cur
+}
+
 // Place a new tetro on top
 fn (g mut Game) generate_tetro() {
 	g.pos_y = 0
 	g.pos_x = FieldWidth / 2 - TetroSize / 2
-	g.tetro_idx = rand.next(BTetros.len)
+	g.tetro_idx = g.rand_tetro()
 	g.rotation_idx = 0
 	g.get_tetro()
 }
@@ -470,7 +479,7 @@ fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
 
 fn (g &Game) draw_score() {
 	if g.font != voidptr(0) {
-		g.draw_text(1, 2, 'score: ' + g.score.str(), 0, 0, 0)
+		g.draw_text(1, 2, 'score: ' + g.score.str() + ' nxt=' + g.tetro_next.str(), 0, 0, 0)
 		if g.state == .gameover {
 			g.draw_text(1, WinHeight / 2 + 0 * TextSize, 'Game Over', 0, 0, 0)
 			g.draw_text(1, WinHeight / 2 + 2 * TextSize, 'SPACE to restart', 0, 0, 0)
