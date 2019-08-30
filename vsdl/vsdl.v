@@ -23,7 +23,9 @@ fn C.SDL_PollEvent(voidptr) int
 //fn C.TTF_OpenFont(a byteptr, b int) voidptr
 //type SdlColor struct
 
-struct SdlColor{
+struct C.TTF_Font { }
+
+struct C.SDL_Color{
 pub:
         r u8
         g u8
@@ -46,7 +48,7 @@ struct SdlColor {
 type SdlScancode int    // TODO define the real enum here
 type SdlKeycode i32
 type SdlRect SdlRect
-type SdlColor SdlColor
+type SdlColor C.SDL_Color
 type SdlSurface SdlSurface
 
 struct SdlQuitEvent {
