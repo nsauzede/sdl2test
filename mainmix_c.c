@@ -33,9 +33,15 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len) {
 }
 #endif
 
-#if 0
+#if 1
+#define BUFFER 1024
+        Sint16 stream[2][BUFFER*2*2];
+int len=BUFFER*2*2, done=0, need_refresh=0, bits=0, which=0,
+        sample_size=0, position=0, rate=0;
+
 static void postmix(void *udata, Uint8 *_stream, int _len)
 {
+#if 0
         position+=_len/sample_size;
         /* fprintf(stderr,"pos=%7.2f seconds \r",position/(float)rate); */
         if(need_refresh)
@@ -45,6 +51,7 @@ static void postmix(void *udata, Uint8 *_stream, int _len)
         memcpy(stream[(which+1)%2],_stream,len>s->w*4?s->w*4:len);
         which=(which+1)%2;
         need_refresh=1;
+#endif
 }
 #endif
 
@@ -85,6 +92,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return 1;
+	atexit(SDL_Quit);
 #ifdef SDL1
 	screen = SDL_SetVideoMode(w, h, bpp, 0);
 #else
@@ -96,7 +104,6 @@ int main(int argc, char *argv[]) {
 		printf("failed to init SDL screen\n");
 		exit(1);
 	}
-	atexit(SDL_Quit);
 #ifdef SDL2
 	if (TTF_Init() == -1) {
 		printf("failed to init TTF\n");
@@ -122,7 +129,12 @@ int main(int argc, char *argv[]) {
                 exit(-1);
         }
 #endif
-	Mix_Music *music = 0;
+        int audio_rate,audio_channels;
+        Uint16 audio_format;
+        Uint32 t;
+        Mix_Music *music;
+        int volume=SDL_MIX_MAXVOLUME;
+
 	int initted=Mix_Init(0);
 	printf("Before Mix_Init SDL_mixer supported: ");
         print_init_flags(initted);
@@ -130,6 +142,49 @@ int main(int argc, char *argv[]) {
         printf("After  Mix_Init SDL_mixer supported: ");
         print_init_flags(initted);
         Mix_Quit();
+        if(Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,BUFFER)<0) {
+                printf("error Mix_OpenAudio\n");
+                exit(1);
+        }
+        /* we play no samples, so deallocate the default 8 channels...*/
+        Mix_AllocateChannels(0);
+        {
+                int i,n=Mix_GetNumChunkDecoders();
+                printf("There are %d available chunk(sample) decoders:\n", n);
+                for(i=0; i<n; ++i)
+                        printf("        %s\n", Mix_GetChunkDecoder(i));
+                n = Mix_GetNumMusicDecoders();
+                printf("There are %d available music decoders:\n",n);
+                for(i=0; i<n; ++i)
+                        printf("        %s\n", Mix_GetMusicDecoder(i));
+        }
+        
+        Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
+        bits=audio_format&0xFF;
+        sample_size=bits/8+audio_channels;
+        rate=audio_rate;
+        printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate,
+                        bits, audio_channels>1?"stereo":"mono", BUFFER );
+        music=Mix_LoadMUS("sounds/SuperTwintrisThoseThree.mod");
+        if (music) {
+          Mix_MusicType type=Mix_GetMusicType(music);
+          printf("Music type: %s\n",
+                          type==MUS_NONE?"MUS_NONE":
+                          type==MUS_CMD?"MUS_CMD":
+                          type==MUS_WAV?"MUS_WAV":
+                          /*type==MUS_MOD_MODPLUG?"MUS_MOD_MODPLUG":*/
+                          type==MUS_MOD?"MUS_MOD":
+                          type==MUS_MID?"MUS_MID":
+                          type==MUS_OGG?"MUS_OGG":
+                          type==MUS_MP3?"MUS_MP3":
+//                          type==MUS_MP3_MAD?"MUS_MP3_MAD":
+                          type==MUS_FLAC?"MUS_FLAC":
+                          "Unknown");
+        }
+        Mix_SetPostMix(postmix,argv[1]);
+        if(Mix_PlayMusic(music, 1)!=-1) {
+	        Mix_VolumeMusic(volume);
+        }
 
 	int quit = 0;
 	int ballx = 0, bally = h / 2, balld = 10, balldir = 1;
