@@ -7,52 +7,15 @@
 #include <SDL_mixer.h>
 #endif
 
-#if 0
 typedef struct AudioCtx_s {
-        // dynamic
-        Uint8 *audio_pos; // current pointer to the audio buffer to be played
-        Uint32 audio_len; // remaining length of the sample we have to play
-        // static at load
-        SDL_AudioSpec wav_spec; // the specs of our piece of music
-        Uint8 *wav_buffer; // buffer containing our audio file
-        Uint32 wav_length; // length of our sample
+	Mix_Chunk *wave;
 } AudioCtx;
-
-void my_audio_callback(void *userdata, Uint8 *stream, int len) {
-        AudioCtx *ctx = userdata;
-        if (ctx->audio_len ==0)
-                return;
-
-        len = ( len > ctx->audio_len ? ctx->audio_len : len );
-        SDL_memset(stream, 0, len);
-        //SDL_memcpy (stream, audio_pos, len);                                  //
-        SDL_MixAudio(stream, ctx->audio_pos, len, SDL_MIX_MAXVOLUME);// mix from on
-
-        ctx->audio_pos += len;
-        ctx->audio_len -= len;
-}
-#endif
 
 #if 1
 #define BUFFER 1024
         Sint16 stream[2][BUFFER*2*2];
 int len=BUFFER*2*2, done=0, need_refresh=0, bits=0, which=0,
         sample_size=0, position=0, rate=0;
-
-static void postmix(void *udata, Uint8 *_stream, int _len)
-{
-#if 0
-        position+=_len/sample_size;
-        /* fprintf(stderr,"pos=%7.2f seconds \r",position/(float)rate); */
-        if(need_refresh)
-                return;
-        /* save the stream buffer and indicate that we need a redraw */
-        len=_len;
-        memcpy(stream[(which+1)%2],_stream,len>s->w*4?s->w*4:len);
-        which=(which+1)%2;
-        need_refresh=1;
-#endif
-}
 #endif
 
 void print_init_flags(int flags)
@@ -112,23 +75,6 @@ int main(int argc, char *argv[]) {
 	atexit(TTF_Quit);
 	font = TTF_OpenFont("RobotoMono-Regular.ttf", 16);
 #endif
-#if 0
-        AudioCtx actx;
-        SDL_zero(actx);
-        if( SDL_LoadWAV(soundpath, &actx.wav_spec, &actx.wav_buffer, &actx.wav_length) == NULL ){
-                printf("couldn't load wav\n");
-                return 1;
-        }
-        // set the callback function
-        actx.wav_spec.callback = my_audio_callback;
-        actx.wav_spec.userdata = &actx;
-
-        /* Open the audio device */
-        if ( SDL_OpenAudio(&actx.wav_spec, NULL) < 0 ){
-                fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
-                exit(-1);
-        }
-#endif
         int audio_rate,audio_channels;
         Uint16 audio_format;
         Uint32 t;
@@ -147,7 +93,7 @@ int main(int argc, char *argv[]) {
                 exit(1);
         }
         /* we play no samples, so deallocate the default 8 channels...*/
-        Mix_AllocateChannels(0);
+//        Mix_AllocateChannels(0);
         {
                 int i,n=Mix_GetNumChunkDecoders();
                 printf("There are %d available chunk(sample) decoders:\n", n);
@@ -165,7 +111,8 @@ int main(int argc, char *argv[]) {
         rate=audio_rate;
         printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate,
                         bits, audio_channels>1?"stereo":"mono", BUFFER );
-        music=Mix_LoadMUS("sounds/SuperTwintrisThoseThree.mod");
+//        music=Mix_LoadMUS("sounds/SuperTwintrisThoseThree.mod");
+        music=Mix_LoadMUS("sounds/TwintrisThosenine.mod");
         if (music) {
           Mix_MusicType type=Mix_GetMusicType(music);
           printf("Music type: %s\n",
@@ -181,11 +128,21 @@ int main(int argc, char *argv[]) {
                           type==MUS_FLAC?"MUS_FLAC":
                           "Unknown");
         }
-        Mix_SetPostMix(postmix,argv[1]);
+#if 1
+        AudioCtx actx;
+        SDL_zero(actx);
+        actx.wave = Mix_LoadWAV(soundpath);
+        if (actx.wave == NULL ){
+                printf("couldn't load wav\n");
+                return 1;
+        }
+#endif
+//        Mix_SetPostMix(postmix,argv[1]);
+#if 1
         if(Mix_PlayMusic(music, 1)!=-1) {
 	        Mix_VolumeMusic(volume);
         }
-
+#endif
 	int quit = 0;
 	int ballx = 0, bally = h / 2, balld = 10, balldir = 1;
 	while (!quit) {
@@ -222,24 +179,14 @@ int main(int argc, char *argv[]) {
 		if (balldir == 1) {
 			if (ballx >= w - balld) {
 				balldir = -1;
-#if 0
         // trigger sound restart
-        actx.audio_pos = actx.wav_buffer; // copy sound buffer
-        actx.audio_len = actx.wav_length; // copy file length
-        /* Start playing */
-        SDL_PauseAudio(0);
-#endif
+	Mix_PlayChannel(0, actx.wave, 0);
 			}
 		} else {
 			if (ballx <= 0) {
 				balldir = 1;
-#if 0
         // trigger sound restart
-        actx.audio_pos = actx.wav_buffer; // copy sound buffer
-        actx.audio_len = actx.wav_length; // copy file length
-        /* Start playing */
-        SDL_PauseAudio(0);
-#endif
+	Mix_PlayChannel(0, actx.wave, 0);
 			}
 		}
 
@@ -251,7 +198,7 @@ int main(int argc, char *argv[]) {
 		SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
 		if (font) {
 			SDL_Color color = { 0, 0, 0 };
-			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL_ttf", color);
+			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL ttf/mixer", color);
 			SDL_Texture * texture = SDL_CreateTextureFromSurface(sdlRenderer, surface);
 			int texW = 0;
 			int texH = 0;
@@ -270,11 +217,9 @@ int main(int argc, char *argv[]) {
 		TTF_CloseFont(font);
 	}
 #endif
-#if 0
-        // shut everything audio down
-        SDL_CloseAudio();
-        SDL_FreeWAV(actx.wav_buffer);
-#endif
+	if (actx.wave) {
+		Mix_FreeChunk(actx.wave);
+	}
         if (music)
                 Mix_FreeMusic(music);
         Mix_CloseAudio();
