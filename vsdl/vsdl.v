@@ -4,9 +4,10 @@
 
 module vsdl
 
-#flag linux `sdl2-config --cflags --libs`  -lSDL2_ttf
+#flag linux `sdl2-config --cflags --libs`  -lSDL2_ttf -lSDL2_mixer
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 fn C.SDL_Init(flags u32) int
 fn C.SDL_CreateWindowAndRenderer(w int, h int, flags u32, window voidptr, renderer voidptr) int
@@ -50,6 +51,7 @@ type SdlKeycode i32
 type SdlRect SdlRect
 type SdlColor C.SDL_Color
 type SdlSurface SdlSurface
+type MixChunk C.Mix_Chunk
 
 struct SdlQuitEvent {
         _type u32

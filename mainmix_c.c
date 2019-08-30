@@ -82,16 +82,19 @@ int main(int argc, char *argv[]) {
         int volume=SDL_MIX_MAXVOLUME;
 
 	int initted=Mix_Init(0);
+#if 0
 	printf("Before Mix_Init SDL_mixer supported: ");
         print_init_flags(initted);
         initted=Mix_Init(~0);
         printf("After  Mix_Init SDL_mixer supported: ");
         print_init_flags(initted);
         Mix_Quit();
+#endif
         if(Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,BUFFER)<0) {
                 printf("error Mix_OpenAudio\n");
                 exit(1);
         }
+#if 0
         /* we play no samples, so deallocate the default 8 channels...*/
 //        Mix_AllocateChannels(0);
         {
@@ -112,7 +115,9 @@ int main(int argc, char *argv[]) {
         printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate,
                         bits, audio_channels>1?"stereo":"mono", BUFFER );
 //        music=Mix_LoadMUS("sounds/SuperTwintrisThoseThree.mod");
+#endif
         music=Mix_LoadMUS("sounds/TwintrisThosenine.mod");
+#if 0
         if (music) {
           Mix_MusicType type=Mix_GetMusicType(music);
           printf("Music type: %s\n",
@@ -128,6 +133,7 @@ int main(int argc, char *argv[]) {
                           type==MUS_FLAC?"MUS_FLAC":
                           "Unknown");
         }
+#endif
 #if 1
         AudioCtx actx;
         SDL_zero(actx);
