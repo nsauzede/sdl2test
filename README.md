@@ -23,6 +23,6 @@ Makefile auto-detects available SDL version (2 or 1)
 - CSDL : small C++ class to abstract SDL1/2
 
 # Credits
-Music and sounds ripped from amiga title Twintris (1990 nostalgia !)
+Colors, Music and Sounds ripped from amiga title Twintris (1990 nostalgia !)
 - Graphician : Svein Berge
 - Musician : Tor Bernhard Gausen (Walkman/Cryptoburners)
