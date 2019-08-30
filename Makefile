@@ -28,7 +28,7 @@ endif
 
 CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
-LDLIBS+=$(SDL_LIBS) -lSDL2_ttf vsdlstub.o
+LDLIBS+=$(SDL_LIBS) vsdlstub.o -lSDL2_ttf
 
 CFLAGS+=-pthread
 CXXFLAGS+=-pthread
