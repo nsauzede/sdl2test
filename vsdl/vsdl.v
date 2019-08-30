@@ -4,8 +4,7 @@
 
 module vsdl
 
-#flag linux -lSDL2
-#flag -I/usr/include/SDL2 -D_REENTRANT
+#flag linux `sdl2-config --cflags --libs`  -lSDL2_ttf
 #include <SDL.h>
 #include <SDL_ttf.h>
 
