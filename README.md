@@ -3,11 +3,11 @@ Small examples of SDL1 vs. SDL2 usage, in V, C and C++ languages.
 
 # Dependencies
 Ubuntu :
-$ sudo apt install libsdl2-ttf-dev libsdl2-mixer-dev
+`$ sudo apt install libsdl2-ttf-dev libsdl2-mixer-dev`
 ClearLinux :
-$ sudo swupd bundle-add devpkg-SDL2_ttf devpkg-SDL2_mixer
+`$ sudo swupd bundle-add devpkg-SDL2_ttf devpkg-SDL2_mixer`
 Windows/MSYS2 :
-$ pacman -S mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer
+`$ pacman -S mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer`
 
 # Misc
 Makefile auto-detects available SDL version (2 or 1)
@@ -18,6 +18,6 @@ Makefile auto-detects available SDL version (2 or 1)
 - CSDL : small C++ class to abstract SDL1/2
 
 # Credits
-Music and sounds ripped from amiga title Twintris
+Music and sounds ripped from amiga title Twintris (1990 nostalgia !)
 - Graphician : Svein Berge
 - Musician : Tor Bernhard Gausen (Walkman/Cryptoburners)
