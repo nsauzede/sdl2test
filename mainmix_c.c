@@ -61,6 +61,10 @@ void print_init_flags(int flags)
 }
 
 int main(int argc, char *argv[]) {
+#ifdef WIN32
+	setbuf(stdout, 0);	// this to avoid stdout buffering on windows/mingw
+#endif
+
 #ifdef SDL1
 #define SDLV 1
 #else

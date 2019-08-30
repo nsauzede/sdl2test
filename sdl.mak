@@ -45,7 +45,7 @@ WINDOWS=1
 endif
 
 ifdef WINDOWS
-SDL_STATIC=1
+#SDL_STATIC=1
 endif
 
 SDL_VER=$(shell $(SDLCONFIG) --version | cut -f 1 -d ".")
