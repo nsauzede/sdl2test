@@ -1,6 +1,8 @@
 # sdl2test
 Small examples of SDL1 vs. SDL2 usage, in V, C and C++ languages.
 
+<img src='https://github.com/nsauzede/sdl2test/raw/master/tetris_v.png'>
+
 # Dependencies
 Ubuntu :
 `$ sudo apt install libsdl2-ttf-dev libsdl2-mixer-dev`
