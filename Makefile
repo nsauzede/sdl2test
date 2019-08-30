@@ -4,6 +4,7 @@ TARGET+=main_c.exe
 TARGET+=mainmix_c.exe
 TARGET+=main_v.exe
 TARGET+=tetris_v.exe
+TARGET+=tetrismix_v.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -28,7 +29,7 @@ endif
 
 CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
-LDLIBS+=$(SDL_LIBS) vsdlstub.o -lSDL2_ttf
+LDLIBS+=$(SDL_LIBS) vsdlstub.o -lSDL2_ttf -lSDL2_mixer
 
 CFLAGS+=-pthread
 CXXFLAGS+=-pthread
@@ -47,6 +48,7 @@ vsdlstub.o: vsdl/vsdlstub.c
 
 main_v.o: CFLAGS+=$(VCFLAGS)
 tetris_v.o: CFLAGS+=$(VCFLAGS)
+tetrismix_v.o: CFLAGS+=$(VCFLAGS)
 %.c: %.v
 	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^

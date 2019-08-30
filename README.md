@@ -13,9 +13,11 @@ $ pacman -S mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer
 Makefile auto-detects available SDL version (2 or 1)
 
 - tetris_v.v is inspired from original source from Alex V example
--- ported to SDL and enhanced with sounds
-- sounds ripped from amiga title Twintris :
--- Graphician : Svein Berge
--- Musician : Tor Bernhard Gausen (Walkman/Cryptoburners)
+- ported to SDL and enhanced with music sounds
 - vsdl : naive V wrapper for SDL2 binding
 - CSDL : small C++ class to abstract SDL1/2
+
+# Credits
+Music and sounds ripped from amiga title Twintris
+- Graphician : Svein Berge
+- Musician : Tor Bernhard Gausen (Walkman/Cryptoburners)
