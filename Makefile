@@ -4,7 +4,7 @@ TARGET+=main_c.exe
 TARGET+=mainmix_c.exe
 TARGET+=main_v.exe
 TARGET+=tetris_v.exe
-TARGET+=tetrismix_v.exe
+TARGET+=tetrisnomix_v.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -48,7 +48,7 @@ vsdlstub.o: vsdl/vsdlstub.c
 
 main_v.o: CFLAGS+=$(VCFLAGS)
 tetris_v.o: CFLAGS+=$(VCFLAGS)
-tetrismix_v.o: CFLAGS+=$(VCFLAGS)
+tetrisnomix_v.o: CFLAGS+=$(VCFLAGS)
 %.c: %.v
 	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^

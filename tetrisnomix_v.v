@@ -20,7 +20,6 @@ const (
 	WinHeight = BlockSize * FieldHeight
 	TimerPeriod = 250 // ms
 	TextSize = 16
-	AudioBufSize = 1024
 )
 
 const (
@@ -85,13 +84,18 @@ enum GameState {
         paused running gameover
 }
 
+struct AudioSample {
+        wav_buffer *u8
+        wav_length u32
+}
+
 struct AudioContext {
 mut:
-//	music *C.Mix_Music
-	music voidptr
-	volume int
-//        waves [3]*MixChunk
-        waves [3]voidptr
+//        audio_pos *u8
+        audio_pos voidptr
+        audio_len u32
+        wav_spec SdlAudioSpec
+        samples [3]AudioSample
 }
 
 struct SdlContext {
@@ -143,6 +147,19 @@ mut:
 	font            voidptr
 }
 
+fn acb(userdata voidptr, stream *u8, _len int) {
+        mut ctx := &AudioContext(userdata)
+        C.memset(stream, 0, _len)
+        if ctx.audio_len == u32(0) {
+                return
+        }
+        mut len := u32(_len)
+        if len > ctx.audio_len { len = ctx.audio_len }
+        C.memcpy(stream, ctx.audio_pos, len)
+        ctx.audio_pos += len
+        ctx.audio_len -= len
+}
+
 fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
 	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
 	C.atexit(C.SDL_Quit)
@@ -156,18 +173,17 @@ fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
 	sdl.screen = C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
 	sdl.texture = C.SDL_CreateTexture(sdl.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
 	
-	C.Mix_Init(0)
-	C.atexit(C.Mix_Quit)
-        if C.Mix_OpenAudio(48000,C.MIX_DEFAULT_FORMAT,2,AudioBufSize) < 0 {
+        C.SDL_LoadWAV('sounds/block.wav', &sdl.actx.wav_spec, &sdl.actx.samples[0].wav_buffer, &sdl.actx.samples[0].wav_length)
+        C.SDL_LoadWAV('sounds/line.wav', &sdl.actx.wav_spec, &sdl.actx.samples[1].wav_buffer, &sdl.actx.samples[1].wav_length)
+        C.SDL_LoadWAV('sounds/double.wav', &sdl.actx.wav_spec, &sdl.actx.samples[2].wav_buffer, &sdl.actx.samples[2].wav_length)
+        sdl.actx.wav_spec.callback = acb
+        sdl.actx.wav_spec.userdata = &sdl.actx
+        sdl.actx.audio_len = u32(0)
+        sdl.actx.audio_pos = voidptr(0)
+        if C.SDL_OpenAudio(&sdl.actx.wav_spec, 0) < 0 {
                 println('couldn\'t open audio')
-        }
-	sdl.actx.music = C.Mix_LoadMUS('sounds/TwintrisThosenine.mod')
-        sdl.actx.waves[0] = C.Mix_LoadWAV('sounds/block.wav')
-        sdl.actx.waves[1] = C.Mix_LoadWAV('sounds/line.wav')
-        sdl.actx.waves[2] = C.Mix_LoadWAV('sounds/double.wav')
-        sdl.actx.volume = C.SDL_MIX_MAXVOLUME
-        if C.Mix_PlayMusic(sdl.actx.music, 1) != -1 {
-                C.Mix_VolumeMusic(sdl.actx.volume)
+        } else {
+                C.SDL_PauseAudio(0)
         }
 }
 
@@ -240,19 +256,6 @@ fn main() {
 	if game.font != voidptr(0) {
 		C.TTF_CloseFont(game.font)
 	}
-	if game.sdl.actx.music != voidptr(0) {
-		C.Mix_FreeMusic(game.sdl.actx.music)
-	}
-	C.Mix_CloseAudio()
-	if game.sdl.actx.waves[0] != voidptr(0) {
-		C.Mix_FreeChunk(game.sdl.actx.waves[0])
-	}
-	if game.sdl.actx.waves[1] != voidptr(0) {
-		C.Mix_FreeChunk(game.sdl.actx.waves[1])
-	}
-	if game.sdl.actx.waves[2] != voidptr(0) {
-		C.Mix_FreeChunk(game.sdl.actx.waves[2])
-	}
 }
 
 fn (g &Game) draw_scene() {
@@ -314,9 +317,11 @@ fn (g mut Game) run() {
 			} else {
 				if g.lines > 0 {
 					if g.lines > 1 {
-						C.Mix_PlayChannel(0, g.sdl.actx.waves[2], 0)
+						g.sdl.actx.audio_pos = g.sdl.actx.samples[2].wav_buffer
+						g.sdl.actx.audio_len = g.sdl.actx.samples[2].wav_length
 					} else if g.lines == 1 {
-						C.Mix_PlayChannel(0, g.sdl.actx.waves[1], 0)
+						g.sdl.actx.audio_pos = g.sdl.actx.samples[1].wav_buffer
+						g.sdl.actx.audio_len = g.sdl.actx.samples[1].wav_length
 					}
 					g.score += 10 * g.lines * g.lines
 					g.lines = 0
@@ -345,7 +350,8 @@ fn (g mut Game) move_tetro() {
 			// Drop it and generate a new one
 			g.drop_tetro()
 			g.generate_tetro()
-			C.Mix_PlayChannel(0, g.sdl.actx.waves[0], 0)
+			g.sdl.actx.audio_pos = g.sdl.actx.samples[0].wav_buffer
+			g.sdl.actx.audio_len = g.sdl.actx.samples[0].wav_length
 			return
 		}
 	}
