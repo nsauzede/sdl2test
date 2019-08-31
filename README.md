@@ -1,6 +1,13 @@
 # sdl2test
 Small examples of SDL1 vs. SDL2 usage, in V, C and C++ languages.
 
+# Credits
+Tetris_v.v is just and SDL port of original source from <a href='https://github.com/vlang/v'>vlang/v</a> example by Alex
+- wrote simple SDL2 V wrapper, ported GLFW to SDL, tweaked colors and added music & sounds
+Colors, Music and Sounds ripped from amiga title Twintris (1990 nostalgia !)
+- Graphician : Svein Berge
+- Musician : Tor Bernhard Gausen (Walkman/Cryptoburners)
+
 <img src='https://github.com/nsauzede/sdl2test/raw/master/tetris_v.png'>
 
 # Dependencies
@@ -17,12 +24,6 @@ Windows/MSYS2 :
 # Misc
 Makefile auto-detects available SDL version (2 or 1)
 
-- tetris_v.v is inspired from original source from Alex V example
-- ported to SDL and enhanced with music sounds
 - vsdl : naive V wrapper for SDL2 binding
 - CSDL : small C++ class to abstract SDL1/2
-
-# Credits
-Colors, Music and Sounds ripped from amiga title Twintris (1990 nostalgia !)
-- Graphician : Svein Berge
-- Musician : Tor Bernhard Gausen (Walkman/Cryptoburners)
+- various C and V examples to
