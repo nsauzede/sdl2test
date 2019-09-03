@@ -101,7 +101,7 @@ mut:
 	h int
 	window          voidptr
 	renderer        voidptr
-	screen          *SdlSurface
+	screen          &SdlSurface
 	texture         voidptr
 //      AUDIO
         actx AudioContext

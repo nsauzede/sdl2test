@@ -22,13 +22,13 @@ mut:
         audio_pos voidptr
         audio_len u32
         wav_spec SdlAudioSpec
-        wav_buffer *byte
+        wav_buffer &byte
         wav_length u32
-        wav2_buffer *byte
+        wav2_buffer &byte
         wav2_length u32
 }
 
-fn acb(userdata voidptr, stream *byte, _len int) {
+fn acb(userdata voidptr, stream &byte, _len int) {
         mut ctx := &AudioContext(userdata)
 //        println('acb!!! wav_buffer=${ctx.wav_buffer} audio_len=${ctx.audio_len}')
         if ctx.audio_len == u32(0) {
