@@ -9,22 +9,23 @@ module vsdl
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 
-fn C.SDL_Init(flags u32) int
-fn C.SDL_CreateWindowAndRenderer(w int, h int, flags u32, window voidptr, renderer voidptr) int
-fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) *SdlSurface
-fn C.SDL_CreateTexture(renderer voidptr, format u32, access int, w int, h int) voidptr
-fn C.SDL_MapRGB(format voidptr, r byte, g byte, b byte) u32
-fn C.SDL_PollEvent(voidptr) int
-//fn C.extTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor, ret **SdlSurface)
-//fn C.toto()
+//fn C.SDL_Init(flags u32) int
+//fn C.SDL_CreateWindowAndRenderer(w int, h int, flags u32, window voidptr, renderer voidptr) int
+//fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) &SdlSurface
+//fn C.SDL_CreateTexture(renderer voidptr, format u32, access int, w int, h int) voidptr
+//fn C.SDL_MapRGB(format voidptr, r byte, g byte, b byte) u32
+//fn C.SDL_PollEvent(voidptr) int
+//fn C.stubTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor, ret **SdlSurface)
+fn C.stubTTF_RenderText_Solid(font voidptr, text voidptr, col &SdlColor, ret &voidptr)
 
-//fn C.TTF_RenderText_Solid(voidptr, voidptr, SdlColor) voidptr
+//fn C.TTF_RenderText_Solid(voidptr, voidptr, C.SdlColor) voidptr
+//fn C.stubTTF_RenderText_Solid(voidptr, voidptr, voidptr, voidptr)
 
 //fn C.TTF_Quit()
 //fn C.TTF_OpenFont(a byteptr, b int) voidptr
 //type SdlColor struct
 
-struct C.TTF_Font { }
+//struct C.TTF_Font { }
 
 struct C.SDL_Color{
 pub:
@@ -33,25 +34,23 @@ pub:
         b byte
         a byte
 }
-
-//fn C.TTF_RenderText_Solid(voidptr, voidptr, voidptr) voidptr
-/*
-struct SdlColor {
-//pub:
-        r byte
-        g byte
-        b byte
-        a byte
-}
-//type SdlColor SdlColor
-*/
-
-type SdlScancode int    // TODO define the real enum here
-type SdlKeycode int
-type SdlRect SdlRect
 type SdlColor C.SDL_Color
-type SdlSurface SdlSurface
-type MixChunk C.Mix_Chunk
+
+struct C.SDL_Rect {
+pub:
+        x int
+        y int
+        w int
+        h int
+}
+type SdlRect C.SDL_Rect
+
+//type SdlScancode int    // TODO define the real enum here
+//type SdlKeycode int
+//type SdlRect SdlRect
+//type SdlColor C.SDL_Color
+//type SdlSurface SdlSurface
+//type MixChunk C.Mix_Chunk
 
 struct SdlQuitEvent {
         _type u32
@@ -59,10 +58,12 @@ struct SdlQuitEvent {
 }
 struct SdlKeysym {
 pub:
-        scancode SdlScancode
-        sym SdlKeycode
-        mod u16
-        unused u32
+//        scancode SdlScancode
+        scancode	int
+//        sym		SdlKeycode
+        sym		int
+        mod		u16
+        unused		u32
 }
 struct SdlKeyboardEvent {
 pub:
@@ -82,21 +83,8 @@ pub:
         key SdlKeyboardEvent
 }
 type SdlEvent SdlEventU
-struct SdlRect {
-pub:
-        x int
-        y int
-        w int
-        h int
-}
-struct SdlColor0 {
-pub:
-        r byte
-        g byte
-        b byte
-        a byte
-}
-struct SdlSurface {
+
+struct C.SDL_Surface {
 pub:
         flags u32
         format voidptr
@@ -111,19 +99,22 @@ pub:
         map voidptr
         refcount int
 }
+type SdlSurface C.SDL_Surface
 
-type SdlAudioFormat u16
-type SdlAudioCallback_t fn(userdata voidptr, stream *byte, len int)
+//type SdlAudioFormat u16
+//type SdlAudioCallback_t fn(userdata voidptr, stream &byte, len int)
 struct SdlAudioSpec {
 pub:
 mut:
         freq int
-        format SdlAudioFormat
+//        format SdlAudioFormat
+        format u16
         channels byte
         silence byte
         samples u16
         size u32
-        callback SdlAudioCallback_t
+//        callback SdlAudioCallback_t
+        callback voidptr
         userdata voidptr
 }
-type SdlAudioSpec SdlAudioSpec
+//type SdlAudioSpec SdlAudioSpec

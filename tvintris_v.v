@@ -22,17 +22,17 @@ const (
 	TextSize = 16
 	AudioBufSize = 1024
 
-	P1FIRE = C.SDLK_l
-	P1UP = C.SDLK_UP
-	P1DOWN = C.SDLK_DOWN
-	P1LEFT = C.SDLK_LEFT
-	P1RIGHT = C.SDLK_RIGHT
+	P2FIRE = C.SDLK_l
+	P2UP = C.SDLK_UP
+	P2DOWN = C.SDLK_DOWN
+	P2LEFT = C.SDLK_LEFT
+	P2RIGHT = C.SDLK_RIGHT
 
-	P2FIRE = C.SDLK_s
-	P2UP = C.SDLK_w
-	P2DOWN = C.SDLK_x
-	P2LEFT = C.SDLK_a
-	P2RIGHT = C.SDLK_d
+	P1FIRE = C.SDLK_s
+	P1UP = C.SDLK_w
+	P1DOWN = C.SDLK_x
+	P1LEFT = C.SDLK_a
+	P1RIGHT = C.SDLK_d
 )
 
 const (
@@ -107,16 +107,18 @@ mut:
 }
 
 struct SdlContext {
+pub:
 mut:
 //      VIDEO
-	w int
-	h int
+	w		int
+	h		int
 	window          voidptr
 	renderer        voidptr
-	screen          *SdlSurface
+	screen          &SdlSurface
+//	screen          voidptr
 	texture         voidptr
 //      AUDIO
-        actx AudioContext
+        actx		AudioContext
 }
 
 struct Game {
@@ -176,7 +178,7 @@ fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
 	sdl.h = h
 	sdl.screen = C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
 	sdl.texture = C.SDL_CreateTexture(sdl.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
-	
+
 	C.Mix_Init(0)
 	C.atexit(C.Mix_Quit)
         if C.Mix_OpenAudio(48000,C.MIX_DEFAULT_FORMAT,2,AudioBufSize) < 0 {
@@ -546,7 +548,12 @@ fn (g &Game) draw_field() {
 
 fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
 	tcol := SdlColor {byte(3), byte(2), byte(1), byte(0)}
-	tsurf := C.TTF_RenderText_Solid(g.font, text.str, tcol)
+
+// TODO : following doesn't compile !!
+//	tsurf := C.TTF_RenderText_Solid(g.font, text.str, tcol)
+	tsurf := voidptr(0)
+	stubTTF_RenderText_Solid(g.font, text.str, &tcol, &tsurf)
+
 	ttext := C.SDL_CreateTextureFromSurface(g.sdl.renderer, tsurf)
 	texw := 0
 	texh := 0
