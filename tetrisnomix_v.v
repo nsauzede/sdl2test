@@ -61,15 +61,15 @@ const (
 	]
 	// Each tetro has its unique color
 	Colors = [
-		SdlColor{u8(0), u8(0), u8(0), u8(0)},        // unused ?
-		SdlColor{u8(253), u8(32), u8(47), u8(0)},    // lightred quad
-		SdlColor{u8(0), u8(110), u8(194), u8(0)},    // lightblue triple
-		SdlColor{u8(170), u8(170), u8(0), u8(0)},    // darkyellow short topright
-		SdlColor{u8(170), u8(0), u8(170), u8(0)},    // purple short topleft
-		SdlColor{u8(50), u8(90), u8(110), u8(0)},    // darkgrey long topleft
-		SdlColor{u8(0), u8(170), u8(0), u8(0)},      // lightgreen long topright
-		SdlColor{u8(170), u8(85), u8(0), u8(0)},     // brown longest
-		SdlColor{u8(0), u8(170), u8(170), u8(0)},    // unused ?
+		SdlColor{byte(0), byte(0), byte(0), byte(0)},        // unused ?
+		SdlColor{byte(253), byte(32), byte(47), byte(0)},    // lightred quad
+		SdlColor{byte(0), byte(110), byte(194), byte(0)},    // lightblue triple
+		SdlColor{byte(170), byte(170), byte(0), byte(0)},    // darkyellow short topright
+		SdlColor{byte(170), byte(0), byte(170), byte(0)},    // purple short topleft
+		SdlColor{byte(50), byte(90), byte(110), byte(0)},    // darkgrey long topleft
+		SdlColor{byte(0), byte(170), byte(0), byte(0)},      // lightgreen long topright
+		SdlColor{byte(170), byte(85), byte(0), byte(0)},     // brown longest
+		SdlColor{byte(0), byte(170), byte(170), byte(0)},    // unused ?
 	]
 )
 
@@ -85,13 +85,13 @@ enum GameState {
 }
 
 struct AudioSample {
-        wav_buffer *u8
+        wav_buffer *byte
         wav_length u32
 }
 
 struct AudioContext {
 mut:
-//        audio_pos *u8
+//        audio_pos *byte
         audio_pos voidptr
         audio_len u32
         wav_spec SdlAudioSpec
@@ -147,7 +147,7 @@ mut:
 	font            voidptr
 }
 
-fn acb(userdata voidptr, stream *u8, _len int) {
+fn acb(userdata voidptr, stream *byte, _len int) {
         mut ctx := &AudioContext(userdata)
         C.memset(stream, 0, _len)
         if ctx.audio_len == u32(0) {
@@ -464,7 +464,7 @@ fn (g &Game) draw_field() {
 }
 
 fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
-	tcol := SdlColor {u8(3), u8(2), u8(1), u8(0)}
+	tcol := SdlColor {byte(3), byte(2), byte(1), byte(0)}
 	tsurf := C.TTF_RenderText_Solid(g.font, text.str, tcol)
 	ttext := C.SDL_CreateTextureFromSurface(g.sdl.renderer, tsurf)
 	texw := 0

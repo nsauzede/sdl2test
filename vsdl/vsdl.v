@@ -13,7 +13,7 @@ fn C.SDL_Init(flags u32) int
 fn C.SDL_CreateWindowAndRenderer(w int, h int, flags u32, window voidptr, renderer voidptr) int
 fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) *SdlSurface
 fn C.SDL_CreateTexture(renderer voidptr, format u32, access int, w int, h int) voidptr
-fn C.SDL_MapRGB(format voidptr, r u8, g u8, b u8) u32
+fn C.SDL_MapRGB(format voidptr, r byte, g byte, b byte) u32
 fn C.SDL_PollEvent(voidptr) int
 //fn C.extTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor, ret **SdlSurface)
 //fn C.toto()
@@ -28,20 +28,20 @@ struct C.TTF_Font { }
 
 struct C.SDL_Color{
 pub:
-        r u8
-        g u8
-        b u8
-        a u8
+        r byte
+        g byte
+        b byte
+        a byte
 }
 
 //fn C.TTF_RenderText_Solid(voidptr, voidptr, voidptr) voidptr
 /*
 struct SdlColor {
 //pub:
-        r u8
-        g u8
-        b u8
-        a u8
+        r byte
+        g byte
+        b byte
+        a byte
 }
 //type SdlColor SdlColor
 */
@@ -69,10 +69,10 @@ pub:
         _type u32
         timestamp u32
         windowid u32
-        state u8
-        repeat u8
-        padding2 u8
-        padding3 u8
+        state byte
+        repeat byte
+        padding2 byte
+        padding3 byte
         keysym SdlKeysym
 }
 union SdlEventU {
@@ -91,10 +91,10 @@ pub:
 }
 struct SdlColor0 {
 pub:
-        r u8
-        g u8
-        b u8
-        a u8
+        r byte
+        g byte
+        b byte
+        a byte
 }
 struct SdlSurface {
 pub:
@@ -113,14 +113,14 @@ pub:
 }
 
 type SdlAudioFormat u16
-type SdlAudioCallback_t fn(userdata voidptr, stream *u8, len int)
+type SdlAudioCallback_t fn(userdata voidptr, stream *byte, len int)
 struct SdlAudioSpec {
 pub:
 mut:
         freq int
         format SdlAudioFormat
-        channels u8
-        silence u8
+        channels byte
+        silence byte
         samples u16
         size u32
         callback SdlAudioCallback_t
