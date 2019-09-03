@@ -47,7 +47,7 @@ struct SdlColor {
 */
 
 type SdlScancode int    // TODO define the real enum here
-type SdlKeycode i32
+type SdlKeycode int
 type SdlRect SdlRect
 type SdlColor C.SDL_Color
 type SdlSurface SdlSurface
