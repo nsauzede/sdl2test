@@ -548,12 +548,7 @@ fn (g &Game) draw_field() {
 
 fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
 	tcol := SdlColor {byte(3), byte(2), byte(1), byte(0)}
-
-// TODO : following doesn't compile !!
-//	tsurf := C.TTF_RenderText_Solid(g.font, text.str, tcol)
-	tsurf := voidptr(0)
-	stubTTF_RenderText_Solid(g.font, text.str, &tcol, &tsurf)
-
+	tsurf := C.TTF_RenderText_Solid(g.font, text.str, tcol)
 	ttext := C.SDL_CreateTextureFromSurface(g.sdl.renderer, tsurf)
 	texw := 0
 	texh := 0

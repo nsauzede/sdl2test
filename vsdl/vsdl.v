@@ -11,15 +11,13 @@ module vsdl
 
 //fn C.SDL_Init(flags u32) int
 //fn C.SDL_CreateWindowAndRenderer(w int, h int, flags u32, window voidptr, renderer voidptr) int
-//fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) &SdlSurface
+fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) &SdlSurface
 //fn C.SDL_CreateTexture(renderer voidptr, format u32, access int, w int, h int) voidptr
 //fn C.SDL_MapRGB(format voidptr, r byte, g byte, b byte) u32
 //fn C.SDL_PollEvent(voidptr) int
 //fn C.stubTTF_RenderText_Solid(font voidptr, text voidptr, col *SdlColor, ret **SdlSurface)
-fn C.stubTTF_RenderText_Solid(font voidptr, text voidptr, col &SdlColor, ret &voidptr)
 
-//fn C.TTF_RenderText_Solid(voidptr, voidptr, C.SdlColor) voidptr
-//fn C.stubTTF_RenderText_Solid(voidptr, voidptr, voidptr, voidptr)
+//fn C.stubTTF_RenderText_Solid(font voidptr, text voidptr, col &SdlColor, ret &voidptr)
 
 //fn C.TTF_Quit()
 //fn C.TTF_OpenFont(a byteptr, b int) voidptr
@@ -103,7 +101,8 @@ type SdlSurface C.SDL_Surface
 
 //type SdlAudioFormat u16
 //type SdlAudioCallback_t fn(userdata voidptr, stream &byte, len int)
-struct SdlAudioSpec {
+//struct SdlAudioSpec {
+struct C.SDL_AudioSpec {
 pub:
 mut:
         freq int
@@ -117,4 +116,4 @@ mut:
         callback voidptr
         userdata voidptr
 }
-//type SdlAudioSpec SdlAudioSpec
+type SdlAudioSpec C.SDL_AudioSpec

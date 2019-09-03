@@ -85,7 +85,7 @@ enum GameState {
 }
 
 struct AudioSample {
-        wav_buffer *byte
+        wav_buffer &byte
         wav_length u32
 }
 
@@ -105,7 +105,7 @@ mut:
 	h int
 	window          voidptr
 	renderer        voidptr
-	screen          *SdlSurface
+	screen          &SdlSurface
 	texture         voidptr
 //      AUDIO
         actx AudioContext
@@ -147,7 +147,7 @@ mut:
 	font            voidptr
 }
 
-fn acb(userdata voidptr, stream *byte, _len int) {
+fn acb(userdata voidptr, stream &byte, _len int) {
         mut ctx := &AudioContext(userdata)
         C.memset(stream, 0, _len)
         if ctx.audio_len == u32(0) {
