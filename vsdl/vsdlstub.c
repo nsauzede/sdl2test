@@ -23,3 +23,11 @@ DECLSPEC void SDLCALL stubTTF_RenderText_Solid(TTF_Font *font,
         dbgprintf("%s: returning res=%p\n", __func__, res);
         *ret = res;
 }
+
+#ifdef WIN32
+int rand_r(unsigned int *seedp) {
+	srand(*seedp);
+	*seedp = rand();
+	return *seedp;
+}
+#endif
