@@ -74,15 +74,15 @@ const (
 	]
 	// Each tetro has its unique color
 	Colors = [
-		SdlColor{u8(0), u8(0), u8(0), u8(0)},		// unused ?
-		SdlColor{u8(0), u8(0x62), u8(0xc0), u8(0)},	// quad : darkblue 0062c0
-		SdlColor{u8(0xca), u8(0x7d), u8(0x5f), u8(0)},	// tricorn : lightbrown ca7d5f
-		SdlColor{u8(0), u8(0xc1), u8(0xbf), u8(0)},	// short topright : lightblue 00c1bf
-		SdlColor{u8(0), u8(0xc1), u8(0), u8(0)},	// short topleft : lightgreen 00c100
-		SdlColor{u8(0xbf), u8(0xbe), u8(0), u8(0)},	// long topleft : yellowish bfbe00
-		SdlColor{u8(0xd1), u8(0), u8(0xbf), u8(0)},	// long topright : pink d100bf
-		SdlColor{u8(0xd1), u8(0), u8(0), u8(0)},	// longest : lightred d10000
-		SdlColor{u8(0), u8(170), u8(170), u8(0)},	// unused ?
+		SdlColor{byte(0), byte(0), byte(0), byte(0)},		// unused ?
+		SdlColor{byte(0), byte(0x62), byte(0xc0), byte(0)},	// quad : darkblue 0062c0
+		SdlColor{byte(0xca), byte(0x7d), byte(0x5f), byte(0)},	// tricorn : lightbrown ca7d5f
+		SdlColor{byte(0), byte(0xc1), byte(0xbf), byte(0)},	// short topright : lightblue 00c1bf
+		SdlColor{byte(0), byte(0xc1), byte(0), byte(0)},	// short topleft : lightgreen 00c100
+		SdlColor{byte(0xbf), byte(0xbe), byte(0), byte(0)},	// long topleft : yellowish bfbe00
+		SdlColor{byte(0xd1), byte(0), byte(0xbf), byte(0)},	// long topright : pink d100bf
+		SdlColor{byte(0xd1), byte(0), byte(0), byte(0)},	// longest : lightred d10000
+		SdlColor{byte(0), byte(170), byte(170), byte(0)},	// unused ?
 	]
 )
 
@@ -545,7 +545,7 @@ fn (g &Game) draw_field() {
 }
 
 fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
-	tcol := SdlColor {u8(3), u8(2), u8(1), u8(0)}
+	tcol := SdlColor {byte(3), byte(2), byte(1), byte(0)}
 	tsurf := C.TTF_RenderText_Solid(g.font, text.str, tcol)
 	ttext := C.SDL_CreateTextureFromSurface(g.sdl.renderer, tsurf)
 	texw := 0

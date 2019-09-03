@@ -11,24 +11,24 @@ fn C.atexit(atexit_func_t)
 
 const (
         Colors = [
-                SdlColor{u8(255), u8(255), u8(255), u8(0)},
-                SdlColor{u8(255), u8(0), u8(0), u8(0)}
+                SdlColor{byte(255), byte(255), byte(255), byte(0)},
+                SdlColor{byte(255), byte(0), byte(0), byte(0)}
         ]
 )
 
 struct AudioContext {
 mut:
-//        audio_pos *u8
+//        audio_pos *byte
         audio_pos voidptr
         audio_len u32
         wav_spec SdlAudioSpec
-        wav_buffer *u8
+        wav_buffer *byte
         wav_length u32
-        wav2_buffer *u8
+        wav2_buffer *byte
         wav2_length u32
 }
 
-fn acb(userdata voidptr, stream *u8, _len int) {
+fn acb(userdata voidptr, stream *byte, _len int) {
         mut ctx := &AudioContext(userdata)
 //        println('acb!!! wav_buffer=${ctx.wav_buffer} audio_len=${ctx.audio_len}')
         if ctx.audio_len == u32(0) {
@@ -143,8 +143,8 @@ fn main() {
                 C.SDL_RenderCopy(sdl_renderer, sdl_texture, 0, 0)
 
 //                tcol := C.SDL_Color {u32(0), u32(0), u32(0)}    // TODO doesn't compile ?
-//                tcol := [u8(0), u8(0), u8(0), u8(0)]
-                tcol := SdlColor {u8(3), u8(2), u8(1), u8(0)}
+//                tcol := [byte(0), byte(0), byte(0), byte(0)]
+                tcol := SdlColor {byte(3), byte(2), byte(1), byte(0)}
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', tcol)
                 tsurf := *voidptr(0xdeadbeef)
 //                println('tsurf=$tsurf')
