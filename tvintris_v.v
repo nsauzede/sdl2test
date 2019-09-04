@@ -33,6 +33,27 @@ const (
 	P1DOWN = C.SDLK_x
 	P1LEFT = C.SDLK_a
 	P1RIGHT = C.SDLK_d
+
+	NJOYMAX = 2
+	// joystick name
+	JOYP1NAME = 'Generic X-Box pad'
+	// following are joystick button number
+	JBP1FIRE = 1
+	// following are joystick hat value
+	JHP1UP = 1
+	JHP1DOWN = 4
+	JHP1LEFT = 8
+	JHP1RIGHT = 3
+
+	// joystick name
+	JOYP2NAME = 'RedOctane Guitar Hero X-plorer'
+	// following are joystick button number
+	JBP2FIRE = 0
+	// following are joystick hat value
+	JHP2UP = 4
+	JHP2DOWN = 1
+	JHP2LEFT = 8
+	JHP2RIGHT = 2
 )
 
 const (
@@ -119,6 +140,9 @@ mut:
 	texture         voidptr
 //      AUDIO
         actx		AudioContext
+//	JOYSTICKS
+	jnames		[2]string
+	jids		[2]int
 }
 
 struct Game {
@@ -137,6 +161,15 @@ mut:
 	k_down          int
 	k_left          int
 	k_right         int
+	// joystick ID
+	joy_id           int
+	// joystick buttons
+	jb_fire          int
+	// joystick hat values
+	jh_up            int
+	jh_down          int
+	jh_left          int
+	jh_right         int
 	// game rand seed
 	seed            int
 	seed_ini            int
@@ -167,7 +200,7 @@ mut:
 }
 
 fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
-	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
+	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO | C.SDL_INIT_JOYSTICK)
 	C.atexit(C.SDL_Quit)
 	C.TTF_Init()
 	C.atexit(C.TTF_Quit)
@@ -192,24 +225,50 @@ fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
         if C.Mix_PlayMusic(sdl.actx.music, 1) != -1 {
                 C.Mix_VolumeMusic(sdl.actx.volume)
         }
+	njoy := C.SDL_NumJoysticks()
+	for i := 0; i < njoy; i++ {
+		C.SDL_JoystickOpen(i)
+		jn := tos_clone(C.SDL_JoystickNameForIndex(i))
+		println('JOY NAME $jn')
+		for j := 0; j < NJOYMAX; j++ {
+			if sdl.jnames[j] == jn {
+				println('FOUND JOYSTICK $j $jn ID=$i')
+				sdl.jids[j] = i
+			}
+		}
+	}
+	C.SDL_JoystickEventState(C.SDL_ENABLE)
 }
 
 fn main() {
 	println('tVintris -- tribute to venerable Twintris')
 	mut game := &Game{}
+	game.sdl.jnames[0] = JOYP1NAME
+	game.sdl.jnames[1] = JOYP2NAME
+	game.sdl.jids[0] = -1
+	game.sdl.jids[1] = -1
 	game.sdl.set_sdl_context(WinWidth, WinHeight, Title)
 	game.font = C.TTF_OpenFont(FontName.str, TextSize)
 	seed := time.now().uni
-
 	mut game2 := &Game{}
 	game2.sdl = game.sdl
 	game2.font = game.font
+
+	game.joy_id = game.sdl.jids[0]
+	println('JOY1 id=${game.joy_id}')
+	game2.joy_id = game.sdl.jids[1]
+	println('JOY2 id=${game2.joy_id}')
 
 	game.k_fire = P1FIRE
 	game.k_up = P1UP
 	game.k_down = P1DOWN
 	game.k_left = P1LEFT
 	game.k_right = P1RIGHT
+	game.jb_fire = JBP1FIRE
+	game.jh_up = JHP1UP
+	game.jh_down = JHP1DOWN
+	game.jh_left = JHP1LEFT
+	game.jh_right = JHP1RIGHT
 	game.ofs_x = 0
 	game.seed_ini = seed
 	game.init_game()
@@ -221,6 +280,11 @@ fn main() {
 	game2.k_down = P2DOWN
 	game2.k_left = P2LEFT
 	game2.k_right = P2RIGHT
+	game2.jb_fire = JBP2FIRE
+	game2.jh_up = JHP2UP
+	game2.jh_down = JHP2DOWN
+	game2.jh_left = JHP2LEFT
+	game2.jh_right = JHP2RIGHT
 	game2.ofs_x = WinWidth * 2 / 3
 	game2.seed_ini = seed
 	game2.init_game()
@@ -260,6 +324,19 @@ fn main() {
 					}
 					game.handle_key(key)
 					game2.handle_key(key)
+				case C.SDL_JOYBUTTONDOWN:
+					jb := int(ev.jbutton.button)
+					joyid := int(ev.jbutton.which)
+//					println('JOY BUTTON $jb $joyid')
+					game.handle_jbutton(jb, joyid)
+					game2.handle_jbutton(jb, joyid)
+				case C.SDL_JOYHATMOTION:
+					jh := int(ev.jhat.hat)
+					jv := int(ev.jhat.value)
+					joyid := int(ev.jhat.which)
+//					println('JOY HAT $jh $jv $joyid')
+					game.handle_jhat(jh, jv, joyid)
+					game2.handle_jhat(jh, jv, joyid)
 			}
 		}
 		if should_close {
@@ -357,6 +434,62 @@ fn (game mut Game) handle_key(key int) {
 		case game.k_right:
 			game.move_right(1)
 		case game.k_down:
+			game.move_tetro() // drop faster when the player presses <down>
+	}
+}
+
+fn (game mut Game) handle_jbutton(jb int, joyid int) {
+	if joyid != game.joy_id {
+		return
+	}
+	// global buttons
+	mut action := Action(.none)
+	switch jb {
+		case game.jb_fire:
+			action = .fire
+	}
+
+	if action == .fire {
+			switch game.state {
+				case .gameover:
+					game.init_game()
+					game.state = .running
+			}
+	}
+}
+
+fn (game mut Game) handle_jhat(jh int, jv int, joyid int) {
+	if joyid != game.joy_id {
+		return
+	}
+	if game.state != .running { return }
+//	println('testing hat values.. joyid=$joyid jh=$jh jv=$jv')
+	// hat values while game is running
+	switch jv {
+		case game.jh_up:
+//			println('UP')
+			// Rotate the tetro
+			old_rotation_idx := game.rotation_idx
+			game.rotation_idx++
+			if game.rotation_idx == TetroSize {
+				game.rotation_idx = 0
+			}
+			game.get_tetro()
+			if !game.move_right(0) {
+				game.rotation_idx = old_rotation_idx
+				game.get_tetro()
+			}
+			if game.pos_x < 0 {
+				game.pos_x = 1
+			}
+		case game.jh_left:
+//			println('LEFT')
+			game.move_right(-1)
+		case game.jh_right:
+//			println('RIGHT')
+			game.move_right(1)
+		case game.jh_down:
+//			println('DOWN')
 			game.move_tetro() // drop faster when the player presses <down>
 	}
 }
@@ -489,7 +622,7 @@ fn myrand_r(seed &int) int {
   *rs = ns
   return ns & 0x7fffffff
 }
-            
+
 // Draw a rand tetro index
 fn (g mut Game) rand_tetro() int {
 	cur := g.tetro_next

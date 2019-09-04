@@ -12,6 +12,7 @@ CXXFLAGS:=-Wall -Werror
 CXXFLAGS+=-Wextra
 
 CXXFLAGS+=-g -O0
+CFLAGS+=-g -O0
 
 CXXFLAGS+=-I.
 
