@@ -74,11 +74,29 @@ pub:
         padding3 byte
         keysym SdlKeysym
 }
+struct SdlJoyButtonEvent {
+pub:
+        _type u32
+        timestamp u32
+        which int
+        button byte
+        state byte
+}
+struct SdlJoyHatEvent {
+pub:
+        _type u32
+        timestamp u32
+        which int
+        hat byte
+        value byte
+}
 union SdlEventU {
 pub:
         _type u32
         quit SdlQuitEvent
         key SdlKeyboardEvent
+        jbutton SdlJoyButtonEvent
+        jhat SdlJoyHatEvent
 }
 type SdlEvent SdlEventU
 

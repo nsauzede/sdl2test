@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 	TTF_Font *font = 0;
 #endif
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return 1;
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0) return 1;
 	atexit(SDL_Quit);
 #ifdef SDL1
 	screen = SDL_SetVideoMode(w, h, bpp, 0);
@@ -143,7 +143,24 @@ int main(int argc, char *argv[]) {
                 return 1;
         }
 #endif
-//        Mix_SetPostMix(postmix,argv[1]);
+    printf("%i joysticks were found.\n\n", SDL_NumJoysticks() );
+    printf("The names of the joysticks are:\n");
+		
+    for( int i=0; i < SDL_NumJoysticks(); i++ ) 
+    {
+    	SDL_Joystick *joy = SDL_JoystickOpen(i);
+#if 0
+    	char *name = SDL_JoystickName(i);
+        printf("    %s\n", name ? name : "(noname)");
+#endif
+        printf("Opened Joystick %d\n", i);
+        printf("Name: %s\n", SDL_JoystickNameForIndex(i));
+        printf("Number of Axes: %d\n", SDL_JoystickNumAxes(joy));
+        printf("Number of Buttons: %d\n", SDL_JoystickNumButtons(joy));
+        printf("Number of Balls: %d\n", SDL_JoystickNumBalls(joy));
+    }
+	SDL_JoystickEventState(SDL_ENABLE);
+    //        Mix_SetPostMix(postmix,argv[1]);
 #if 1
         if(Mix_PlayMusic(music, 1)!=-1) {
 	        Mix_VolumeMusic(volume);
@@ -158,10 +175,35 @@ int main(int argc, char *argv[]) {
 				quit = 1;
 				break;
 			}
+			if (event.type == SDL_JOYDEVICEADDED) {
+				printf("JOYDEVADDED\n");
+				continue;
+			}
+			if (event.type == SDL_JOYHATMOTION) {
+				printf("hat\n");
+				continue;
+			}
+			if (event.type == SDL_JOYAXISMOTION) {
+//				printf("axis\n");
+				continue;
+			}
+			if (event.type == SDL_JOYBUTTONDOWN) {
+				printf("EVENT JOYSTICK : button=%d\n", event.jbutton.button);
+				if (event.jbutton.button == 0) {
+        // trigger sound restart
+	Mix_PlayChannel(0, actx.wave, 0);
+				}
+				continue;
+			}
 			if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					quit = 1;
 					break;
+				}
+				if (event.key.keysym.sym == SDLK_SPACE) {
+        // trigger sound restart
+	Mix_PlayChannel(0, actx.wave, 0);
+					continue;
 				}
 			}
 		}
