@@ -31,7 +31,12 @@ endif
 
 CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
+
+ifeq ($(SDL_VER),1)
+LDLIBS+=$(SDL_LIBS) -lSDL_ttf -lSDL_mixer
+else
 LDLIBS+=$(SDL_LIBS) -lSDL2_ttf -lSDL2_mixer
+endif
 
 CFLAGS+=-pthread
 CXXFLAGS+=-pthread
@@ -41,7 +46,6 @@ $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
-mainmix_c.exe: LDLIBS+=-lSDL2_mixer
 %.exe: %.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 

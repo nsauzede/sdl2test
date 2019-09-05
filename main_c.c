@@ -73,7 +73,11 @@ int main(int argc, char *argv[]) {
 #endif
 
         AudioCtx actx;
+#ifdef SDL2
         SDL_zero(actx);
+#else
+	memset(&actx, 0, sizeof(actx));
+#endif
         if( SDL_LoadWAV(soundpath, &actx.wav_spec, &actx.wav_buffer, &actx.wav_length) == NULL ){
                 printf("couldn't load wav\n");
                 return 1;

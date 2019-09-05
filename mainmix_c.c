@@ -3,9 +3,9 @@
 
 #include <SDL.h>
 #ifdef SDL2
+#endif
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
-#endif
 
 typedef struct AudioCtx_s {
 	Mix_Chunk *wave;
@@ -136,7 +136,11 @@ int main(int argc, char *argv[]) {
 #endif
 #if 1
         AudioCtx actx;
+#ifdef SDL2
         SDL_zero(actx);
+#else
+	memset(&actx, 0, sizeof(actx));
+#endif
         actx.wave = Mix_LoadWAV(soundpath);
         if (actx.wave == NULL ){
                 printf("couldn't load wav\n");
@@ -149,12 +153,14 @@ int main(int argc, char *argv[]) {
     for( int i=0; i < SDL_NumJoysticks(); i++ ) 
     {
     	SDL_Joystick *joy = SDL_JoystickOpen(i);
-#if 0
-    	char *name = SDL_JoystickName(i);
-        printf("    %s\n", name ? name : "(noname)");
-#endif
         printf("Opened Joystick %d\n", i);
+#ifdef SDL1
+//	char *name = SDL_JoystickName(i);
+//	printf("    %s\n", name ? name : "(noname)");
+        printf("Name: %s\n", SDL_JoystickName(i));
+#else
         printf("Name: %s\n", SDL_JoystickNameForIndex(i));
+#endif
         printf("Number of Axes: %d\n", SDL_JoystickNumAxes(joy));
         printf("Number of Buttons: %d\n", SDL_JoystickNumButtons(joy));
         printf("Number of Balls: %d\n", SDL_JoystickNumBalls(joy));
@@ -175,10 +181,12 @@ int main(int argc, char *argv[]) {
 				quit = 1;
 				break;
 			}
+#ifdef SDL2
 			if (event.type == SDL_JOYDEVICEADDED) {
 				printf("JOYDEVADDED\n");
 				continue;
 			}
+#endif
 			if (event.type == SDL_JOYHATMOTION) {
 				printf("hat\n");
 				continue;
