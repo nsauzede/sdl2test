@@ -31,7 +31,7 @@ endif
 
 CFLAGS+=$(SDL_FLAGS)
 CXXFLAGS+=$(SDL_FLAGS)
-LDLIBS+=$(SDL_LIBS) vsdlstub.o -lSDL2_ttf -lSDL2_mixer
+LDLIBS+=$(SDL_LIBS) -lSDL2_ttf -lSDL2_mixer
 
 CFLAGS+=-pthread
 CXXFLAGS+=-pthread
@@ -42,14 +42,15 @@ $(V):
 	(cd $(@D) ; $(MAKE) ; cd -)
 
 mainmix_c.exe: LDLIBS+=-lSDL2_mixer
-%.exe: %.o | vsdlstub.o
+%.exe: %.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 vsdlstub.o: vsdl/vsdlstub.c
 	$(CC) -c -o $@ $(CFLAGS) -g $^
 
 %_v.exe: CFLAGS+=$(VCFLAGS)
-%.c: %.v
+%_v.exe: LDLIBS+=vsdlstub.o
+%.c: %.v | vsdlstub.o
 	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^
 
