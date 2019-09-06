@@ -6,6 +6,7 @@ TARGET+=main_v.exe
 TARGET+=tetris_v.exe
 TARGET+=tetrisnomix_v.exe
 TARGET+=tvintris_v.exe
+TARGET+=tvintris0_v.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
