@@ -7,7 +7,7 @@
 import rand
 import time
 import math
-import vsdl
+import nsauzede.vsdl2
 
 const (
 	Title = 'tVintris'
