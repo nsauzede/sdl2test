@@ -1,14 +1,18 @@
-# sdl2test
+# sdl2test (obsolete for V binding, see below)
 Small examples of libSDL2 usage in V, C and C++ languages.
 Historically, the purpose was to evaluate the changes from SDL1 to SDL2.
 
+*UPDATE* for those interested in the V SDL2 wrapper, a separate, cleaned up 'vsdl2' V module has been officially registered on vpm.best : <a href='https://vpm.best/mod/nsauzede.vsdl2'>here</a>
+  git repo : <a href='https://github.com/nsauzede/vsdl2'>here</a>
+It also contains an updated tvintris example
+
 # Credits
-tetris_v.v is just and SDL port of original source from <a href='https://github.com/vlang/v'>vlang/v</a> example by Alex
+tetris_v.v is just and SDL port of original source from <a href='https://github.com/vlang/v'>vlang/v</a> example by Alex (obsolete, see above)
 - wrote simple SDL2 V wrapper, ported GLFW to SDL, tweaked colors and added music & sounds
 
 <img src='https://github.com/nsauzede/sdl2test/raw/master/tetris_v.png'>
 
-tvintris0_v.v is a dual-player (local) version, inspired by ancient game Twintris
+tvintris0_v.v is a dual-player (local) version, inspired by ancient game Twintris (obsolete, see above)
 -uses published vpm module nsauzede.vsdl2
 
 <img src='https://github.com/nsauzede/sdl2test/blob/master/tvintris.png'>
