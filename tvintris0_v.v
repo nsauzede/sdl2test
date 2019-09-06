@@ -295,6 +295,7 @@ fn main() {
 	game2.state = .running
 	go game2.run() // Run the game loop in a new thread
 
+	mut g := Game{}
         mut should_close := false
 	for {
 		game.draw_begin()
@@ -311,7 +312,15 @@ fn main() {
 
 	game.draw_score()
 	game2.draw_score()
-	game.draw_stats()
+	g1 := game
+	g2 := game2
+	if g1.tetro_total > g.tetro_total {
+		g = *g1
+	}
+	if g2.tetro_total > g.tetro_total {
+		g = *g2
+	}
+	g.draw_stats()
 
 		game.draw_end()
 //		game.handle_events()            // CRASHES if done in function ???
@@ -568,6 +577,7 @@ fn (g mut Game) move_tetro() {
 			// The new tetro has no space to drop => end of the game
 			if g.pos_y < 2 {
 				g.state = .gameover
+				g.tetro_total = 0
 				return
 			}
 			// Drop it and generate a new one
@@ -729,14 +739,18 @@ fn (g &Game) draw_score() {
 
 fn (g &Game) draw_stats() {
 	if g.font != voidptr(0) {
-		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 0 * TextSize, 'stats: ' + g.tetro_total.str(), 0, 0, 0)
+		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 0 * TextSize, 'stats: ' + g.tetro_total.str() + ' tetros', 0, 0, 0)
 		mut stats := ''
-		for s in g.tetro_stats {
+		for st in g.tetro_stats {
+			mut s := 0
+			if g.tetro_total > 0 {
+				s = 100 * st / g.tetro_total
+			}
 			stats += ' '
 			// / g.tetro_total
 			stats += s.str()
 		}
-		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 2 * TextSize, stats, 0, 0, 0)
+		g.draw_text(WinWidth / 3 - 8, WinHeight * 3 / 4 + 2 * TextSize, stats, 0, 0, 0)
 	}
 }
 
