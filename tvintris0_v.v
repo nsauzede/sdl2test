@@ -259,9 +259,9 @@ fn main() {
 	game2.font = game.font
 
 	game.joy_id = game.sdl.jids[0]
-	println('JOY1 id=${game.joy_id}')
+//	println('JOY1 id=${game.joy_id}')
 	game2.joy_id = game.sdl.jids[1]
-	println('JOY2 id=${game2.joy_id}')
+//	println('JOY2 id=${game2.joy_id}')
 
 	game.k_fire = P1FIRE
 	game.k_up = P1UP
@@ -643,7 +643,7 @@ fn (g mut Game) generate_tetro() {
 	g.pos_y = 0
 	g.pos_x = FieldWidth / 2 - TetroSize / 2
 	g.tetro_idx = g.rand_tetro()
-	println('idx=${g.tetro_idx}')
+//	println('idx=${g.tetro_idx}')
 	g.tetro_stats[g.tetro_idx] += 1
 	g.tetro_total++
 	g.rotation_idx = 0
@@ -730,11 +730,11 @@ fn (g &Game) draw_score() {
 fn (g &Game) draw_stats() {
 	if g.font != voidptr(0) {
 		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 0 * TextSize, 'stats: ' + g.tetro_total.str(), 0, 0, 0)
-		mut stats := 'hello'
+		mut stats := ''
 		for s in g.tetro_stats {
-			bucket := s
+			stats += ' '
 			// / g.tetro_total
-			stats += bucket.str()
+			stats += s.str()
 		}
 		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 2 * TextSize, stats, 0, 0, 0)
 	}
