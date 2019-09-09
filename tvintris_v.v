@@ -2,16 +2,23 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-// SDL2 port+wrapper, Twintris-like dual-game logic, by Nicolas Sauzede 2019
+// SDL2 port+wrapper, Twintris-like dual-game logic,
+// and more, by Nicolas Sauzede 2019.
+
+module main
 
 import rand
 import time
 import math
-import vsdl
+import nsauzede.vsdl2
 
 const (
 	Title = 'tVintris'
 	FontName = 'RobotoMono-Regular.ttf'
+	MusicName = 'sounds/TwintrisThosenine.mod'
+	SndBlockName = 'sounds/block.wav'
+	SndLineName = 'sounds/single.wav'
+	SndDoubleName = 'sounds/triple.wav'
 	BlockSize = 20 // pixels
 	FieldHeight = 20 // # of blocks
 	FieldWidth = 10
@@ -35,7 +42,7 @@ const (
 	P1RIGHT = C.SDLK_d
 
 	NJOYMAX = 2
-	// joystick name
+	// joystick name => enter your own device name
 	JOYP1NAME = 'Generic X-Box pad'
 	// following are joystick button number
 	JBP1FIRE = 1
@@ -45,7 +52,7 @@ const (
 	JHP1LEFT = 8
 	JHP1RIGHT = 3
 
-	// joystick name
+	// joystick name => enter your own device name
 	JOYP2NAME = 'RedOctane Guitar Hero X-plorer'
 	// following are joystick button number
 	JBP2FIRE = 0
@@ -120,10 +127,8 @@ enum GameState {
 
 struct AudioContext {
 mut:
-//	music *C.Mix_Music
 	music voidptr
 	volume int
-//        waves [3]*MixChunk
         waves [3]voidptr
 }
 
@@ -136,7 +141,6 @@ mut:
 	window          voidptr
 	renderer        voidptr
 	screen          &SdlSurface
-//	screen          voidptr
 	texture         voidptr
 //      AUDIO
         actx		AudioContext
@@ -218,17 +222,17 @@ fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
 
 	C.Mix_Init(0)
 	C.atexit(C.Mix_Quit)
-        if C.Mix_OpenAudio(48000,C.MIX_DEFAULT_FORMAT,2,AudioBufSize) < 0 {
-                println('couldn\'t open audio')
-        }
-	sdl.actx.music = C.Mix_LoadMUS('sounds/TwintrisThosenine.mod')
-        sdl.actx.waves[0] = C.Mix_LoadWAV('sounds/block.wav')
-        sdl.actx.waves[1] = C.Mix_LoadWAV('sounds/line.wav')
-        sdl.actx.waves[2] = C.Mix_LoadWAV('sounds/double.wav')
-        sdl.actx.volume = C.SDL_MIX_MAXVOLUME
-        if C.Mix_PlayMusic(sdl.actx.music, 1) != -1 {
-                C.Mix_VolumeMusic(sdl.actx.volume)
-        }
+	if C.Mix_OpenAudio(48000,C.MIX_DEFAULT_FORMAT,2,AudioBufSize) < 0 {
+		println('couldn\'t open audio')
+	}
+	sdl.actx.music = C.Mix_LoadMUS(MusicName.str)
+	sdl.actx.waves[0] = C.Mix_LoadWAV(SndBlockName.str)
+	sdl.actx.waves[1] = C.Mix_LoadWAV(SndLineName.str)
+	sdl.actx.waves[2] = C.Mix_LoadWAV(SndDoubleName.str)
+	sdl.actx.volume = C.SDL_MIX_MAXVOLUME
+	if C.Mix_PlayMusic(sdl.actx.music, 1) != -1 {
+		C.Mix_VolumeMusic(sdl.actx.volume)
+	}
 	njoy := C.SDL_NumJoysticks()
 	for i := 0; i < njoy; i++ {
 		C.SDL_JoystickOpen(i)
@@ -259,9 +263,9 @@ fn main() {
 	game2.font = game.font
 
 	game.joy_id = game.sdl.jids[0]
-	println('JOY1 id=${game.joy_id}')
+//	println('JOY1 id=${game.joy_id}')
 	game2.joy_id = game.sdl.jids[1]
-	println('JOY2 id=${game2.joy_id}')
+//	println('JOY2 id=${game2.joy_id}')
 
 	game.k_fire = P1FIRE
 	game.k_up = P1UP
@@ -295,25 +299,35 @@ fn main() {
 	game2.state = .running
 	go game2.run() // Run the game loop in a new thread
 
+	mut g := Game{}
         mut should_close := false
 	for {
-		game.draw_begin()
+		g1 := game
+		g2 := game2
+		// here we determine which game contains most recent state
+		if g1.tetro_total > g.tetro_total {
+			g = *g1
+		}
+		if g2.tetro_total > g.tetro_total {
+			g = *g2
+		}
+		g.draw_begin()
 
-//		game.draw_scene()
-//		game2.draw_scene()
+		g1.draw_tetro()
+		g1.draw_field()
 
-	game.draw_tetro()
-	game.draw_field()
-	game2.draw_tetro()
-	game2.draw_field()
+		g2.draw_tetro()
+		g2.draw_field()
 
-		game.draw_middle()
+		g.draw_middle()
 
-	game.draw_score()
-	game2.draw_score()
-	game.draw_stats()
+		g1.draw_score()
+		g2.draw_score()
 
-		game.draw_end()
+		g.draw_stats()
+
+		g.draw_end()
+
 //		game.handle_events()            // CRASHES if done in function ???
 		ev := SdlEvent{}
 		for !!C.SDL_PollEvent(&ev) {
@@ -376,28 +390,8 @@ fn (game mut Game) handle_key(key int) {
 	switch key {
 		case C.SDLK_SPACE:
 			action = .space
-///*
-/* FIXME : compile error ?
-			switch game.state {
-				case .running:
-					game.state = .paused
-				case .paused:
-					game.state = .running
-			}
-*/
 		case game.k_fire:
 			action = .fire
-/* FIXME : compile error ?
-			switch game.state {
-				case .gameover:
-					game.init_game()
-					game.state = .running
-			}
-*/
-//                        if game.state == .gameover {
-//				game.init_game()
-//				game.state = .running
-//                        }
 	}
 
 	if action == .space {
@@ -420,20 +414,7 @@ fn (game mut Game) handle_key(key int) {
 	// keys while game is running
 	switch key {
 		case game.k_up:
-			// Rotate the tetro
-			old_rotation_idx := game.rotation_idx
-			game.rotation_idx++
-			if game.rotation_idx == TetroSize {
-				game.rotation_idx = 0
-			}
-			game.get_tetro()
-			if !game.move_right(0) {
-				game.rotation_idx = old_rotation_idx
-				game.get_tetro()
-			}
-			if game.pos_x < 0 {
-				game.pos_x = 1
-			}
+			game.rotate_tetro()
 		case game.k_left:
 			game.move_right(-1)
 		case game.k_right:
@@ -473,20 +454,7 @@ fn (game mut Game) handle_jhat(jh int, jv int, joyid int) {
 	switch jv {
 		case game.jh_up:
 //			println('UP')
-			// Rotate the tetro
-			old_rotation_idx := game.rotation_idx
-			game.rotation_idx++
-			if game.rotation_idx == TetroSize {
-				game.rotation_idx = 0
-			}
-			game.get_tetro()
-			if !game.move_right(0) {
-				game.rotation_idx = old_rotation_idx
-				game.get_tetro()
-			}
-			if game.pos_x < 0 {
-				game.pos_x = 1
-			}
+			game.rotate_tetro()
 		case game.jh_left:
 //			println('LEFT')
 			game.move_right(-1)
@@ -555,6 +523,23 @@ fn (g mut Game) run() {
 	}
 }
 
+fn (game mut Game) rotate_tetro() {
+	// Rotate the tetro
+	old_rotation_idx := game.rotation_idx
+	game.rotation_idx++
+	if game.rotation_idx == TetroSize {
+		game.rotation_idx = 0
+	}
+	game.get_tetro()
+	if !game.move_right(0) {
+		game.rotation_idx = old_rotation_idx
+		game.get_tetro()
+	}
+	if game.pos_x < 0 {
+		game.pos_x = 1
+	}
+}
+
 fn (g mut Game) move_tetro() {
 	// Check each block in current tetro
 	for block in g.tetro {
@@ -568,6 +553,7 @@ fn (g mut Game) move_tetro() {
 			// The new tetro has no space to drop => end of the game
 			if g.pos_y < 2 {
 				g.state = .gameover
+				g.tetro_total = 0
 				return
 			}
 			// Drop it and generate a new one
@@ -623,6 +609,7 @@ fn (g mut Game) delete_completed_line(y int) int {
 }
 
 // Ported from https://git.musl-libc.org/cgit/musl/diff/src/prng/rand_r.c?id=0b44a0315b47dd8eced9f3b7f31580cf14bbfc01
+// Thanks spytheman
 fn myrand_r(seed &int) int {
   mut rs := seed
   ns := ( *rs * 1103515245 + 12345 )
@@ -643,7 +630,7 @@ fn (g mut Game) generate_tetro() {
 	g.pos_y = 0
 	g.pos_x = FieldWidth / 2 - TetroSize / 2
 	g.tetro_idx = g.rand_tetro()
-	println('idx=${g.tetro_idx}')
+//	println('idx=${g.tetro_idx}')
 	g.tetro_stats[g.tetro_idx] += 1
 	g.tetro_total++
 	g.rotation_idx = 0
@@ -729,14 +716,28 @@ fn (g &Game) draw_score() {
 
 fn (g &Game) draw_stats() {
 	if g.font != voidptr(0) {
-		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 0 * TextSize, 'stats: ' + g.tetro_total.str(), 0, 0, 0)
-		mut stats := 'hello'
-		for s in g.tetro_stats {
-			bucket := s
-			// / g.tetro_total
-			stats += bucket.str()
+		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 0 * TextSize, 'stats: ' + g.tetro_total.str() + ' tetros', 0, 0, 0)
+		mut stats := ''
+		for st in g.tetro_stats {
+			mut s := 0
+			if g.tetro_total > 0 {
+				s = 100 * st / g.tetro_total
+			}
+			stats += ' '
+			stats += s.str()
+
+//	h := s * 20 / 100
+	h := 40
+//	rect := SdlRect {WinWidth / 3 + 10 + idx * 4, WinHeight * 3 / 4 - h, 4, h}
+	rect := SdlRect {10, 10, h, h}
+//	scol := Colors[idx]
+//	col := C.SDL_MapRGB(g.sdl.screen.format, scol.r, scol.g, scol.b)
+	col := C.SDL_MapRGB(g.sdl.screen.format, 255, 0, 0)
+	C.SDL_FillRect(g.sdl.screen, &rect, col)
+//	idx++
+
 		}
-		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 2 * TextSize, stats, 0, 0, 0)
+		g.draw_text(WinWidth / 3 - 8, WinHeight * 3 / 4 + 2 * TextSize, stats, 0, 0, 0)
 	}
 }
 
@@ -750,6 +751,23 @@ fn (g &Game) draw_begin() {
 	C.SDL_FillRect(g.sdl.screen, &rect, col)
 	rect = SdlRect {WinWidth - BlockSize * FieldWidth - 4,0,2,g.sdl.h}
 	C.SDL_FillRect(g.sdl.screen, &rect, col)
+
+	mut idx := 0
+	for st in g.tetro_stats {
+		mut s := 10
+		if g.tetro_total > 0 {
+			s += 90 * st / g.tetro_total
+		}
+		w := BlockSize
+		h := s * 4 * w / 100
+		rect = SdlRect {(WinWidth - 7 * (w + 1)) / 2 + idx * (w + 1), WinHeight * 3 / 4 - h, w, h}
+//		rect = SdlRect {10 + 5 * idx, 100 - h, 4, h}
+		scol := Colors[idx + 1]
+		col = C.SDL_MapRGB(g.sdl.screen.format, scol.r, scol.g, scol.b)
+//		col = C.SDL_MapRGB(g.sdl.screen.format, 255, 0, 0)
+		C.SDL_FillRect(g.sdl.screen, &rect, col)
+		idx++
+	}
 }
 
 fn (g &Game) draw_scene() {

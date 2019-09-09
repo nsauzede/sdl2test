@@ -259,9 +259,9 @@ fn main() {
 	game2.font = game.font
 
 	game.joy_id = game.sdl.jids[0]
-//	println('JOY1 id=${game.joy_id}')
+	println('JOY1 id=${game.joy_id}')
 	game2.joy_id = game.sdl.jids[1]
-//	println('JOY2 id=${game2.joy_id}')
+	println('JOY2 id=${game2.joy_id}')
 
 	game.k_fire = P1FIRE
 	game.k_up = P1UP
@@ -295,7 +295,6 @@ fn main() {
 	game2.state = .running
 	go game2.run() // Run the game loop in a new thread
 
-	mut g := Game{}
         mut should_close := false
 	for {
 		game.draw_begin()
@@ -312,15 +311,7 @@ fn main() {
 
 	game.draw_score()
 	game2.draw_score()
-	g1 := game
-	g2 := game2
-	if g1.tetro_total > g.tetro_total {
-		g = *g1
-	}
-	if g2.tetro_total > g.tetro_total {
-		g = *g2
-	}
-	g.draw_stats()
+	game.draw_stats()
 
 		game.draw_end()
 //		game.handle_events()            // CRASHES if done in function ???
@@ -577,7 +568,6 @@ fn (g mut Game) move_tetro() {
 			// The new tetro has no space to drop => end of the game
 			if g.pos_y < 2 {
 				g.state = .gameover
-				g.tetro_total = 0
 				return
 			}
 			// Drop it and generate a new one
@@ -653,7 +643,7 @@ fn (g mut Game) generate_tetro() {
 	g.pos_y = 0
 	g.pos_x = FieldWidth / 2 - TetroSize / 2
 	g.tetro_idx = g.rand_tetro()
-//	println('idx=${g.tetro_idx}')
+	println('idx=${g.tetro_idx}')
 	g.tetro_stats[g.tetro_idx] += 1
 	g.tetro_total++
 	g.rotation_idx = 0
@@ -739,18 +729,14 @@ fn (g &Game) draw_score() {
 
 fn (g &Game) draw_stats() {
 	if g.font != voidptr(0) {
-		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 0 * TextSize, 'stats: ' + g.tetro_total.str() + ' tetros', 0, 0, 0)
-		mut stats := ''
-		for st in g.tetro_stats {
-			mut s := 0
-			if g.tetro_total > 0 {
-				s = 100 * st / g.tetro_total
-			}
-			stats += ' '
+		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 0 * TextSize, 'stats: ' + g.tetro_total.str(), 0, 0, 0)
+		mut stats := 'hello'
+		for s in g.tetro_stats {
+			bucket := s
 			// / g.tetro_total
-			stats += s.str()
+			stats += bucket.str()
 		}
-		g.draw_text(WinWidth / 3 - 8, WinHeight * 3 / 4 + 2 * TextSize, stats, 0, 0, 0)
+		g.draw_text(WinWidth / 3 + 10, WinHeight * 3 / 4 + 2 * TextSize, stats, 0, 0, 0)
 	}
 }
 

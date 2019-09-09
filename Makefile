@@ -21,7 +21,10 @@ V:=./v/v
 VFLAGS:=-debug -show_c_cmd
 VCFLAGS:=-std=gnu11 -w -g -O0
 
-all: SDL_CHECK $(TARGET)
+all: SDL_CHECK VMOD_INSTALL $(TARGET)
+
+VMOD_INSTALL: $(V)
+	$(V) install nsauzede.vsdl2
 
 include sdl.mak
 ifeq ($(SDL_VER),1)
