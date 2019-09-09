@@ -174,6 +174,7 @@ int main(int argc, char *argv[]) {
 #endif
 	int quit = 0;
 	int ballx = 0, bally = h / 2, balld = 10, balldir = 1;
+	int pause = 0;
 	while (!quit) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -208,9 +209,20 @@ int main(int argc, char *argv[]) {
 					quit = 1;
 					break;
 				}
+				if (event.key.keysym.sym == SDLK_RETURN) {
+					if (!pause) {
+						// trigger sound restart
+						Mix_PlayChannel(0, actx.wave, 0);
+					}
+					continue;
+				}
 				if (event.key.keysym.sym == SDLK_SPACE) {
-        // trigger sound restart
-	Mix_PlayChannel(0, actx.wave, 0);
+					pause = 1 - pause;
+					if (pause) {
+						Mix_PauseMusic();
+					} else {
+						Mix_ResumeMusic();
+					}
 					continue;
 				}
 			}
@@ -231,6 +243,7 @@ int main(int argc, char *argv[]) {
 		rect.h = balld;
 		col = SDL_MapRGB(screen->format, 255, 0, 0);
 		SDL_FillRect(screen, &rect, col);
+if (!pause) {
 		ballx += balldir;
 		if (balldir == 1) {
 			if (ballx >= w - balld) {
@@ -245,7 +258,7 @@ int main(int argc, char *argv[]) {
 	Mix_PlayChannel(0, actx.wave, 0);
 			}
 		}
-
+}
 #ifdef SDL1
 		SDL_UpdateRect(screen, 0, 0, 0, 0);
 #else
