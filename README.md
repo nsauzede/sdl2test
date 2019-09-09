@@ -3,7 +3,9 @@ Small examples of libSDL2 usage in V, C and C++ languages.
 Historically, the purpose was to evaluate the changes from SDL1 to SDL2.
 
 *UPDATE* for those interested in the V SDL2 wrapper, a separate, cleaned up 'vsdl2' V module has been officially registered on vpm.best : <a href='https://vpm.best/mod/nsauzede.vsdl2'>here</a>
-  git repo : <a href='https://github.com/nsauzede/vsdl2'>here</a>
+
+The git repo : <a href='https://github.com/nsauzede/vsdl2'>here</a>
+
 It also contains an updated tvintris example
 
 - tvintris_v.v is a dual-player (local) version, inspired by ancient game Twintris (obsolete, see above). It uses published vpm module nsauzede.vsdl2
