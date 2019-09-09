@@ -12,7 +12,7 @@ tetris_v.v is just and SDL port of original source from <a href='https://github.
 
 <img src='https://github.com/nsauzede/sdl2test/raw/master/tetris_v.png'>
 
-tvintris0_v.v is a dual-player (local) version, inspired by ancient game Twintris (obsolete, see above)
+tvintris_v.v is a dual-player (local) version, inspired by ancient game Twintris (obsolete, see above)
 -uses published vpm module nsauzede.vsdl2
 
 <img src='https://github.com/nsauzede/sdl2test/blob/master/tvintris.png'>
