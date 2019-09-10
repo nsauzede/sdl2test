@@ -60,6 +60,8 @@ int main(int argc, char *argv[]) {
 	screen = SDL_CreateRGBSurface(0, w, h, bpp,0x00FF0000,0x0000FF00,0x000000FF,0xFF000000);
 	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
 	// OpenGL
+	// Loosely followed the great SDL2+OpenGL2.1 tutorial here :
+	// http://lazyfoo.net/tutorials/OpenGL/01_hello_opengl/index2.php
 	SDL_GLContext glContext = SDL_GL_CreateContext(sdlWindow);
 	if (glContext == NULL) {
 		printf("Couldn't create OpenGL context !\n");
