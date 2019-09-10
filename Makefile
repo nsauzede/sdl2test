@@ -7,6 +7,7 @@ TARGET+=tetris_v.exe
 TARGET+=tetrisnomix_v.exe
 TARGET+=tvintris_v.exe
 TARGET+=tvintris0_v.exe
+TARGET+=maingl_c.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -21,9 +22,14 @@ V:=./v/v
 VFLAGS:=-debug -show_c_cmd
 VCFLAGS:=-std=gnu11 -w -g -O0
 
-all: SDL_CHECK VMOD_INSTALL $(TARGET)
+GLLDLIBS:=-lGL -lGLU
 
-VMOD_INSTALL: $(V)
+all: SDL_CHECK VMOD_CHECK $(TARGET)
+
+maingl_c.exe: LDLIBS+=$(GLLDLIBS)
+
+VMOD_CHECK: $(V) $(HOME)/.vmodules/nsauzede/vsdl2/v.mod
+$(HOME)/.vmodules/nsauzede/vsdl2/v.mod:
 	$(V) install nsauzede.vsdl2
 
 include sdl.mak
