@@ -5,6 +5,7 @@
 #ifdef SDL2
 #include <SDL_ttf.h>
 #endif
+#define GL_GLEXT_PROTOTYPES	// to get glGenBuffers(), ..
 #include <SDL_opengl.h>
 #include <GL/glu.h>
 
@@ -30,6 +31,27 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len) {
 
         ctx->audio_pos += len;
         ctx->audio_len -= len;
+}
+
+//#define USE2D
+void GlFillRect(SDL_Surface *screen, SDL_Rect *rect, SDL_Color *col) {
+	int ww = screen->w;
+	int hh = screen->h;
+	GLfloat x = (GLfloat)2 * rect->x / (ww - 1) - 1;			// 0->w-1 => 0->2 => -1->+1
+	GLfloat y = (GLfloat)2 * ((hh - 1) - rect->y) / (hh - 1) - 1;	// 0->h-1 => 1->0 => 2->0 => +1->-1
+	GLfloat w = (GLfloat)2 * rect->w / ww;
+	GLfloat h = (GLfloat)2 * rect->h / hh;
+	GLfloat r = (GLfloat)col->r / 255;
+	GLfloat g = (GLfloat)col->g / 255;
+	GLfloat b = (GLfloat)col->b / 255;
+
+	glColor3f(r, g, b);
+//	glBegin(GL_QUADS);
+	glVertex2f(x, y);
+	glVertex2f(x + w, y);
+	glVertex2f(x + w, y - h);
+	glVertex2f(x, y - h);
+//	glEnd();
 }
 
 int main(int argc, char *argv[]) {
@@ -116,6 +138,10 @@ int main(int argc, char *argv[]) {
 	int quit = 0;
 	int ballx = 0, bally = h / 2, balld = 10, balldir = 1, balldelt = balld / 2;
 	int nangle = 0;
+#if 0
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+#endif
 	while (!quit) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -132,22 +158,6 @@ int main(int argc, char *argv[]) {
 		}
 		if (quit)
 			break;
-#if 0
-		SDL_Rect rect;
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = w;
-		rect.h = h;
-		Uint32 col = SDL_MapRGB(screen->format, 0, 0, 0);
-		SDL_FillRect(screen, &rect, col);
-
-		rect.x = ballx;
-		rect.y = bally;
-		rect.w = balld;
-		rect.h = balld;
-		col = SDL_MapRGB(screen->format, 255, 0, 0);
-		SDL_FillRect(screen, &rect, col);
-#endif
 		ballx += balldir * balldelt;
 		if (balldir == 1) {
 			if (ballx >= w - balld) {
@@ -172,13 +182,33 @@ int main(int argc, char *argv[]) {
 #ifdef SDL1
 		SDL_UpdateRect(screen, 0, 0, 0, 0);
 #else
-#if 0
+#ifdef USE2D
+#if 1
 		SDL_UpdateTexture(sdlTexture, NULL, screen->pixels, screen->pitch);
 		SDL_RenderClear(sdlRenderer);
 		SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
+#endif
+#if 1
+		SDL_Rect rect = {0, 0, w, h};
+		Uint32 col = SDL_MapRGB(screen->format, 0, 0, 0);
+		SDL_FillRect(screen, &rect, col);
+#if 0
+		rect.x = 0;rect.y = 0;rect.w = w / 2;rect.h = h / 2;
+		col = SDL_MapRGB(screen->format, 0, 255, 0);
+		SDL_FillRect(screen, &rect, col);
+
+		rect.x = w / 2;rect.y = h / 2;rect.w = w / 2;rect.h = h / 2;
+		col = SDL_MapRGB(screen->format, 0, 0, 255);
+		SDL_FillRect(screen, &rect, col);
+#endif
+		rect.x = ballx;rect.y = bally;rect.w = balld;rect.h = balld;
+		col = SDL_MapRGB(screen->format, 255, 0, 0);
+		SDL_FillRect(screen, &rect, col);
+#endif
+#if 1
 		if (font) {
 			SDL_Color color = { 255, 255, 255 };
-			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL_ttf", color);
+			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL OpenGL", color);
 			SDL_Texture * texture = SDL_CreateTextureFromSurface(sdlRenderer, surface);
 			int texW = 0;
 			int texH = 0;
@@ -189,10 +219,13 @@ int main(int argc, char *argv[]) {
 			SDL_FreeSurface(surface);
 		}
 #endif
+		SDL_RenderPresent(sdlRenderer);
+#else
+		glClear(GL_COLOR_BUFFER_BIT);
+#if 1
 #define DELT 2
 		float angle = nangle * DELT;
 		nangle++;
-		glClear(GL_COLOR_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glRotatef(angle,1,1,1);
@@ -206,16 +239,30 @@ int main(int argc, char *argv[]) {
 		glColor3f(0.f, 1.f, 0.2f);
 		glVertex2f(-0.5f, 0.5f);
 		glEnd();
-		SDL_GL_SwapWindow(sdlWindow);
-
+#endif
+#if 1
+		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		SDL_Rect rect = {0, 0, w, h};
-		Uint32 col = SDL_MapRGB(screen->format, 0, 255, 0);
-		SDL_FillRect(screen, &rect, col);
-//		SDL_UpdateTexture(sdlTexture, NULL, screen->pixels, screen->pitch);
-//		SDL_RenderClear(sdlRenderer);
-//		SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
-//		SDL_RenderPresent(sdlRenderer);
+		glBegin(GL_QUADS);
+		SDL_Rect rect;
+		SDL_Color col;
+#if 0
+		rect.x = 0;rect.y = 0; rect.w = w / 2; rect.h = h / 2;
+		col.r = 0; col.g = 255;col.b = 0;
+		GlFillRect(screen, &rect, &col);
+
+		rect.x = w / 2;rect.y = h / 2;rect.w = w / 2;rect.h = h / 2;
+		col.r = 0;col.g = 0;col.b = 255;
+		GlFillRect(screen, &rect, &col);
+#endif
+		rect.x = ballx;rect.y = bally;rect.w = balld;rect.h = balld;
+		col.r = 255;col.g = 0;col.b = 0;
+		GlFillRect(screen, &rect, &col);
+
+		glEnd();
+#endif
+		SDL_GL_SwapWindow(sdlWindow);
+#endif
 #endif
 		SDL_Delay(10);
 	}
