@@ -15,9 +15,9 @@ import vsdl2
 pub fn fill_rect(screen &SdlSurface, rect &SdlRect, col &SdlColor) {
         ww := screen.w
         hh := screen.h
-        r := f32(1)
-        g := f32(0)
-        b := f32(0)
+        r := f32(col.r) / 255
+        g := f32(col.g) / 255
+        b := f32(col.b) / 255
         x := f32(2) * rect.x / (ww - 1) - 1
         y := f32(2) * ((hh - 1) - rect.y) / (hh - 1) - 1
         w := f32(2) * rect.w / ww

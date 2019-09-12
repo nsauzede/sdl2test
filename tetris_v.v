@@ -256,23 +256,6 @@ fn main() {
 	}
 }
 
-fn (g &Game) draw_scene() {
-	rect := SdlRect {0,0,g.sdl.w,g.sdl.h}
-	col := C.SDL_MapRGB(g.sdl.screen.format, 255, 255, 255)
-	C.SDL_FillRect(g.sdl.screen, &rect, col)
-
-	g.draw_tetro()
-	g.draw_field()
-
-	C.SDL_UpdateTexture(g.sdl.texture, 0, g.sdl.screen.pixels, g.sdl.screen.pitch)
-	C.SDL_RenderClear(g.sdl.renderer)
-	C.SDL_RenderCopy(g.sdl.renderer, g.sdl.texture, 0, 0)
-
-	g.draw_score()
-
-	C.SDL_RenderPresent(g.sdl.renderer)
-}
-
 fn (g mut Game) init_game() {
 	g.parse_tetros()
 	rand.seed(time.now().uni)
@@ -429,13 +412,6 @@ fn (g mut Game) drop_tetro() {
 	}
 }
 
-fn (g &Game) draw_tetro() {
-	for i := 0; i < TetroSize; i++ {
-		tetro := g.tetro[i]
-		g.draw_block(g.pos_y + tetro.y, g.pos_x + tetro.x, g.tetro_idx + 1)
-	}
-}
-
 fn (g &Game) draw_block(i, j, color_idx int) {
 	rect := SdlRect {(j - 1) * BlockSize, (i - 1) * BlockSize,
 		BlockSize - 1, BlockSize - 1}
@@ -445,17 +421,6 @@ fn (g &Game) draw_block(i, j, color_idx int) {
 	bb := scol.b
 	col := C.SDL_MapRGB(g.sdl.screen.format, rr, gg, bb)
 	C.SDL_FillRect(g.sdl.screen, &rect, col)
-}
-
-fn (g &Game) draw_field() {
-	for i := 1; i < FieldHeight + 1; i++ {
-		for j := 1; j < FieldWidth + 1; j++ {
-			f := g.field[i]
-			if f[j] > 0 {
-				g.draw_block(i, j, f[j])
-			}
-		}
-	}
 }
 
 fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
@@ -471,6 +436,24 @@ fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
 	C.SDL_FreeSurface(tsurf)
 }
 
+fn (g &Game) draw_tetro() {
+	for i := 0; i < TetroSize; i++ {
+		tetro := g.tetro[i]
+		g.draw_block(g.pos_y + tetro.y, g.pos_x + tetro.x, g.tetro_idx + 1)
+	}
+}
+
+fn (g &Game) draw_field() {
+	for i := 1; i < FieldHeight + 1; i++ {
+		for j := 1; j < FieldWidth + 1; j++ {
+			f := g.field[i]
+			if f[j] > 0 {
+				g.draw_block(i, j, f[j])
+			}
+		}
+	}
+}
+
 fn (g &Game) draw_score() {
 	if g.font != voidptr(0) {
 		g.draw_text(1, 2, 'score: ' + g.score.str() + ' nxt=' + g.tetro_next.str(), 0, 0, 0)
@@ -482,6 +465,23 @@ fn (g &Game) draw_score() {
 			g.draw_text(1, WinHeight / 2 + 2 * TextSize, 'SPACE to resume', 0, 0, 0)
 		}
 	}
+}
+
+fn (g &Game) draw_scene() {
+	rect := SdlRect {0,0,g.sdl.w,g.sdl.h}
+	col := C.SDL_MapRGB(g.sdl.screen.format, 255, 255, 255)
+	C.SDL_FillRect(g.sdl.screen, &rect, col)
+
+	g.draw_tetro()
+	g.draw_field()
+
+	C.SDL_UpdateTexture(g.sdl.texture, 0, g.sdl.screen.pixels, g.sdl.screen.pitch)
+	C.SDL_RenderClear(g.sdl.renderer)
+	C.SDL_RenderCopy(g.sdl.renderer, g.sdl.texture, 0, 0)
+
+	g.draw_score()
+
+	C.SDL_RenderPresent(g.sdl.renderer)
 }
 
 fn parse_binary_tetro(t_ int) []Block {
