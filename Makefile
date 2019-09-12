@@ -74,7 +74,7 @@ clean:
 	$(RM) $(TARGET) *.o *_v.c
 
 clobber: clean
-	$(RM) *~ *.exe fns.txt
+	$(RM) *~ *.exe fns.txt *.tmp.c
 
 mrproper: clobber
 	$(RM) -Rf v

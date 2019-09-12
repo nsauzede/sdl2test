@@ -5,9 +5,7 @@ module main
 
 //import vsdl2
 import vsdl2gl
-fn sdl_fill_rect(screen &SdlSurface, rect &SdlRect, col &SdlColor) {
-	vsdl2gl.fill_rect(screen, rect, col)
-}
+[inline] fn sdl_fill_rect(s &SdlSurface,r &SdlRect,c &SdlColor) {vsdl2gl.fill_rect(s,r,c)}
 
 type atexit_func_t fn ()
 fn C.atexit(atexit_func_t)
@@ -45,28 +43,6 @@ fn acb(userdata voidptr, stream &byte, _len int) {
         ctx.audio_pos += len
         ctx.audio_len -= len
 }
-/*
-fn sdl_gl_fill_rect(screen &SdlSurface, rect &SdlRect, col &SdlColor) {
-	ww := screen.w
-	hh := screen.h
-	r := f32(1)
-	g := f32(0)
-	b := f32(0)
-	x := f32(2) * rect.x / (ww - 1) - 1
-	y := f32(2) * ((hh - 1) - rect.y) / (hh - 1) - 1
-	w := f32(2) * rect.w / ww
-	h := f32(2) * rect.h / hh
-	C.glMatrixMode(C.GL_MODELVIEW)
-	C.glLoadIdentity()
-	C.glBegin(C.GL_QUADS)
-	C.glColor3f(r, g, b)
-	C.glVertex2f(x, y)
-	C.glVertex2f(x + w, y)
-	C.glVertex2f(x + w, y - h)
-	C.glVertex2f(x, y - h)
-	C.glEnd()
-}
-*/
 fn main() {
         println('hello SDL2 OpenGL V !!')
         w := 400
@@ -184,16 +160,14 @@ fn main() {
 		mut col := SdlColor{}
 		rect = SdlRect {ballx, bally, balld, balld}
 		col = SdlColor{byte(255), byte(0), byte(0), byte(0)}
-//		vsdl2gl.fill_rect(screen, &rect, &col)
-//		type sdl_fill_rect vsdl2gl.fill_rect
 		sdl_fill_rect(screen, &rect, &col)
 
 		C.SDL_GL_SwapWindow(sdl_window)
 
 		C.SDL_Delay(10)
-        }
-        C.SDL_CloseAudio()
-        if voidptr(actx.wav_buffer) != voidptr(0) {
-                C.SDL_FreeWAV(actx.wav_buffer)
+	}
+	C.SDL_CloseAudio()
+	if voidptr(actx.wav_buffer) != voidptr(0) {
+		C.SDL_FreeWAV(actx.wav_buffer)
 	}
 }
