@@ -2,12 +2,15 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE_v file.
 module main
-import vsdl
+
+//import vsdl2
+import vsdl2gl
+fn sdl_fill_rect(screen &SdlSurface, rect &SdlRect, col &SdlColor) {
+	vsdl2gl.fill_rect(screen, rect, col)
+}
+
 type atexit_func_t fn ()
 fn C.atexit(atexit_func_t)
-
-//fn C.TTF_Quit()
-//fn C.TTF_RenderText_Solid(voidptr, voidptr, SdlColor) voidptr
 
 const (
         Colors = [
@@ -42,29 +45,61 @@ fn acb(userdata voidptr, stream &byte, _len int) {
         ctx.audio_pos += len
         ctx.audio_len -= len
 }
-
+/*
+fn sdl_gl_fill_rect(screen &SdlSurface, rect &SdlRect, col &SdlColor) {
+	ww := screen.w
+	hh := screen.h
+	r := f32(1)
+	g := f32(0)
+	b := f32(0)
+	x := f32(2) * rect.x / (ww - 1) - 1
+	y := f32(2) * ((hh - 1) - rect.y) / (hh - 1) - 1
+	w := f32(2) * rect.w / ww
+	h := f32(2) * rect.h / hh
+	C.glMatrixMode(C.GL_MODELVIEW)
+	C.glLoadIdentity()
+	C.glBegin(C.GL_QUADS)
+	C.glColor3f(r, g, b)
+	C.glVertex2f(x, y)
+	C.glVertex2f(x + w, y)
+	C.glVertex2f(x + w, y - h)
+	C.glVertex2f(x, y - h)
+	C.glEnd()
+}
+*/
 fn main() {
-        println('hello SDL 2 [v]\n')
-        w := 200
-        h := 400
+        println('hello SDL2 OpenGL V !!')
+        w := 400
+        h := 300
         bpp := 32
         sdl_window := *voidptr(0)
         sdl_renderer := *voidptr(0)
         C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
         C.atexit(C.SDL_Quit)
-        C.TTF_Init()
-        C.atexit(C.TTF_Quit)
-        font := C.TTF_OpenFont('RobotoMono-Regular.ttf', 16)
-//        println('font=$font')
         C.SDL_CreateWindowAndRenderer(w, h, 0, &sdl_window, &sdl_renderer)
 //        println('renderer=$sdl_renderer')
         screen := C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
-        sdl_texture := C.SDL_CreateTexture(sdl_renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
+//        sdl_texture := C.SDL_CreateTexture(sdl_renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
+
+	// OpenGL
+	// Loosely followed the great SDL2+OpenGL2.1 tutorial here :
+	// http://lazyfoo.net/tutorials/OpenGL/01_hello_opengl/index2.php
+	gl_context := C.SDL_GL_CreateContext(sdl_window)
+	if isnil(gl_context) {
+		println('Couldn\'t create OpenGL context !')
+	} else {
+		println('Created OpenGL context.')
+	}
+	C.SDL_GL_SetSwapInterval(1)
+	C.glMatrixMode(C.GL_PROJECTION)
+	C.glLoadIdentity()
+	C.glMatrixMode(C.GL_MODELVIEW)
+	C.glLoadIdentity()
+	C.glClearColor(0., 0., 0., 1.)
+
         mut actx := AudioContext{}
         C.SDL_zero(actx)
         C.SDL_LoadWAV('sounds/door2.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
-//        C.SDL_LoadWAV('sounds/block.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
-//        println('got wav_buffer=${actx.wav_buffer}')
         C.SDL_LoadWAV('sounds/single.wav', &actx.wav_spec, &actx.wav2_buffer, &actx.wav2_length)
         actx.wav_spec.callback = acb
         actx.wav_spec.userdata = &actx
@@ -76,8 +111,9 @@ fn main() {
         mut ballx := 0
         bally := h / 2
         balld := 10
-        ballm := 1
+        ballm := balld / 2
         mut balldir := ballm
+	mut nangle := 0
         for !quit {
                 ev := SdlEvent{}
                 for !!C.SDL_PollEvent(&ev) {
@@ -100,24 +136,13 @@ fn main() {
                 if quit {
                         break
                 }
-//                rect := SdlRect {x: 0, y: 0, w: w, h: h }     // TODO doesn't compile ???
-                mut rect := SdlRect {0,0,w,h}
-                mut col := C.SDL_MapRGB(screen.format, 255, 255, 255)
-                C.SDL_FillRect(screen, &rect, col)
-
-                rect = SdlRect {ballx, bally, balld, balld}
-//                col = C.SDL_MapRGB(screen.format, 255, 0, 0)
-                col = C.SDL_MapRGB(screen.format, Colors[1].r, Colors[1].g, Colors[1].b)
-                C.SDL_FillRect(screen, &rect, col)
                 ballx += balldir
                 if balldir == ballm {
                         if ballx == w - balld * 4 {
-//                                println('+1WAV =>')
                                 actx.audio_pos = actx.wav2_buffer
 //                                actx.audio_len = actx.wav2_length
                                 C.SDL_PauseAudio(0)
                         } else if ballx >= w - balld {
-//                                println('+1WAV <= -1')
                                 balldir = -ballm
                                 actx.audio_pos = actx.wav_buffer
                                 actx.audio_len = actx.wav_length
@@ -125,52 +150,50 @@ fn main() {
                         }
                 } else {
                         if ballx == balld * 4 {
-//                                println('-1WAV2 <=')
                                 actx.audio_pos = actx.wav2_buffer
 //                                actx.audio_len = actx.wav2_length
                                 C.SDL_PauseAudio(0)
                         } else if ballx <= 0 {
-//                                println('-1WAV => 1')
                                 balldir = ballm
                                 actx.audio_pos = actx.wav_buffer
                                 actx.audio_len = actx.wav_length
                                 C.SDL_PauseAudio(0)
                         }
                 }
+		C.glClear(C.GL_COLOR_BUFFER_BIT)
 
-                C.SDL_UpdateTexture(sdl_texture, 0, screen.pixels, screen.pitch)
-                C.SDL_RenderClear(sdl_renderer)
-                C.SDL_RenderCopy(sdl_renderer, sdl_texture, 0, 0)
+		// 3D part
+		C.glMatrixMode(C.GL_MODELVIEW)
+		C.glLoadIdentity()
+		angle := f32(nangle) * 2
+		nangle++
+		C.glRotatef(angle,f32(1),f32(1),f32(1))
+		C.glBegin(C.GL_QUADS)
+		C.glColor3f(0., 0., 0.2)
+		C.glVertex2f(-0.5, -0.5)
+		C.glColor3f(1., 0., 0.2)
+		C.glVertex2f(0.5, -0.5)
+		C.glColor3f(1., 1., 0.2)
+		C.glVertex2f(0.5, 0.5)
+		C.glColor3f(0., 1., 0.2)
+		C.glVertex2f(-0.5, 0.5)
+		C.glEnd()
 
-//                tcol := C.SDL_Color {u32(0), u32(0), u32(0)}    // TODO doesn't compile ?
-//                tcol := [byte(0), byte(0), byte(0), byte(0)]
-                tcol := SdlColor {byte(3), byte(2), byte(1), byte(0)}
-//                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', tcol)
-                tsurf := *voidptr(0xdeadbeef)
-//                println('tsurf=$tsurf')
-                C.stubTTF_RenderText_Solid(font,'Hello SDL_ttf V !', &tcol, &tsurf)
-//                println('tsurf=$tsurf')
-//                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', 0)
-//                println('tsurf=$tsurf')
-//                println('tsurf=' + $tsurf')
-                ttext := C.SDL_CreateTextureFromSurface(sdl_renderer, tsurf)
-//                println('ttext=$ttext')
-                texw := 0
-                texh := 0
-                C.SDL_QueryTexture(ttext, 0, 0, &texw, &texh)
-                dstrect := SdlRect { 0, 0, texw, texh }
-                C.SDL_RenderCopy(sdl_renderer, ttext, 0, &dstrect)
-                C.SDL_DestroyTexture(ttext)
-                C.SDL_FreeSurface(tsurf)
+		// 2D part
+		mut rect := SdlRect{}
+		mut col := SdlColor{}
+		rect = SdlRect {ballx, bally, balld, balld}
+		col = SdlColor{byte(255), byte(0), byte(0), byte(0)}
+//		vsdl2gl.fill_rect(screen, &rect, &col)
+//		type sdl_fill_rect vsdl2gl.fill_rect
+		sdl_fill_rect(screen, &rect, &col)
 
-                C.SDL_RenderPresent(sdl_renderer)
-                C.SDL_Delay(10)
-        }
-        if isnil(font) {
-                C.TTF_CloseFont(font)
+		C.SDL_GL_SwapWindow(sdl_window)
+
+		C.SDL_Delay(10)
         }
         C.SDL_CloseAudio()
         if voidptr(actx.wav_buffer) != voidptr(0) {
                 C.SDL_FreeWAV(actx.wav_buffer)
-        }
+	}
 }

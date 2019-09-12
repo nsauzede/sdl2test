@@ -8,6 +8,7 @@ TARGET+=tetrisnomix_v.exe
 TARGET+=tvintris_v.exe
 TARGET+=tvintris0_v.exe
 TARGET+=maingl_c.exe
+TARGET+=maingl_v.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -26,7 +27,8 @@ GLLDLIBS:=-lGL -lGLU
 
 all: SDL_CHECK VMOD_CHECK $(TARGET)
 
-maingl_c.exe: LDLIBS+=$(GLLDLIBS)
+%gl_c.exe: LDLIBS+=$(GLLDLIBS)
+%gl_v.exe: LDLIBS+=$(GLLDLIBS)
 
 VMOD_CHECK: $(V) $(HOME)/.vmodules/nsauzede/vsdl2/v.mod
 $(HOME)/.vmodules/nsauzede/vsdl2/v.mod:
