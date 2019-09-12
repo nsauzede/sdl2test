@@ -5,7 +5,7 @@
 #ifdef SDL2
 #include <SDL_ttf.h>
 #endif
-#define GL_GLEXT_PROTOTYPES	// to get glGenBuffers(), ..
+//#define GL_GLEXT_PROTOTYPES	// to get glGenBuffers(), ..
 #include <SDL_opengl.h>
 #include <GL/glu.h>
 
@@ -37,7 +37,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len) {
 void GlFillRect(SDL_Surface *screen, SDL_Rect *rect, SDL_Color *col) {
 	int ww = screen->w;
 	int hh = screen->h;
-	GLfloat x = (GLfloat)2 * rect->x / (ww - 1) - 1;			// 0->w-1 => 0->2 => -1->+1
+	GLfloat x = (GLfloat)2 * rect->x / (ww - 1) - 1;		// 0->w-1 => 0->2 => -1->+1
 	GLfloat y = (GLfloat)2 * ((hh - 1) - rect->y) / (hh - 1) - 1;	// 0->h-1 => 1->0 => 2->0 => +1->-1
 	GLfloat w = (GLfloat)2 * rect->w / ww;
 	GLfloat h = (GLfloat)2 * rect->h / hh;
