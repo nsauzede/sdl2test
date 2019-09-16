@@ -20,7 +20,7 @@ CFLAGS+=-g -O0
 CXXFLAGS+=-I.
 
 V:=./v/v
-VFLAGS:=-debug -show_c_cmd
+#VFLAGS:=-debug -show_c_cmd
 VCFLAGS:=-std=gnu11 -w -g -O0
 
 GLLDLIBS:=-lGL -lGLU
@@ -66,8 +66,8 @@ vsdlstub.o: vsdl/vsdlstub.c
 
 %_v.exe: CFLAGS+=$(VCFLAGS)
 %_v.exe: LDLIBS+=vsdlstub.o
-%.c: %.v | vsdlstub.o
-	$(MAKE) -s $(V)
+%.c: %.v | $(V) vsdlstub.o
+#	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^
 
 clean:
