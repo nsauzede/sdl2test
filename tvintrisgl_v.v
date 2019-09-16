@@ -11,11 +11,13 @@ import rand
 import time
 import math
 //import nsauzede.vsdl2
-import vsdl2
-[inline] fn sdl_fill_rect(s &SdlSurface,r &SdlRect,c &SdlColor){vsdl2.fill_rect(s,r,c)}
+//import vsdl2
+//[inline]fn sdl_fill_rect(s &SdlSurface,r &SdlRect,c &SdlColor){vsdl2.fill_rect(s,r,c)}
+import vsdl2gl
+[inline]fn sdl_fill_rect(s &SdlSurface,r &SdlRect,c &SdlColor){vsdl2gl.fill_rect(s,r,c)}
 
 const (
-	Title = 'tVintris'
+	Title = 'tVintrisGl'
 	FontName = 'RobotoMono-Regular.ttf'
 	MusicName = 'sounds/TwintrisThosenine.mod'
 	SndBlockName = 'sounds/block.wav'
@@ -185,9 +187,11 @@ mut:
 	jh_down          int
 	jh_left          int
 	jh_right         int
+	// game ticks
+	ticks            int
 	// game rand seed
-	seed            int
-	seed_ini            int
+	seed             int
+	seed_ini         int
 	// Position of the current tetro
 	pos_x        int
 	pos_y        int
@@ -267,7 +271,8 @@ fn main() {
 	game.sdl.jids[0] = -1
 	game.sdl.jids[1] = -1
 	game.sdl.set_sdl_context(WinWidth, WinHeight, Title)
-	game.font = C.TTF_OpenFont(FontName.str, TextSize)
+//	game.font = C.TTF_OpenFont(FontName.str, TextSize)
+	game.font = voidptr(0)
 	seed := time.now().uni
 	mut game2 := &Game{}
 	game2.sdl = game.sdl
@@ -311,6 +316,7 @@ fn main() {
 	go game2.run() // Run the game loop in a new thread
 
 	mut g := Game{}
+	mut ticks := 0
         mut should_close := false
 	for {
 		g1 := game
@@ -322,6 +328,8 @@ fn main() {
 		if g2.tetro_total > g.tetro_total {
 			g = *g2
 		}
+		g.ticks = ticks
+		ticks++
 		g.draw_begin()
 
 		g1.draw_tetro()
@@ -734,8 +742,24 @@ fn (g &Game) draw_begin() {
 }
 
 fn (g &Game) draw_middle() {
-	C.SDL_UpdateTexture(g.sdl.texture, 0, g.sdl.screen.pixels, g.sdl.screen.pitch)
-	C.SDL_RenderCopy(g.sdl.renderer, g.sdl.texture, 0, 0)
+//	C.SDL_UpdateTexture(g.sdl.texture, 0, g.sdl.screen.pixels, g.sdl.screen.pitch)
+//	C.SDL_RenderCopy(g.sdl.renderer, g.sdl.texture, 0, 0)
+	// 3D part
+	C.glMatrixMode(C.GL_MODELVIEW)
+	C.glLoadIdentity()
+	angle := f32(g.ticks) * 2
+	d := 0.1
+	C.glRotatef(angle,f32(1),f32(1),f32(1))
+	C.glBegin(C.GL_QUADS)
+	C.glColor3f(0., 0., 0.2)
+	C.glVertex2f(-d, -d)
+	C.glColor3f(1., 0., 0.2)
+	C.glVertex2f(d, -d)
+	C.glColor3f(1., 1., 0.2)
+	C.glVertex2f(d, d)
+	C.glColor3f(0., 1., 0.2)
+	C.glVertex2f(-d, d)
+	C.glEnd()
 }
 
 fn (g &Game) draw_score() {
@@ -768,7 +792,9 @@ fn (g &Game) draw_stats() {
 }
 
 fn (g &Game) draw_end() {
-	C.SDL_RenderPresent(g.sdl.renderer)
+//	C.SDL_RenderPresent(g.sdl.renderer)
+	// 3D part
+	C.SDL_GL_SwapWindow(g.sdl.window)
 }
 
 fn parse_binary_tetro(t_ int) []Block {
