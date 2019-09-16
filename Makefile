@@ -2,12 +2,13 @@ TARGET:=
 TARGET+=main_cpp.exe
 TARGET+=main_c.exe
 TARGET+=mainmix_c.exe
+TARGET+=maingl_c.exe
 TARGET+=main_v.exe
 TARGET+=tetris_v.exe
 TARGET+=tetrisnomix_v.exe
 TARGET+=tvintris_v.exe
 TARGET+=tvintris0_v.exe
-TARGET+=maingl_c.exe
+TARGET+=tvintrisgl_v.exe
 TARGET+=maingl_v.exe
 
 CFLAGS:=

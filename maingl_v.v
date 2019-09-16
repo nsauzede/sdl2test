@@ -56,7 +56,8 @@ fn main() {
 //        println('renderer=$sdl_renderer')
         screen := C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
 //        sdl_texture := C.SDL_CreateTexture(sdl_renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
-
+glinit := true
+if glinit {
 	// OpenGL
 	// Loosely followed the great SDL2+OpenGL2.1 tutorial here :
 	// http://lazyfoo.net/tutorials/OpenGL/01_hello_opengl/index2.php
@@ -72,7 +73,7 @@ fn main() {
 	C.glMatrixMode(C.GL_MODELVIEW)
 	C.glLoadIdentity()
 	C.glClearColor(0., 0., 0., 1.)
-
+}
         mut actx := AudioContext{}
         C.SDL_zero(actx)
         C.SDL_LoadWAV('sounds/door2.wav', &actx.wav_spec, &actx.wav_buffer, &actx.wav_length)
@@ -118,9 +119,11 @@ fn main() {
                 ballx += balldir
                 if balldir == ballm {
                         if ballx == w - balld * 4 {
+/*
                                 actx.audio_pos = actx.wav2_buffer
-//                                actx.audio_len = actx.wav2_length
+                                actx.audio_len = actx.wav2_length
                                 C.SDL_PauseAudio(0)
+*/
                         } else if ballx >= w - balld {
                                 balldir = -ballm
                                 actx.audio_pos = actx.wav_buffer
@@ -129,9 +132,11 @@ fn main() {
                         }
                 } else {
                         if ballx == balld * 4 {
+/*
                                 actx.audio_pos = actx.wav2_buffer
-//                                actx.audio_len = actx.wav2_length
+                                actx.audio_len = actx.wav2_length
                                 C.SDL_PauseAudio(0)
+*/
                         } else if ballx <= 0 {
                                 balldir = ballm
                                 actx.audio_pos = actx.wav_buffer
