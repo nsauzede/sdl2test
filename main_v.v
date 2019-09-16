@@ -146,9 +146,10 @@ fn main() {
 //                tcol := [byte(0), byte(0), byte(0), byte(0)]
                 tcol := SdlColor {byte(3), byte(2), byte(1), byte(0)}
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', tcol)
-                tsurf := *voidptr(0xdeadbeef)
+//                tsurf := *voidptr(0xdeadbeef)
 //                println('tsurf=$tsurf')
-                C.stubTTF_RenderText_Solid(font,'Hello SDL_ttf V !', &tcol, &tsurf)
+//                C.stubTTF_RenderText_Solid(font,'Hello SDL_ttf V !', &tcol, &tsurf)
+                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf V !', tcol)
 //                println('tsurf=$tsurf')
 //                tsurf := C.TTF_RenderText_Solid(font,'Hello SDL_ttf', 0)
 //                println('tsurf=$tsurf')
