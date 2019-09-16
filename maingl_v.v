@@ -90,6 +90,7 @@ fn main() {
         ballm := balld / 2
         mut balldir := ballm
 	mut nangle := 0
+	mut show_3d := true
         for !quit {
                 ev := SdlEvent{}
                 for !!C.SDL_PollEvent(&ev) {
@@ -106,6 +107,8 @@ fn main() {
                                                         actx.audio_pos = actx.wav2_buffer
                                                         actx.audio_len = actx.wav2_length
                                                         C.SDL_PauseAudio(0)
+                                                case C.SDLK_3:
+                                                        show_3d = !show_3d
                                         }
                         }
                 }
@@ -136,13 +139,21 @@ fn main() {
                                 C.SDL_PauseAudio(0)
                         }
                 }
-		C.glClear(C.GL_COLOR_BUFFER_BIT)
 
+		mut rect := SdlRect{}
+		mut col := SdlColor{}
+		// 2D part
+		rect = SdlRect {0, 0, w, h}
+		col = SdlColor{byte(0), byte(0), byte(0), byte(0)}
+		sdl_fill_rect(screen, &rect, &col)
+if show_3d {
 		// 3D part
+// following line is useless if we wipe the screen in 2D above (sdl_fill_rect)
+//		C.glClear(C.GL_COLOR_BUFFER_BIT)
+
 		C.glMatrixMode(C.GL_MODELVIEW)
 		C.glLoadIdentity()
 		angle := f32(nangle) * 2
-		nangle++
 		C.glRotatef(angle,f32(1),f32(1),f32(1))
 		C.glBegin(C.GL_QUADS)
 		C.glColor3f(0., 0., 0.2)
@@ -154,14 +165,15 @@ fn main() {
 		C.glColor3f(0., 1., 0.2)
 		C.glVertex2f(-0.5, 0.5)
 		C.glEnd()
+		nangle++
+}
 
 		// 2D part
-		mut rect := SdlRect{}
-		mut col := SdlColor{}
 		rect = SdlRect {ballx, bally, balld, balld}
 		col = SdlColor{byte(255), byte(0), byte(0), byte(0)}
 		sdl_fill_rect(screen, &rect, &col)
 
+		// 3D part
 		C.SDL_GL_SwapWindow(sdl_window)
 
 		C.SDL_Delay(10)
