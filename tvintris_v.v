@@ -621,19 +621,10 @@ fn (g mut Game) delete_completed_line(y int) int {
 	return 1
 }
 
-// Ported from https://git.musl-libc.org/cgit/musl/diff/src/prng/rand_r.c?id=0b44a0315b47dd8eced9f3b7f31580cf14bbfc01
-// Thanks spytheman
-fn myrand_r(seed &int) int {
-  mut rs := seed
-  ns := ( *rs * 1103515245 + 12345 )
-  *rs = ns
-  return ns & 0x7fffffff
-}
-
 // Draw a rand tetro index
 fn (g mut Game) rand_tetro() int {
 	cur := g.tetro_next
-	g.tetro_next = myrand_r(&g.seed)
+	g.tetro_next = rand.rand_r(&g.seed)
 	g.tetro_next = g.tetro_next % BTetros.len
 	return cur
 }
