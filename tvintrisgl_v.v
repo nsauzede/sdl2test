@@ -328,8 +328,13 @@ fn main() {
 		if g2.tetro_total > g.tetro_total {
 			g = *g2
 		}
+//		println('ticks=$ticks ${g1.state} ${g2.state} ${g.state}')
+		// g ticks will be used to update OpenGL stuff
 		g.ticks = ticks
-		ticks++
+		// we sample g1 state because the state is not copied ??!!
+		if !(g1.state == .paused || g2.state == .paused) {
+			ticks++
+		}
 		g.draw_begin()
 
 		g1.draw_tetro()
