@@ -167,7 +167,7 @@ fn main() {
                 C.SDL_RenderPresent(sdl_renderer)
                 C.SDL_Delay(10)
         }
-        if isnil(font) {
+        if !isnil(font) {
                 C.TTF_CloseFont(font)
         }
         C.SDL_CloseAudio()
