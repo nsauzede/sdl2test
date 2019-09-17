@@ -10,6 +10,7 @@ TARGET+=tvintris_v.exe
 TARGET+=tvintris0_v.exe
 TARGET+=tvintrisgl_v.exe
 TARGET+=maingl_v.exe
+TARGET+=glfnt.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -27,6 +28,9 @@ VCFLAGS:=-std=gnu11 -w -g -O0
 GLLDLIBS:=-lGL -lGLU
 
 all: SDL_CHECK VMOD_CHECK $(TARGET)
+
+glfnt.exe: glfnt.cpp
+	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype /usr/local/lib64/bad/libglfw3.a  -ldl -lX11 -pthread
 
 %gl_c.exe: LDLIBS+=$(GLLDLIBS)
 %gl_v.exe: LDLIBS+=$(GLLDLIBS)
