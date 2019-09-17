@@ -596,7 +596,7 @@ fn (g mut Game) move_right(dx int) bool {
 	return true
 }
 
-fn (g mut Game) delete_completed_lines() int {
+fn (g &Game) delete_completed_lines() int {
 	mut n := 0
 	for y := FieldHeight; y >= 1; y-- {
 		n += g.delete_completed_line(y)
@@ -604,7 +604,7 @@ fn (g mut Game) delete_completed_lines() int {
 	return n
 }
 
-fn (g mut Game) delete_completed_line(y int) int {
+fn (g &Game) delete_completed_line(y int) int {
 	for x := 1; x <= FieldWidth; x++ {
 		f := g.field[y]
 		if f[x] == 0 {
@@ -648,7 +648,7 @@ fn (g mut Game) get_tetro() {
 	g.tetro = g.tetros_cache.slice(idx, idx + TetroSize)
 }
 
-fn (g mut Game) drop_tetro() {
+fn (g &Game) drop_tetro() {
 	for i := 0; i < TetroSize; i++ {
 		tetro := g.tetro[i]
 		x := tetro.x + g.pos_x

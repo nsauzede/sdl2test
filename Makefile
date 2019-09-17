@@ -30,7 +30,7 @@ GLLDLIBS:=-lGL -lGLU
 all: SDL_CHECK VMOD_CHECK $(TARGET)
 
 glfnt.exe: glfnt.cpp
-	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype /usr/local/lib64/bad/libglfw3.a  -ldl -lX11 -pthread
+	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype /usr/local/lib64/libglfw3.a  -ldl -lX11 -pthread
 
 %gl_c.exe: LDLIBS+=$(GLLDLIBS)
 %gl_v.exe: LDLIBS+=$(GLLDLIBS)
