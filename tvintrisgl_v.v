@@ -746,6 +746,7 @@ fn (g &Game) draw_middle() {
 	angle := f32(g.ticks) * 2
 	d := 0.1
 	C.glRotatef(angle,f32(1),f32(1),f32(1))
+	C.glTranslatef(f32(math.cos(angle * C.M_PI / 180)) / 10,f32(0),f32(0))
 	C.glBegin(C.GL_QUADS)
 	C.glColor3f(0., 0., 0.2)
 	C.glVertex2f(-d, -d)

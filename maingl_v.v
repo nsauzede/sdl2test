@@ -118,26 +118,14 @@ if glinit {
                 }
                 ballx += balldir
                 if balldir == ballm {
-                        if ballx == w - balld * 4 {
-/*
-                                actx.audio_pos = actx.wav2_buffer
-                                actx.audio_len = actx.wav2_length
-                                C.SDL_PauseAudio(0)
-*/
-                        } else if ballx >= w - balld {
+                        if ballx >= w - balld {
                                 balldir = -ballm
                                 actx.audio_pos = actx.wav_buffer
                                 actx.audio_len = actx.wav_length
                                 C.SDL_PauseAudio(0)
                         }
                 } else {
-                        if ballx == balld * 4 {
-/*
-                                actx.audio_pos = actx.wav2_buffer
-                                actx.audio_len = actx.wav2_length
-                                C.SDL_PauseAudio(0)
-*/
-                        } else if ballx <= 0 {
+                        if ballx <= 0 {
                                 balldir = ballm
                                 actx.audio_pos = actx.wav_buffer
                                 actx.audio_len = actx.wav_length
