@@ -259,6 +259,19 @@ int main(int argc, char *argv[]) {
 		col.r = 255;col.g = 0;col.b = 0;
 		GlFillRect(screen, &rect, &col);
 
+		if (font) {
+			SDL_Color color = { 255, 255, 255 };
+			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL OpenGL", color);
+			SDL_Texture * texture = SDL_CreateTextureFromSurface(sdlRenderer, surface);
+			int texW = 0;
+			int texH = 0;
+			SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+			SDL_Rect dstrect = { 0, 0, texW, texH };
+			SDL_RenderCopy(sdlRenderer, texture, NULL, &dstrect);
+			SDL_DestroyTexture(texture);
+			SDL_FreeSurface(surface);
+		}
+
 		glEnd();
 #endif
 		SDL_GL_SwapWindow(sdlWindow);
