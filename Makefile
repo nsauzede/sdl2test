@@ -1,3 +1,8 @@
+_SYS:=$(shell uname -o)
+ifeq ($(_SYS),Msys)
+WIN32:=1
+endif
+
 TARGET:=
 TARGET+=main_cpp.exe
 TARGET+=main_c.exe
@@ -7,10 +12,12 @@ TARGET+=main_v.exe
 TARGET+=tetris_v.exe
 TARGET+=tetrisnomix_v.exe
 TARGET+=tvintris_v.exe
-TARGET+=tvintris0_v.exe
+#TARGET+=tvintris0_v.exe
 TARGET+=tvintrisgl_v.exe
 TARGET+=maingl_v.exe
+ifndef WIN32
 TARGET+=glfnt.exe
+endif
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -25,18 +32,13 @@ V:=./v/v
 #VFLAGS:=-debug -show_c_cmd
 VCFLAGS:=-std=gnu11 -w -g -O0
 
-_SYS:=$(shell uname -o)
-ifeq ($(_SYS),Msys)
-WIN32:=1
-endif
-
 ifdef WIN32
 GLLDLIBS:=-lopengl32 -lglu32
 else
 GLLDLIBS:=-lGL -lGLU
 endif
 
-all: SDL_CHECK VMOD_CHECK $(TARGET)
+all: SDL_CHECK $(TARGET)
 
 glfnt.exe: glfnt.cpp
 	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype /usr/local/lib64/libglfw3.a  -ldl -lX11 -pthread
