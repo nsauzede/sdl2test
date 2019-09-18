@@ -393,11 +393,11 @@ fn main() {
 }
 
 enum Action {
-        none space fire
+        idle space fire
 }
 fn (game mut Game) handle_key(key int) {
 	// global keys
-	mut action := Action(.none)
+	mut action := Action(.idle)
 	switch key {
 		case C.SDLK_SPACE:
 			action = .space
@@ -442,7 +442,7 @@ fn (game mut Game) handle_jbutton(jb int, joyid int) {
 		return
 	}
 	// global buttons
-	mut action := Action(.none)
+	mut action := Action(.idle)
 	switch jb {
 		case game.jb_fire:
 			action = .fire
