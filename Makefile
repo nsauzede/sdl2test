@@ -25,7 +25,16 @@ V:=./v/v
 #VFLAGS:=-debug -show_c_cmd
 VCFLAGS:=-std=gnu11 -w -g -O0
 
+_SYS:=$(shell uname -o)
+ifeq ($(_SYS),Msys)
+WIN32:=1
+endif
+
+ifdef WIN32
+GLLDLIBS:=-lopengl32 -lglu32
+else
 GLLDLIBS:=-lGL -lGLU
+endif
 
 all: SDL_CHECK VMOD_CHECK $(TARGET)
 
