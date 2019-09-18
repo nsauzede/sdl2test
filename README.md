@@ -1,4 +1,4 @@
-# sdl2test (obsolete for V binding, see below)
+# sdl2test
 Small examples of libSDL2 usage in V, C and C++ languages.
 Historically, the purpose was to evaluate the changes from SDL1 to SDL2.
 
@@ -7,6 +7,9 @@ Historically, the purpose was to evaluate the changes from SDL1 to SDL2.
 The git repo : <a href='https://github.com/nsauzede/vsdl2'>here</a>
 
 It also contains an updated tvintris example
+
+Note that this repo still holds the experiments around SDL2/OpenGL and V (and others)
+Once they stabilize, the enhancements will be reported to the nsauzede.vsdl2 VPM module.
 
 ----
 
