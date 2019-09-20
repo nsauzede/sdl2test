@@ -9,6 +9,7 @@ module main
 
 import rand
 import time
+import os
 import math
 //import nsauzede.vsdl2
 import vsdl2
@@ -700,10 +701,13 @@ fn (g &Game) draw_text(x int, y int, text string, tcol SdlColor) {
 	g.draw_text(g.ofs_x + x, y, text, tcol)
 }
 
+[live]
 fn (g &Game) draw_begin() {
 	C.SDL_RenderClear(g.sdl.renderer)
 	mut rect := SdlRect {0,0,g.sdl.w,g.sdl.h}
-	sdl_fill_rect(g.sdl.screen, &rect, BackgroundColor)
+	col := SdlColor{byte(0), byte(0), byte(0), byte(0)}
+//	sdl_fill_rect(g.sdl.screen, &rect, BackgroundColor)
+	sdl_fill_rect(g.sdl.screen, &rect, col)
 
 	rect = SdlRect {BlockSize * FieldWidth + 2,0,2,g.sdl.h}
 	sdl_fill_rect(g.sdl.screen, &rect, ForegroundColor)

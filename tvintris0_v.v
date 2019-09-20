@@ -9,6 +9,8 @@ import time
 import math
 import nsauzede.vsdl2
 
+import os
+
 const (
 	Title = 'tVintris'
 	FontName = 'RobotoMono-Regular.ttf'
@@ -368,11 +370,11 @@ fn main() {
 }
 
 enum Action {
-        none space fire
+        idle space fire
 }
 fn (game mut Game) handle_key(key int) {
 	// global keys
-	mut action := Action(.none)
+	mut action := Action(.idle)
 	switch key {
 		case C.SDLK_SPACE:
 			action = .space
@@ -448,7 +450,7 @@ fn (game mut Game) handle_jbutton(jb int, joyid int) {
 		return
 	}
 	// global buttons
-	mut action := Action(.none)
+	mut action := Action(.idle)
 	switch jb {
 		case game.jb_fire:
 			action = .fire
@@ -635,7 +637,7 @@ fn (g mut Game) generate_tetro() {
 	g.pos_y = 0
 	g.pos_x = FieldWidth / 2 - TetroSize / 2
 	g.tetro_idx = g.rand_tetro()
-	println('idx=${g.tetro_idx}')
+//	println('idx=${g.tetro_idx}')
 	g.tetro_stats[g.tetro_idx] += 1
 	g.tetro_total++
 	g.rotation_idx = 0
@@ -732,9 +734,10 @@ fn (g &Game) draw_stats() {
 	}
 }
 
+[live]
 fn (g &Game) draw_begin() {
 	mut rect := SdlRect {0,0,g.sdl.w,g.sdl.h}
-	mut col := C.SDL_MapRGB(g.sdl.screen.format, 255, 255, 255)
+	mut col := C.SDL_MapRGB(g.sdl.screen.format, 255, 0, 0)
 	C.SDL_FillRect(g.sdl.screen, &rect, col)
 
 	col = C.SDL_MapRGB(g.sdl.screen.format, 0, 0, 0)
