@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define SDL_DISABLE_IMMINTRIN_H
 #include <SDL.h>
 #ifdef SDL2
 #include <SDL_ttf.h>

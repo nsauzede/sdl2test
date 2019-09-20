@@ -1,8 +1,10 @@
 // Copyright(C) 2019 Nicolas Sauzede. All rights reserved.
 // Use of this source code is governed by an MIT license
-// that can be found in the LICENSE_v file.
+// that can be found in the LICENSE_v.txt file.
 module main
-import vsdl
+import vsdl2
+import time
+import os
 type atexit_func_t fn ()
 fn C.atexit(atexit_func_t)
 
@@ -43,7 +45,8 @@ fn acb(userdata voidptr, stream &byte, _len int) {
         ctx.audio_len -= len
 }
 
-fn main() {
+[live]
+fn livemain() {
         println('hello SDL 2 [v]\n')
         w := 200
         h := 400
@@ -174,4 +177,8 @@ fn main() {
         if voidptr(actx.wav_buffer) != voidptr(0) {
                 C.SDL_FreeWAV(actx.wav_buffer)
         }
+}
+
+fn main() {
+	livemain()
 }
