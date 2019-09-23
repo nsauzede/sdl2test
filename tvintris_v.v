@@ -703,6 +703,7 @@ fn (g &Game) draw_text(x int, y int, text string, tcol SdlColor) {
 
 [live]
 fn (g &Game) draw_begin() {
+//	println('about to clear')
 	C.SDL_RenderClear(g.sdl.renderer)
 	mut rect := SdlRect {0,0,g.sdl.w,g.sdl.h}
 	col := SdlColor{byte(0), byte(0), byte(0), byte(0)}
