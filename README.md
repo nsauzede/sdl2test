@@ -18,6 +18,7 @@ Once they stabilize, the enhancements will be reported to the nsauzede.vsdl2 VPM
 <img src='https://github.com/nsauzede/sdl2test/blob/master/tvintris.png'>
 
 - tvintrisgl_v.v is a dual-player (local) version with OpenGL, inspired by ancient game Twintris. It uses published vpm module nsauzede.vsdl2
+This OpenGL version still lacks TTF font for now, however
 
 <img src='https://github.com/nsauzede/sdl2test/blob/master/tvintrisgl.gif'>
 
