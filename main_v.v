@@ -83,7 +83,7 @@ fn livemain() {
         mut balldir := ballm
         for !quit {
                 ev := SdlEvent{}
-                for !!C.SDL_PollEvent(&ev) {
+                for 0 < C.SDL_PollEvent(&ev) {
                         switch int(ev._type) {
                                 case C.SDL_QUIT:
                                         quit = true

@@ -11,6 +11,7 @@ module vsdl2
 #include <SDL_mixer.h>
 
 fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) &SdlSurface
+fn C.SDL_PollEvent(&SdlEvent) int
 
 struct C.SDL_Color{
 pub:
