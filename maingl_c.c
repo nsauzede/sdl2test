@@ -259,6 +259,7 @@ int main(int argc, char *argv[]) {
 		col.r = 255;col.g = 0;col.b = 0;
 		GlFillRect(screen, &rect, &col);
 
+#if 0
 		if (font) {
 			SDL_Color color = { 255, 255, 255 };
 			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL OpenGL", color);
@@ -271,6 +272,7 @@ int main(int argc, char *argv[]) {
 			SDL_DestroyTexture(texture);
 			SDL_FreeSurface(surface);
 		}
+#endif
 
 		glEnd();
 #endif

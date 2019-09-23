@@ -330,7 +330,7 @@ fn main() {
 
 //		game.handle_events()            // CRASHES if done in function ???
 		ev := SdlEvent{}
-		for !!C.SDL_PollEvent(&ev) {
+		for 0 < C.SDL_PollEvent(&ev) {
 			switch ev._type {
 				case C.SDL_QUIT:
 					should_close = true
