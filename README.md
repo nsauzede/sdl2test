@@ -13,15 +13,15 @@ Once they stabilize, the enhancements will be reported to the nsauzede.vsdl2 VPM
 
 ----
 
+- tvintris_v.v is a dual-player (local) version, inspired by ancient game Twintris. It uses published vpm module nsauzede.vsdl2
+
+<img src='https://github.com/nsauzede/sdl2test/blob/master/tvintris.png'>
+
 - tvintrisgl_v.v is a dual-player (local) version with OpenGL, inspired by ancient game Twintris. It uses published vpm module nsauzede.vsdl2
 
 <img src='https://github.com/nsauzede/sdl2test/blob/master/tvintrisgl.gif'>
 
 <img src='https://github.com/nsauzede/sdl2test/blob/master/tvintrisgl.png'>
-
-- tvintris_v.v is a dual-player (local) version, inspired by ancient game Twintris. It uses published vpm module nsauzede.vsdl2
-
-<img src='https://github.com/nsauzede/sdl2test/blob/master/tvintris.png'>
 
 # Credits
 - tetris_v.v is just and SDL2 port of original source from <a href='https://github.com/vlang/v'>vlang/v</a> example by Alex
