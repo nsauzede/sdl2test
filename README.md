@@ -29,7 +29,7 @@ I wrote a simple SDL2 V wrapper, ported GLFW usage to SDL2, tweaked colors and a
 
 <img src='https://github.com/nsauzede/sdl2test/raw/master/tetris_v.png'>
 
-Colors, Music and Sounds ripped from amiga title Twintris (1990 nostalgia !)
+Colors, Music and Sounds ripped from amiga title <a href='http://hol.abime.net/5109/screenshot'>Twintris</a> (1990 nostalgia !)
 - Graphician : Svein Berge
 - Musician : Tor Bernhard Gausen (Walkman/Cryptoburners)
 
