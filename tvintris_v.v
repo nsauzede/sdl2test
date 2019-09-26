@@ -706,7 +706,7 @@ fn (g &Game) draw_begin() {
 //	println('about to clear')
 	C.SDL_RenderClear(g.sdl.renderer)
 	mut rect := SdlRect {0,0,g.sdl.w,g.sdl.h}
-	col := SdlColor{byte(0), byte(0), byte(0), byte(0)}
+	col := SdlColor{byte(00), byte(00), byte(0), byte(0)}
 //	sdl_fill_rect(g.sdl.screen, &rect, BackgroundColor)
 	sdl_fill_rect(g.sdl.screen, &rect, col)
 

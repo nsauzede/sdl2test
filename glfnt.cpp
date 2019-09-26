@@ -1,5 +1,3 @@
-
-
 // Std. Includes
 #include <iostream>
 #include <map>
@@ -64,7 +62,6 @@ int main()
     Shader shader("shaders/text.vs", "shaders/text.frag");
     glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(WIDTH), 0.0f, static_cast<GLfloat>(HEIGHT));
     shader.use();
-//    glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     shader.setMat4("projection", projection);
 
     // FreeType
@@ -82,12 +79,12 @@ int main()
     FT_Set_Pixel_Sizes(face, 0, 48);
 
     // Disable byte-alignment restriction
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // Load first 128 characters of ASCII set
     for (GLubyte c = 0; c < 128; c++)
     {
-        // Load character glyph 
+        // Load character glyph
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
         {
             std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
@@ -127,7 +124,6 @@ int main()
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    
     // Configure VAO/VBO for texture quads
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -151,7 +147,7 @@ int main()
 
         RenderText(shader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
         RenderText(shader, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
-       
+
         // Swap the buffers
         glfwSwapBuffers(window);
     }
@@ -162,16 +158,15 @@ int main()
 
 void RenderText(Shader &shader, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
 {
-    // Activate corresponding render state	
+    // Activate corresponding render state
     shader.use();
-//    glUniform3f(glGetUniformLocation(shader.Program, "textColor"), color.x, color.y, color.z);
     shader.setVec3("fontColor", color.x, color.y, color.z);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
 
     // Iterate through all characters
     std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++) 
+    for (c = text.begin(); c != text.end(); c++)
     {
         Character ch = Characters[*c];
 
@@ -182,13 +177,13 @@ void RenderText(Shader &shader, std::string text, GLfloat x, GLfloat y, GLfloat 
         GLfloat h = ch.Size.y * scale;
         // Update VBO for each character
         GLfloat vertices[6][4] = {
-            { xpos,     ypos + h,   0.0, 0.0 },            
+            { xpos,     ypos + h,   0.0, 0.0 },
             { xpos,     ypos,       0.0, 1.0 },
             { xpos + w, ypos,       1.0, 1.0 },
 
             { xpos,     ypos + h,   0.0, 0.0 },
             { xpos + w, ypos,       1.0, 1.0 },
-            { xpos + w, ypos + h,   1.0, 0.0 }           
+            { xpos + w, ypos + h,   1.0, 0.0 }
         };
         // Render glyph texture over quad
         glBindTexture(GL_TEXTURE_2D, ch.TextureID);
@@ -205,5 +200,3 @@ void RenderText(Shader &shader, std::string text, GLfloat x, GLfloat y, GLfloat 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
-
-
