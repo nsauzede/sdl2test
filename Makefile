@@ -41,7 +41,7 @@ endif
 all: SDL_CHECK $(TARGET)
 
 glfnt.exe: glfnt.cpp
-	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype /usr/local/lib64/libglfw3.a  -ldl -lX11 -pthread
+	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype -lglfw  -ldl -lX11 -pthread
 
 %gl_c.exe: LDLIBS+=$(GLLDLIBS)
 %gl_v.exe: LDLIBS+=$(GLLDLIBS)
@@ -90,7 +90,7 @@ clean:
 	$(RM) $(TARGET) *.o *_v.c
 
 clobber: clean
-	$(RM) *~ *.exe fns.txt *.tmp.c *.so *_v
+	$(RM) *~ *.exe fns.txt *.tmp.c .tmp.*.c *.so *_v
 
 mrproper: clobber
 	$(RM) -Rf v

@@ -7,8 +7,7 @@ module vsdl2gl
 import vsdl2
 
 // apparently, following line also works on non-linux ? o_O
-#flag linux `sdl2-config --cflags --libs`  -lSDL2_ttf -lSDL2_mixer -lGL -lGLU
-
+#flag linux -lGL -lGLU
 #include <SDL_opengl.h>
 #include <GL/glu.h>
 
