@@ -38,6 +38,9 @@ else
 GLLDLIBS:=-lGL -lGLU
 endif
 
+GLADFLAGS:=-I ../v/thirdparty/
+GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
+
 all: SDL_CHECK $(TARGET)
 
 glfnt.exe: glfnt.cpp
@@ -46,6 +49,8 @@ glfnt.exe: glfnt.cpp
 %gl_c.exe: LDLIBS+=$(GLLDLIBS)
 %glsl_c.exe: LDLIBS+=$(GLLDLIBS)
 %gl_v.exe: LDLIBS+=$(GLLDLIBS)
+%glad.exe: CXXFLAGS+=$(GLADFLAGS)
+%glad.exe: LDLIBS+=$(GLADLIBS)
 
 VMOD_CHECK: $(V) $(HOME)/.vmodules/nsauzede/vsdl2/v.mod
 $(HOME)/.vmodules/nsauzede/vsdl2/v.mod:
