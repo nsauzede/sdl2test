@@ -44,6 +44,7 @@ glfnt.exe: glfnt.cpp
 	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype -lglfw  -ldl -lX11 -pthread
 
 %gl_c.exe: LDLIBS+=$(GLLDLIBS)
+%glsl_c.exe: LDLIBS+=$(GLLDLIBS)
 %gl_v.exe: LDLIBS+=$(GLLDLIBS)
 
 VMOD_CHECK: $(V) $(HOME)/.vmodules/nsauzede/vsdl2/v.mod
