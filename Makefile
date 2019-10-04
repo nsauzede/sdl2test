@@ -38,7 +38,7 @@ else
 GLLDLIBS:=-lGL -lGLU
 endif
 
-GLADFLAGS:=-I ../v/thirdparty/
+GLADFLAGS:=-I ../v/thirdparty/ -I ../stb
 GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
 
 all: SDL_CHECK $(TARGET)
