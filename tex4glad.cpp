@@ -135,7 +135,7 @@ data = stbi_load("textures/wall.jpg", &width, &height, &nrChannels, 0);
 #else
 width = SCR_WIDTH;
 height = SCR_HEIGHT;
-nrChannels = 3;
+nrChannels = 4;
 data = (unsigned char *)calloc(width * height, nrChannels);
 #endif
 if (data)
@@ -157,11 +157,13 @@ else
 		for (int i = 0; i < width; i++) {
 			if (!(i % 10))
 				col = 255 - col;
-            data[j * width * nrChannels + i * nrChannels + 0] = col;
-            data[j * width * nrChannels + i * nrChannels + 1] = 0;
-            data[j * width * nrChannels + i * nrChannels + 2] = 0;
-        }
-    }
+			data[j * width * nrChannels + i * nrChannels + 0] = col;
+			data[j * width * nrChannels + i * nrChannels + 1] = 0;
+			data[j * width * nrChannels + i * nrChannels + 2] = 0;
+			if ((i < width / 3) || (i > 2 * width / 3))
+				data[j * width * nrChannels + i * nrChannels + 3] = 255;
+		}
+	}
 #endif
     int wireframe = 0;
     while (!glfwWindowShouldClose(window)){
@@ -175,25 +177,14 @@ else
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         // draw our first quad
+glEnable(GL_BLEND);
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 float timeValue = glfwGetTime();
 float xOfs = (sin(timeValue) / 1.9f);
 int vertexColorLocation = glGetUniformLocation(shaderProgram, "aOfs");
 glUniform3f(vertexColorLocation, xOfs, 0.0f, 0.0f);
-#if 0
-	char col = 0;
-	for (int j = 0; j < height; j++) {
-		if (!(j % 10))
-			col = 255 - col;
-		for (int i = 0; i < width; i++) {
-			if (!(i % 10))
-				col = 255 - col;
-            data[j * width * nrChannels + i * nrChannels + 0] = col;
-            data[j * width * nrChannels + i * nrChannels + 1] = 0;
-            data[j * width * nrChannels + i * nrChannels + 2] = 0;
-        }
-    }
-#endif
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         glBindTexture(GL_TEXTURE_2D, texture);
         glUseProgram(shaderProgram);
