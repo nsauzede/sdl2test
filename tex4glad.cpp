@@ -1,7 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <unistd.h>
 #include <math.h>
 #include <iostream>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 const unsigned int SCR_WIDTH = 800, SCR_HEIGHT = 600;
@@ -26,8 +27,8 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "uniform sampler2D ourTexture;\n"
     "void main(){\n"
 //    "   FragColor = vec4(ourColor, 1.0f);\n"
-//    "   FragColor = texture(ourTexture, TexCoord);\n"
-    "   FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);\n"
+    "   FragColor = texture(ourTexture, TexCoord);\n"
+//    "   FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);\n"
     "}";
 static void *g_p = 0;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -81,19 +82,29 @@ int main(){
     }
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-    float vertices[] = {
-        // positions         // colors       // tex coords
-        -0.5f, -0.5f, 0.0f,  1.0, 0.0, 0.0,  0.0, 0.0, // left
-         0.5f, -0.5f, 0.0f,  0.0, 1.0, 0.0,  1.0, 0.0, // right
-         0.0f,  0.5f, 0.0f,  0.0, 0.0, 1.0,  0.5, 1.0, // top
+float vertices[] = {
+    // positions          // colors           // texture coords
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+};
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
     };
-    unsigned int VBO, VAO;
+    unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     // positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -118,18 +129,40 @@ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 // load and generate the texture
 int width, height, nrChannels;
-unsigned char *data = stbi_load("textures/wall.jpg", &width, &height, &nrChannels, 0);
+unsigned char *data = 0;
+#if 0
+data = stbi_load("textures/wall.jpg", &width, &height, &nrChannels, 0);
+#else
+width = SCR_WIDTH;
+height = SCR_HEIGHT;
+nrChannels = 3;
+data = (unsigned char *)calloc(width * height, nrChannels);
+#endif
 if (data)
 {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+	printf("channels=%d\n", (int)nrChannels);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+//    glGenerateMipmap(GL_TEXTURE_2D);
 }
 else
 {
     std::cout << "Failed to load texture" << std::endl;
 }
-stbi_image_free(data);
 
+#if 1
+	char col = 0;
+	for (int j = 0; j < height; j++) {
+		if (!(j % 10))
+			col = 255 - col;
+		for (int i = 0; i < width; i++) {
+			if (!(i % 10))
+				col = 255 - col;
+            data[j * width * nrChannels + i * nrChannels + 0] = col;
+            data[j * width * nrChannels + i * nrChannels + 1] = 0;
+            data[j * width * nrChannels + i * nrChannels + 2] = 0;
+        }
+    }
+#endif
     int wireframe = 0;
     while (!glfwWindowShouldClose(window)){
         glfwPollEvents();
@@ -141,19 +174,41 @@ stbi_image_free(data);
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        // draw our first triangle
+        // draw our first quad
 float timeValue = glfwGetTime();
-float xOfs = (sin(timeValue) / 2.0f);
+float xOfs = (sin(timeValue) / 1.9f);
 int vertexColorLocation = glGetUniformLocation(shaderProgram, "aOfs");
 glUniform3f(vertexColorLocation, xOfs, 0.0f, 0.0f);
+#if 0
+	char col = 0;
+	for (int j = 0; j < height; j++) {
+		if (!(j % 10))
+			col = 255 - col;
+		for (int i = 0; i < width; i++) {
+			if (!(i % 10))
+				col = 255 - col;
+            data[j * width * nrChannels + i * nrChannels + 0] = col;
+            data[j * width * nrChannels + i * nrChannels + 1] = 0;
+            data[j * width * nrChannels + i * nrChannels + 2] = 0;
+        }
+    }
+#endif
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        glBindTexture(GL_TEXTURE_2D, texture);
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time
         glfwSwapBuffers(window);
+        usleep(50000);
     }
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
     glfwTerminate();
+    if (data) {
+stbi_image_free(data);
+    }
     return 0;
 }
