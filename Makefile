@@ -80,6 +80,16 @@ $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
+%ig_v.exe: CFLAGS+=-Ivig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API= $(SDL_FLAGS)
+%ig_v.exe: LDFLAGS=
+%ig_v.exe: LDLIBS=vig/imgui_impl_sdl.o vig/imgui_impl_opengl3.so vig/cimgui.so $(SDL_LIBS) -lGL -lGLEW -lm
+
+VIG_CHECK:
+	$(MAKE) -C vig
+
+%ig_v.exe: %ig_v.o | VIG_CHECK
+	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
 %.exe: %.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
@@ -87,8 +97,9 @@ vsdlstub.o: vsdl/vsdlstub.c
 	$(CC) -c -o $@ $(CFLAGS) -g $^
 
 %_v.exe: CFLAGS+=$(VCFLAGS)
-%_v.exe: LDLIBS+=vsdlstub.o
-%.c: %.v | $(V) vsdlstub.o
+#%_v.exe: LDLIBS+=vsdlstub.o
+#%.c: %.v | $(V) vsdlstub.o
+%.c: %.v | $(V)
 #	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^
 

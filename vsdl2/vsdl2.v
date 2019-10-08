@@ -10,6 +10,7 @@ module vsdl2
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 
+fn C.SDL_MapRGB(fmt voidptr, r byte, g byte, b byte) u32
 fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) &SdlSurface
 fn C.SDL_PollEvent(&SdlEvent) int
 
@@ -76,6 +77,7 @@ pub:
         key SdlKeyboardEvent
         jbutton SdlJoyButtonEvent
         jhat SdlJoyHatEvent
+        _pad56 [56]byte
 }
 type SdlEvent SdlEventU
 
