@@ -1,3 +1,8 @@
+// Copyright(C) 2019 Nicolas Sauzede. All rights reserved.
+// Use of this source code is governed by an MIT license
+// that can be found in the LICENSE file.
+
+// The vig module use the nice ImGui/cimgui libraries (see README.md)
 module vig
 
 #flag linux -Ivig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API=
