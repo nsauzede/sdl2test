@@ -6,7 +6,10 @@
 module main
 import vsdl2
 import vig
-fn main() {
+import os
+import time
+[live]
+fn live_main() {
 	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
 	glsl_version := "#version 130"
 	C.SDL_GL_SetAttribute(C.SDL_GL_DOUBLEBUFFER, 1)
@@ -19,14 +22,14 @@ fn main() {
 	C.SDL_GL_SetSwapInterval(1) // Enable vsync
 	C.glewInit()
 	C.igCreateContext(C.NULL)
-	io := C.igGetIO()
+	io := vig.ig_get_io()
 	C.igStyleColorsDark(C.NULL)
 	C.ImGui_ImplSDL2_InitForOpenGL(window, gl_context)
 	C.ImGui_ImplOpenGL3_Init(glsl_version.str)
 	// Our state
 	show_demo_window := true
 	mut show_another_window := false
-	clear_color := ImVecFour{0.45, 0.55, 0.60, 1.00}
+	clear_color := vig.ImVec4{0.45, 0.55, 0.60, 1.00}
 	size0 := ImVecTwo {0, 0}
 	f := 0.0
 	mut counter := 0
@@ -62,13 +65,13 @@ fn main() {
 		}
 		C.igSameLine(0, 0)
 		C.igText("counter = %d", counter)
-//		C.igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / io->Framerate, io->Framerate)
+		C.igText("Application average %.3f ms/frame (%.1f FPS) clicked=%d,%d,%d,%d,%d", 1000.0 / io.Framerate, io.Framerate, io.MouseClicked[0], io.MouseClicked[1], io.MouseClicked[2], io.MouseClicked[3], io.MouseClicked[4])
 		C.igEnd()
 		}
 		// 3. Show another simple window.
 		if (show_another_window) {
-			C.igBegin("Another Vindow", &show_another_window, 0)   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-			C.igText("Hello from another Vindow!")
+			C.igBegin("Another Vindov", &show_another_window, 0)   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+			C.igText("Hello from another Vindov!")
 			if C.igButton("Close Me", size0) {
 				show_another_window = false
 			}
@@ -76,11 +79,14 @@ fn main() {
 		}
 		// Rendering
 		C.igRender()
-//		C.glViewport(0, 0, int(io->DisplaySize.x), int(io->DisplaySize.y))
+		C.glViewport(0, 0, int(io.DisplaySize.x), int(io.DisplaySize.y))
 		C.glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w)
 		C.glClear(C.GL_COLOR_BUFFER_BIT)
 		C.ImGui_ImplOpenGL3_RenderDrawData(C.igGetDrawData())
 		C.SDL_GL_SwapWindow(window)
 	}
 	// Cleanup => TODO
+}
+fn main() {
+	live_main()
 }

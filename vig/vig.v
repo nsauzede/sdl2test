@@ -5,7 +5,12 @@
 // The vig module use the nice ImGui/cimgui libraries (see README.md)
 module vig
 
-#flag linux -Ivig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API=
+#flag linux -Ivig
+#flag linux -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1
+#flag linux -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1
+#flag linux -DIMGUI_IMPL_API=
+#flag linux vig/imgui_impl_sdl.o vig/imgui_impl_opengl3.so vig/cimgui.so
+#flag linux -lGL -lGLEW -lm
 #include "cimgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
@@ -24,7 +29,7 @@ mut:
 //type ImVec2 C.ImVec2
 type ImVecTwo C.ImVec2
 
-struct C.ImVec4 {
+struct ImVec4 {
 pub:
 mut:
         x f32
@@ -32,5 +37,102 @@ mut:
         z f32
         w f32
 }
+//type ImVecFour C.ImVec4
 //type ImVec4 C.ImVec4
-type ImVecFour C.ImVec4
+//type ImVec4 ImVec4
+
+type ImGuiConfigFlags int
+type ImGuiBackendFlags int
+
+struct C.ImGuiIO {
+pub:
+mut:
+    ConfigFlags ImGuiConfigFlags
+    BackendFlags ImGuiBackendFlags
+    DisplaySize ImVec2
+    DeltaTime f32
+    IniSavingRate f32
+/*
+    const char* IniFilename
+    const char* LogFilename
+*/
+    MouseDoubleClickTime f32
+    MouseDoubleClickMaxDist f32
+    MouseDragThreshold f32
+/*
+    int KeyMap[ImGuiKey_COUNT]
+    float KeyRepeatDelay
+    float KeyRepeatRate
+    void* UserData
+    ImFontAtlas*Fonts
+    float FontGlobalScale
+    bool FontAllowUserScaling
+    ImFont* FontDefault
+    ImVec2 DisplayFramebufferScale
+    bool MouseDrawCursor
+    bool ConfigMacOSXBehaviors
+    bool ConfigInputTextCursorBlink
+    bool ConfigWindowsResizeFromEdges
+    bool ConfigWindowsMoveFromTitleBarOnly
+    float ConfigWindowsMemoryCompactTimer
+    const char* BackendPlatformName
+    const char* BackendRendererName
+    void* BackendPlatformUserData
+    void* BackendRendererUserData
+    void* BackendLanguageUserData
+    const char* (*GetClipboardTextFn)(void* user_data)
+    void (*SetClipboardTextFn)(void* user_data, const char* text)
+    void* ClipboardUserData
+    void (*ImeSetInputScreenPosFn)(int x, int y)
+    void* ImeWindowHandle
+    void* RenderDrawListsFnUnused
+    ImVec2 MousePos
+    bool MouseDown[5]
+    float MouseWheel
+    float MouseWheelH
+    bool KeyCtrl
+    bool KeyShift
+    bool KeyAlt
+    bool KeySuper
+    bool KeysDown[512]
+    float NavInputs[ImGuiNavInput_COUNT]
+    bool WantCaptureMouse
+    bool WantCaptureKeyboard
+    bool WantTextInput
+    bool WantSetMousePos
+    bool WantSaveIniSettings
+    bool NavActive
+    bool NavVisible
+*/
+    Framerate f32
+    MetricsRenderVertices int
+    MetricsRenderIndices int
+    MetricsRenderWindows int
+    MetricsActiveWindows int
+    MetricsActiveAllocations int
+    MouseDelta ImVec2
+    MousePosPrev ImVec2
+    MouseClickedPos [5]ImVec2
+    MouseClickedTime [5]f64
+    MouseClicked [5]bool
+    MouseDoubleClicked [5]bool
+    MouseReleased [5]bool
+    MouseDownOwned [5]bool
+    MouseDownWasDoubleClick [5]bool
+/*
+    float MouseDownDuration[5]
+    float MouseDownDurationPrev[5]
+    ImVec2 MouseDragMaxDistanceAbs[5]
+    float MouseDragMaxDistanceSqr[5]
+    float KeysDownDuration[512]
+    float KeysDownDurationPrev[512]
+    float NavInputsDownDuration[ImGuiNavInput_COUNT]
+    float NavInputsDownDurationPrev[ImGuiNavInput_COUNT]
+    ImVector_ImWchar InputQueueCharacters
+*/
+}
+type ImGuiIo ImGuiIO
+
+pub fn ig_get_io() &ImGuiIo {
+	return C.igGetIO()
+}
