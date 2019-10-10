@@ -52,58 +52,62 @@ mut:
     DisplaySize ImVec2
     DeltaTime f32
     IniSavingRate f32
-/*
-    const char* IniFilename
-    const char* LogFilename
-*/
+    IniFilename byteptr
+    LogFilename byteptr
     MouseDoubleClickTime f32
     MouseDoubleClickMaxDist f32
     MouseDragThreshold f32
 /*
-    int KeyMap[ImGuiKey_COUNT]
-    float KeyRepeatDelay
-    float KeyRepeatRate
-    void* UserData
+    KeyMap [ImGuiKey_COUNT]int
+*/
+    KeyRepeatDelay f32
+    KeyRepeatRate f32
+    UserData voidptr
+/*
     ImFontAtlas*Fonts
     float FontGlobalScale
     bool FontAllowUserScaling
     ImFont* FontDefault
-    ImVec2 DisplayFramebufferScale
-    bool MouseDrawCursor
-    bool ConfigMacOSXBehaviors
-    bool ConfigInputTextCursorBlink
-    bool ConfigWindowsResizeFromEdges
-    bool ConfigWindowsMoveFromTitleBarOnly
-    float ConfigWindowsMemoryCompactTimer
-    const char* BackendPlatformName
-    const char* BackendRendererName
-    void* BackendPlatformUserData
-    void* BackendRendererUserData
-    void* BackendLanguageUserData
+*/
+    DisplayFramebufferScale ImVec2
+    MouseDrawCursor bool
+    ConfigMacOSXBehaviors bool
+    ConfigInputTextCursorBlink bool
+    ConfigWindowsResizeFromEdges bool
+    ConfigWindowsMoveFromTitleBarOnly bool
+    ConfigWindowsMemoryCompactTimer f32
+    BackendPlatformName byteptr
+    BackendRendererName byteptr
+    BackendPlatformUserData voidptr
+    BackendRendererUserData voidptr
+    BackendLanguageUserData voidptr
+/*
     const char* (*GetClipboardTextFn)(void* user_data)
     void (*SetClipboardTextFn)(void* user_data, const char* text)
     void* ClipboardUserData
     void (*ImeSetInputScreenPosFn)(int x, int y)
     void* ImeWindowHandle
     void* RenderDrawListsFnUnused
-    ImVec2 MousePos
-    bool MouseDown[5]
-    float MouseWheel
-    float MouseWheelH
-    bool KeyCtrl
-    bool KeyShift
-    bool KeyAlt
-    bool KeySuper
-    bool KeysDown[512]
-    float NavInputs[ImGuiNavInput_COUNT]
-    bool WantCaptureMouse
-    bool WantCaptureKeyboard
-    bool WantTextInput
-    bool WantSetMousePos
-    bool WantSaveIniSettings
-    bool NavActive
-    bool NavVisible
 */
+    MousePos ImVec2
+    MouseDown [5]bool
+    MouseWheel f32
+    MouseWheelH f32
+    KeyCtrl bool
+    KeyShift bool
+    KeyAlt bool
+    KeySuper bool
+    KeysDown [512]bool
+/*
+    float NavInputs[ImGuiNavInput_COUNT]
+*/
+    WantCaptureMouse bool
+    WantCaptureKeyboard bool
+    WantTextInput bool
+    WantSetMousePos bool
+    WantSaveIniSettings bool
+    NavActive bool
+    NavVisible bool
     Framerate f32
     MetricsRenderVertices int
     MetricsRenderIndices int
@@ -119,13 +123,13 @@ mut:
     MouseReleased [5]bool
     MouseDownOwned [5]bool
     MouseDownWasDoubleClick [5]bool
+    MouseDownDuration [5]f32
+    MouseDownDurationPrev [5]f32
+    MouseDragMaxDistanceAbs [5]ImVec2
+    MouseDragMaxDistanceSqr [5]f32
+    KeysDownDuration [512]f32
+    KeysDownDurationPrev [512]f32
 /*
-    float MouseDownDuration[5]
-    float MouseDownDurationPrev[5]
-    ImVec2 MouseDragMaxDistanceAbs[5]
-    float MouseDragMaxDistanceSqr[5]
-    float KeysDownDuration[512]
-    float KeysDownDurationPrev[512]
     float NavInputsDownDuration[ImGuiNavInput_COUNT]
     float NavInputsDownDurationPrev[ImGuiNavInput_COUNT]
     ImVector_ImWchar InputQueueCharacters

@@ -16,7 +16,7 @@ fn live_main() {
 	C.SDL_GL_SetAttribute(C.SDL_GL_DEPTH_SIZE, 24)
 	C.SDL_GL_SetAttribute(C.SDL_GL_STENCIL_SIZE, 8)
 	window_flags := C.SDL_WINDOW_OPENGL | C.SDL_WINDOW_RESIZABLE | C.SDL_WINDOW_ALLOW_HIGHDPI
-	window := C.SDL_CreateWindow("V ImGui+SDL2+OpenGL3 example", C.SDL_WINDOWPOS_CENTERED, C.SDL_WINDOWPOS_CENTERED, 800, 600, window_flags)
+	window := C.SDL_CreateWindow("V ImGui+SDL2+OpenGL3 example", C.SDL_WINDOWPOS_CENTERED, C.SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags)
 	gl_context := C.SDL_GL_CreateContext(window)
 	C.SDL_GL_MakeCurrent(window, gl_context)
 	C.SDL_GL_SetSwapInterval(1) // Enable vsync
@@ -65,7 +65,7 @@ fn live_main() {
 		}
 		C.igSameLine(0, 0)
 		C.igText("counter = %d", counter)
-		C.igText("Application average %.3f ms/frame (%.1f FPS) clicked=%d,%d,%d,%d,%d", 1000.0 / io.Framerate, io.Framerate, io.MouseClicked[0], io.MouseClicked[1], io.MouseClicked[2], io.MouseClicked[3], io.MouseClicked[4])
+		C.igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0 / io.Framerate, io.Framerate)
 		C.igEnd()
 		}
 		// 3. Show another simple window.
