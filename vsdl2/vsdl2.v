@@ -10,9 +10,6 @@ module vsdl2
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 
-fn C.SDL_MapRGB(fmt voidptr, r byte, g byte, b byte) u32
-fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) &SdlSurface
-fn C.SDL_PollEvent(&SdlEvent) int
 
 struct C.SDL_Color{
 pub:
@@ -31,6 +28,25 @@ pub:
         h int
 }
 type SdlRect C.SDL_Rect
+
+struct C.SDL_Surface {
+pub:
+        flags u32
+        format voidptr
+        w int
+        h int
+        pitch int
+        pixels voidptr
+        userdata voidptr
+        locked int
+        lock_data voidptr
+        clip_rect SdlRect
+        map voidptr
+        refcount int
+}
+type SdlSurface C.SDL_Surface
+
+/////////////////////////////////////////////////////////
 
 struct SdlQuitEvent {
         _type u32
@@ -70,6 +86,7 @@ pub:
         hat byte
         value byte
 }
+
 union SdlEventU {
 pub:
         _type u32
@@ -81,22 +98,6 @@ pub:
 }
 type SdlEvent SdlEventU
 
-struct C.SDL_Surface {
-pub:
-        flags u32
-        format voidptr
-        w int
-        h int
-        pitch int
-        pixels voidptr
-        userdata voidptr
-        locked int
-        lock_data voidptr
-        clip_rect SdlRect
-        map voidptr
-        refcount int
-}
-type SdlSurface C.SDL_Surface
 
 struct C.SDL_AudioSpec {
 pub:
@@ -112,7 +113,20 @@ mut:
 }
 type SdlAudioSpec C.SDL_AudioSpec
 
+//////////////////////////////////////////////////////////
+
+fn C.SDL_MapRGB(fmt voidptr, r byte, g byte, b byte) u32
+fn C.SDL_CreateRGBSurface(flags u32, width int, height int, depth int, Rmask u32, Gmask u32, Bmask u32, Amask u32) &SdlSurface
+fn C.SDL_PollEvent(&SdlEvent) int
+
+//////////////////////////////////////////////////////////
+
 pub fn fill_rect(screen &SdlSurface, rect &SdlRect, _col &SdlColor) {
 	col := C.SDL_MapRGB(screen.format, _col.r, _col.g, _col.b)
 	C.SDL_FillRect(screen, rect, col)
 }
+
+const (
+  version = '0.2' // hack to avoid unused module warning in the main program
+)
+
