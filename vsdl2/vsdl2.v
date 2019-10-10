@@ -116,3 +116,8 @@ pub fn fill_rect(screen &SdlSurface, rect &SdlRect, _col &SdlColor) {
 	col := C.SDL_MapRGB(screen.format, _col.r, _col.g, _col.b)
 	C.SDL_FillRect(screen, rect, col)
 }
+
+const (
+  version = '0.2' // hack to avoid unused module warning in the main program
+)
+
