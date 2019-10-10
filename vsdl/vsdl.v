@@ -135,3 +135,8 @@ mut:
         userdata voidptr
 }
 type SdlAudioSpec C.SDL_AudioSpec
+
+
+const (
+	version = '0.0.1'
+)

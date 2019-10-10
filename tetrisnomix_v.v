@@ -170,7 +170,7 @@ fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
 	C.SDL_SetWindowTitle(sdl.window, title.str)
 	sdl.w = w
 	sdl.h = h
-	sdl.screen = C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
+	sdl.screen = &SdlSurface(C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000))
 	sdl.texture = C.SDL_CreateTexture(sdl.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
 	
         C.SDL_LoadWAV('sounds/block.wav', &sdl.actx.wav_spec, &sdl.actx.samples[0].wav_buffer, &sdl.actx.samples[0].wav_length)

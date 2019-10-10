@@ -180,5 +180,9 @@ fn livemain() {
 }
 
 fn main() {
+	// these 3 lines just silence the v unused modules warnings (errors when -prod is given)
+	println('vsdl2 version: $vsdl2.version')
+	println('current time: ${time.now().format_ss()}')
+	println('executable: ${os.executable()}')
 	livemain()
 }
