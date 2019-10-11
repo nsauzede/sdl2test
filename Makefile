@@ -17,6 +17,7 @@ TARGET+=tvintrisgl_v.exe
 TARGET+=maingl_v.exe
 ifndef WIN32
 TARGET+=glfnt.exe
+TARGET+=mainig_v.exe
 endif
 
 CFLAGS:=
