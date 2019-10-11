@@ -15,11 +15,11 @@ struct AppState{
 	size0 ImVecTwo
 	f f32
 	mut:
-	window int
 	done bool
 	show_another_window bool
 	counter int
 	io &ImGuiIo
+	window voidptr
 }
 
 fn new_app_state() AppState {
