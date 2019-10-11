@@ -9,6 +9,8 @@
 #include <sstream>
 #include <iostream>
 
+#define nullptr 0
+
 class Shader
 {
 public:

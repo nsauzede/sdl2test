@@ -31,7 +31,7 @@ cimgui/bld/cimgui.so:
 	(export CFLAGS= CXXFLAGS= ; cd cimgui ; mkdir bld ; cd bld ; cmake .. ; make)
 
 imgui_impl_sdl.o: $(IMGUI)/examples/imgui_impl_sdl.cpp
-	$(CXX) -c -o $@ $^ -I$(IMGUI) `sdl2-config --cflags` -DIMGUI_IMPL_API=extern\ \"C\" -fno-threadsafe-statics
+	$(CXX) -fPIC -c -o $@ $^ -I$(IMGUI) `sdl2-config --cflags` -DIMGUI_IMPL_API=extern\ \"C\" -fno-threadsafe-statics
 
 imgui_impl_opengl3.o: $(IMGUI)/examples/imgui_impl_opengl3.cpp
 	$(CXX) -fPIC -c -o $@ $^ -I$(IMGUI) -DIMGUI_IMPL_API=extern\ \"C\" -fno-threadsafe-statics
