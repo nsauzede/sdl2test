@@ -24,8 +24,8 @@ struct AppState{
 
 fn new_app_state() AppState {
 	return AppState{
-		show_demo_window: true,
-		show_another_window: true,
+		show_demo_window: false,
+		show_another_window: false,
 		clear_color: vig.ImVec4{0.45, 0.55, 0.60, 1.00},
 		size0: ImVecTwo {0, 0},
 		f: 0.0,
@@ -42,7 +42,7 @@ fn setup_main_loop() {
 	C.SDL_GL_SetAttribute(C.SDL_GL_DEPTH_SIZE, 24)
 	C.SDL_GL_SetAttribute(C.SDL_GL_STENCIL_SIZE, 8)
 	window_flags := C.SDL_WINDOW_OPENGL | C.SDL_WINDOW_RESIZABLE | C.SDL_WINDOW_ALLOW_HIGHDPI
-	state.window = C.SDL_CreateWindow("V ImGui+SDL2+OpenGL3 example", C.SDL_WINDOWPOS_CENTERED, C.SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags)
+	state.window = C.SDL_CreateWindow("Live! V ImGui+SDL2+OpenGL3 demo", C.SDL_WINDOWPOS_CENTERED, C.SDL_WINDOWPOS_CENTERED, 600, 400, window_flags)
 	gl_context := C.SDL_GL_CreateContext(state.window)
 	C.SDL_GL_MakeCurrent(state.window, gl_context)
 	C.SDL_GL_SetSwapInterval(1) // Enable vsync
@@ -63,14 +63,14 @@ fn setup_main_loop() {
 				break
 			}
 		}
-		
+
         state.imgui_frame()
 	}
 	// Cleanup => TODO
 }
 
 [live]
-fn (state mut AppState) imgui_frame(){    
+fn (state mut AppState) imgui_frame(){
 	// Start the Dear ImGui frame
 	C.ImGui_ImplOpenGL3_NewFrame()
 	C.ImGui_ImplSDL2_NewFrame(state.window)
@@ -81,7 +81,7 @@ fn (state mut AppState) imgui_frame(){
 	}
 	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 	{
-		C.igBegin("Hello, @nsauzede !", C.NULL, 0)        // Create a window called "Hello, world!" and append into it.
+		C.igBegin("Hello, Vorld!", C.NULL, 0)        // Create a window called "Hello, world!" and append into it.
 		C.igText("This is some useful text.")               // Display some text (you can use a format strings too)
 		C.igCheckbox("Demo Vindow", &state.show_demo_window)      // Edit bools storing our window open/close state
 		C.igCheckbox("Another Vindow", &state.show_another_window)
@@ -97,8 +97,8 @@ fn (state mut AppState) imgui_frame(){
 	}
 	// 3. Show another simple window.
 	if (state.show_another_window) {
-		C.igBegin("Another Vindov", &state.show_another_window, 0)   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		C.igText("Hello from another Vindov!")
+		C.igBegin("Another Vindow", &state.show_another_window, 0)   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+		C.igText("Hello from another Vindow!")
 		if C.igButton("Close Me", state.size0) {
 			state.show_another_window = false
 		}
@@ -111,7 +111,7 @@ fn (state mut AppState) imgui_frame(){
 	C.glClear(C.GL_COLOR_BUFFER_BIT)
 	C.ImGui_ImplOpenGL3_RenderDrawData(C.igGetDrawData())
 	C.SDL_GL_SwapWindow(state.window)
-}    
+}
 
 fn main() {
 	setup_main_loop()
