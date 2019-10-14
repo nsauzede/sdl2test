@@ -99,7 +99,7 @@ VIG_CHECK:
 VNK_CHECK:
 	$(MAKE) -C vnk
 
-mainnk_v.c: vnk/examples/mainnk_v/mainnk_v.v
+mainnk_v.c: vnk/examples/mainnk_v/mainnk_v.v | $(V)
 	$(V) -o $@ $(VFLAGS) $^
 
 %nk_v.exe: %nk_v.o | VNK_CHECK
