@@ -19,6 +19,7 @@ ifndef WIN32
 TARGET+=glfnt.exe
 TARGET+=mainig_v.exe
 endif
+TARGET+=mainnk_v.exe
 
 CFLAGS:=
 CXXFLAGS:=-Wall -Werror
@@ -89,6 +90,19 @@ VIG_CHECK:
 	$(MAKE) -C vig
 
 %ig_v.exe: %ig_v.o | VIG_CHECK
+	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+%nk_v.exe: CFLAGS+=-Ivnk -DNK_INCLUDE_FIXED_TYPES -DNK_INCLUDE_STANDARD_IO -DNK_INCLUDE_STANDARD_VARARGS -DNK_INCLUDE_DEFAULT_ALLOCATOR -DNK_INCLUDE_VERTEX_BUFFER_OUTPUT -DNK_INCLUDE_FONT_BAKING -DNK_INCLUDE_DEFAULT_FONT -DNK_IMPLEMENTATION -DNK_SDL_GL3_IMPLEMENTATION $(SDL_FLAGS)
+%nk_v.exe: LDFLAGS=
+%nk_v.exe: LDLIBS=$(SDL_LIBS) -lGL -lGLEW -lm
+
+VNK_CHECK:
+	$(MAKE) -C vnk
+
+mainnk_v.c: vnk/examples/mainnk_v/mainnk_v.v
+	$(V) -o $@ $(VFLAGS) $^
+
+%nk_v.exe: %nk_v.o | VNK_CHECK
 	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 %.exe: %.o
