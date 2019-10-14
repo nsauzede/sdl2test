@@ -18,10 +18,10 @@ This is a V port of Nuklear sdl_opengl3 demo
 
 # Dependencies
 Ubuntu :
-`$ sudo apt install git cmake libsdl2-dev libglew-dev`
+`$ sudo apt install git cmake libsdl2-dev libglew-dev libsdl2-ttf-dev`
 
 ClearLinux :
-`$ sudo swupd bundle-add git cmake devpkg-SDL2 devpkg-glew`
+`$ sudo swupd bundle-add git cmake devpkg-SDL2 devpkg-glew devpkg-SDL2_ttf`
 
 Windows/MSYS2 :
-`$ pacman -S msys/git mingw64/mingw-w64-x86_64-cmake mingw64/mingw-w64-x86_64-SDL2 mingw64/mingw-w64-x86_64-glew`
+`$ pacman -S msys/git mingw64/mingw-w64-x86_64-cmake mingw64/mingw-w64-x86_64-SDL2 mingw64/mingw-w64-x86_64-glew mingw64/mingw-w64-x86_64-SDL2_ttf mingw64/mingw-w64-x86_64-SDL2_mixer`
