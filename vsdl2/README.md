@@ -16,6 +16,10 @@ Current APIs available/tested in examples :
 ![tVintris screenshot](https://github.com/nsauzede/vsdl2/blob/master/examples/tvintris/tvintris.png)
 
 # Dependencies
+
+Fedora :
+`$ sudo dnf install SDL2-devel SDL2_ttf-devel SDL2_ttf-devel` 
+
 Ubuntu :
 `$ sudo apt install libsdl2-ttf-dev libsdl2-mixer-dev`
 
