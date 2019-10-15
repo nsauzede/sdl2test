@@ -18,7 +18,7 @@ Current APIs available/tested in examples :
 # Dependencies
 
 Fedora :
-`$ sudo dnf install SDL2-devel SDL2_ttf-devel SDL2_ttf-devel` 
+`$ sudo dnf install SDL2-devel SDL2_ttf-devel SDL2_mixer-devel` 
 
 Ubuntu :
 `$ sudo apt install libsdl2-ttf-dev libsdl2-mixer-dev`
