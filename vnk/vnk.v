@@ -33,8 +33,3 @@ mut:
 	a f32
 }
 type NkColorF NkColorF0
-
-struct NkFontAtlas0 {
-	foo int
-}
-type NkFontAtlas NkFontAtlas0

@@ -46,7 +46,7 @@ fn main() {
     /* Load Cursor: if you uncomment cursor loading please hide the cursor */
     {
     //struct nk_font_atlas *atlas
-    atlas := NkFontAtlas{}
+    atlas := voidptr(0)
     C.nk_sdl_font_stash_begin(&atlas)
     /*struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);*/
     /*struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);*/
