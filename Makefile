@@ -43,7 +43,10 @@ endif
 GLADFLAGS:=-I ../v/thirdparty/ -I ../stb
 GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
 
-all: SDL_CHECK $(TARGET)
+all: SDL_CHECK VSDL2_CHECK $(TARGET)
+
+VSDL2_CHECK:
+	git submodule update --init --recursive
 
 glfnt.exe: glfnt.cpp
 	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype -lglfw  -ldl -lX11 -pthread
