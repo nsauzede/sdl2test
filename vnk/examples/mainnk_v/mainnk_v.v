@@ -6,6 +6,8 @@
 module main
 import vsdl2
 import vnk
+import os
+import time
 
 const (
 	WINDOW_WIDTH = 400

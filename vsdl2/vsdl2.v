@@ -5,6 +5,9 @@
 module vsdl2
 
 #flag linux `sdl2-config --cflags --libs`  -lSDL2_ttf -lSDL2_mixer
+//#flag windows `sdl2-config --cflags`
+//#flag windows `sdl2-config --libs`  -lSDL2_ttf -lSDL2_mixer
+//#flag `sdl2-config --cflags --libs`  -lSDL2_ttf -lSDL2_mixer
 
 // following kludge until `sdl2-config ...` is supported also on windows
 #flag windows -I/msys64/mingw64/include/SDL2
