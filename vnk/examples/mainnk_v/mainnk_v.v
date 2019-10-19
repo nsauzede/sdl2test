@@ -31,7 +31,9 @@ fn main() {
     win := C.SDL_CreateWindow("V Nuklear+SDL2+OpenGL3 Demo",
         C.SDL_WINDOWPOS_CENTERED, C.SDL_WINDOWPOS_CENTERED,
         WINDOW_WIDTH, WINDOW_HEIGHT, C.SDL_WINDOW_OPENGL|C.SDL_WINDOW_SHOWN|C.SDL_WINDOW_ALLOW_HIGHDPI)
+    println('win=$win')
     gl_context := C.SDL_GL_CreateContext(win)
+    println('gl_context=$gl_context')
     win_width := 0
     win_height := 0
     C.SDL_GetWindowSize(win, &win_width, &win_height)
@@ -42,6 +44,7 @@ fn main() {
     }
 //    struct C.nk_context *ctx
     ctx := C.nk_sdl_init(win)
+    println('ctx=$ctx')
     /* Load Fonts: if none of these are loaded a default font will be used  */
     /* Load Cursor: if you uncomment cursor loading please hide the cursor */
     {
@@ -66,6 +69,7 @@ fn main() {
     mut running := true
     for running {
         evt := SdlEvent{}
+	println('ctx=$ctx')
         C.nk_input_begin(ctx)
         for C.SDL_PollEvent(&evt) > 0 {
             if int(evt._type) == C.SDL_QUIT {
@@ -115,6 +119,7 @@ fn main() {
         C.glClearColor(bg.r, bg.g, bg.b, bg.a)
         C.nk_sdl_render(C.NK_ANTI_ALIASING_ON, MAX_VERTEX_MEMORY, MAX_ELEMENT_MEMORY)
         C.SDL_GL_SwapWindow(win)
+        break
     }
 
 cleanup:
