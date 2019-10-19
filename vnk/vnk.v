@@ -2,24 +2,27 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-// The vnl module use the nice Nuklear library (see README.md)
+// The vnk module uses the nice Nuklear library (see README.md)
 module vnk
 
-#flag linux -Ivnk
-#flag linux -DNK_INCLUDE_FIXED_TYPES
-#flag linux -DNK_INCLUDE_STANDARD_IO
-#flag linux -DNK_INCLUDE_STANDARD_VARARGS
-#flag linux -DNK_INCLUDE_DEFAULT_ALLOCATOR
-#flag linux -DNK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#flag linux -DNK_INCLUDE_FONT_BAKING
-#flag linux -DNK_INCLUDE_DEFAULT_FONT
-#flag linux -DNK_IMPLEMENTATION
-#flag linux -DNK_SDL_GL3_IMPLEMENTATION
+#flag -Ivnk
+#flag -DNK_INCLUDE_FIXED_TYPES
+#flag -DNK_INCLUDE_STANDARD_IO
+#flag -DNK_INCLUDE_STANDARD_VARARGS
+#flag -DNK_INCLUDE_DEFAULT_ALLOCATOR
+#flag -DNK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#flag -DNK_INCLUDE_FONT_BAKING
+#flag -DNK_INCLUDE_DEFAULT_FONT
+#flag -DNK_IMPLEMENTATION
+#flag -DNK_SDL_GL3_IMPLEMENTATION
+
 #include <GL/glew.h>
 #include "nuklear.h"
 #include "nuklear_sdl_gl3.h"
 
 #flag linux -lGL -lGLEW
+
+#flag windows -lopengl32 -lglew32
 
 struct NkColorF0 {
 pub:

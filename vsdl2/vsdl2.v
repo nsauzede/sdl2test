@@ -4,8 +4,13 @@
 
 module vsdl2
 
-// apparently, following line also works on non-linux ? o_O
 #flag linux `sdl2-config --cflags --libs`  -lSDL2_ttf -lSDL2_mixer
+
+// following kludge until `sdl2-config ...` is supported also on windows
+#flag windows -I/msys64/mingw64/include/SDL2
+#flag windows -Dmain=SDL_main
+#flag windows -L/mingw64/lib -lmingw32 -lSDL2main -lSDL2
+
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>

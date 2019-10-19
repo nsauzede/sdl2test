@@ -2,7 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE file.
 
-// The vig module use the nice ImGui/cimgui libraries (see README.md)
+// The vig module uses the nice ImGui/cimgui libraries (see README.md)
 module vig
 
 #flag linux -Ivig
