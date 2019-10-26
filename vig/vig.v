@@ -20,16 +20,24 @@ module vig
 //fn C.igShowDemoWindow(p_open *bool)
 //fn C.igCheckbox(label voidptr, p_open *bool)
 
-struct C.ImVec2 {
+//struct C.ImVec2 {
+pub struct ImVecTwo {
 pub:
 mut:
         x f32
         y f32
 }
 //type ImVec2 C.ImVec2
-type ImVecTwo C.ImVec2
+//type ImVecTwo C.ImVec2
 
-struct ImVec4 {
+pub struct ImVec2 {
+pub:
+mut:
+        x f32
+        y f32
+}
+
+pub struct ImVec4 {
 pub:
 mut:
         x f32
@@ -44,7 +52,8 @@ mut:
 type ImGuiConfigFlags int
 type ImGuiBackendFlags int
 
-struct C.ImGuiIO {
+pub struct C.ImGuiIO {
+//pub struct ImGuiIO {
 pub:
 mut:
     ConfigFlags ImGuiConfigFlags
@@ -135,7 +144,7 @@ mut:
     ImVector_ImWchar InputQueueCharacters
 */
 }
-type ImGuiIo ImGuiIO
+type ImGuiIo C.ImGuiIO
 
 pub fn ig_get_io() &ImGuiIo {
 	return C.igGetIO()

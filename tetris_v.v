@@ -101,7 +101,7 @@ mut:
 	h int
 	window          voidptr
 	renderer        voidptr
-	screen          &SdlSurface
+	screen          &vsdl2.SdlSurface
 	texture         voidptr
 //      AUDIO
         actx AudioContext
@@ -153,7 +153,7 @@ fn (sdl mut SdlContext) set_sdl_context(w int, h int, title string) {
 	C.SDL_SetWindowTitle(sdl.window, title.str)
 	sdl.w = w
 	sdl.h = h
-	sdl.screen = &SdlSurface(C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000))
+	sdl.screen = &vsdl2.SdlSurface(C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000))
 	sdl.texture = C.SDL_CreateTexture(sdl.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
 	
 	C.Mix_Init(0)
@@ -414,7 +414,7 @@ fn (g &Game) drop_tetro() {
 }
 
 fn (g &Game) draw_block(i, j, color_idx int) {
-	rect := SdlRect {(j - 1) * BlockSize, (i - 1) * BlockSize,
+	rect := vsdl2.SdlRect {(j - 1) * BlockSize, (i - 1) * BlockSize,
 		BlockSize - 1, BlockSize - 1}
 	scol := Colors[color_idx]
 	rr := scol.r
@@ -431,7 +431,7 @@ fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
 	texw := 0
 	texh := 0
 	C.SDL_QueryTexture(ttext, 0, 0, &texw, &texh)
-	dstrect := SdlRect { x, y, texw, texh }
+	dstrect := vsdl2.SdlRect { x, y, texw, texh }
 	C.SDL_RenderCopy(g.sdl.renderer, ttext, 0, &dstrect)
 	C.SDL_DestroyTexture(ttext)
 	C.SDL_FreeSurface(tsurf)
@@ -469,7 +469,7 @@ fn (g &Game) draw_score() {
 }
 
 fn (g &Game) draw_scene() {
-	rect := SdlRect {0,0,g.sdl.w,g.sdl.h}
+	rect := vsdl2.SdlRect {0,0,g.sdl.w,g.sdl.h}
 	col := C.SDL_MapRGB(g.sdl.screen.format, 255, 255, 255)
 	C.SDL_FillRect(g.sdl.screen, &rect, col)
 

@@ -9,15 +9,15 @@ TARGET+=main_c.exe
 TARGET+=mainmix_c.exe
 TARGET+=maingl_c.exe
 TARGET+=main_v.exe
-TARGET+=tetris_v.exe
-TARGET+=tetrisnomix_v.exe
+#TARGET+=tetris_v.exe
+#TARGET+=tetrisnomix_v.exe
 TARGET+=tvintris_v.exe
 #TARGET+=tvintris0_v.exe
-TARGET+=tvintrisgl_v.exe
-TARGET+=maingl_v.exe
+#TARGET+=tvintrisgl_v.exe
+#TARGET+=maingl_v.exe
 ifndef WIN32
 TARGET+=glfnt.exe
-TARGET+=mainig_v.exe
+#TARGET+=mainig_v.exe
 endif
 TARGET+=mainnk_v.exe
 

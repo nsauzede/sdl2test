@@ -12,13 +12,13 @@ import time
 struct AppState{
 	show_demo_window bool
 	clear_color vig.ImVec4
-	size0 ImVecTwo
+	size0 vig.ImVec2
 	f f32
 	mut:
 	done bool
 	show_another_window bool
 	counter int
-	io &ImGuiIo
+	io &C.ImGuiIo
 	window voidptr
 }
 
@@ -27,7 +27,7 @@ fn new_app_state() AppState {
 		show_demo_window: false,
 		show_another_window: false,
 		clear_color: vig.ImVec4{0.45, 0.55, 0.60, 1.00},
-		size0: ImVecTwo {0, 0},
+		size0: vig.ImVec2 {0, 0},
 		f: 0.0,
 		counter: 0,
 		done: false,
