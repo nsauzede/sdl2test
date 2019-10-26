@@ -17,7 +17,7 @@ TARGET+=tvintris_v.exe
 #TARGET+=maingl_v.exe
 ifndef WIN32
 TARGET+=glfnt.exe
-#TARGET+=mainig_v.exe
+TARGET+=mainig_v.exe
 endif
 TARGET+=mainnk_v.exe
 

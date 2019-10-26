@@ -71,6 +71,9 @@ fn setup_main_loop() {
 
 [live]
 fn (state mut AppState) imgui_frame(){
+	mut size0 := C.ImVec2{}
+	size0.x = state.size0.x
+	size0.y = state.size0.y
 	// Start the Dear ImGui frame
 	C.ImGui_ImplOpenGL3_NewFrame()
 	C.ImGui_ImplSDL2_NewFrame(state.window)
@@ -87,7 +90,9 @@ fn (state mut AppState) imgui_frame(){
 		C.igCheckbox("Another Vindow", &state.show_another_window)
 		C.igSliderFloat("float", &state.f, 0.0, 1.0, 0, 0)            // Edit 1 float using a slider from 0.0f to 1.0f
 		C.igColorEdit3("clear color", &state.clear_color, 0) // Edit 3 floats representing a color
-		if C.igButton("Button", state.size0) {                            // Buttons return true when clicked (most widgets return true when edited/activated)
+//		if C.igButton("Button", state.size0) {                            // Buttons return true when clicked (most widgets return true when edited/activated)
+		//state.size0.x, state.size0.y}
+		if C.igButton("Button", size0) {                            // Buttons return true when clicked (most widgets return true when edited/activated)
 			state.counter++
 		}
 		C.igSameLine(0, 0)
@@ -99,7 +104,8 @@ fn (state mut AppState) imgui_frame(){
 	if (state.show_another_window) {
 		C.igBegin("Another Vindow", &state.show_another_window, 0)   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 		C.igText("Hello from another Vindow!")
-		if C.igButton("Close Me", state.size0) {
+//		if C.igButton("Close Me", state.size0) {
+		if C.igButton("Close Me", size0) {
 			state.show_another_window = false
 		}
 		C.igEnd()

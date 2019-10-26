@@ -20,6 +20,13 @@ module vig
 //fn C.igShowDemoWindow(p_open *bool)
 //fn C.igCheckbox(label voidptr, p_open *bool)
 
+struct C.ImVec2 {
+pub:
+mut:
+        x f32
+        y f32
+}
+
 //struct C.ImVec2 {
 pub struct ImVecTwo {
 pub:
