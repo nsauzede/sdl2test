@@ -54,13 +54,14 @@ fn setup_main_loop() {
 	C.ImGui_ImplOpenGL3_Init(glsl_version.str)
 	// Our state
 	for !state.done {
-		ev := SdlEvent{}
+		ev := vsdl2.SdlEvent{}
 		for 0 < C.SDL_PollEvent(&ev) {
 			C.ImGui_ImplSDL2_ProcessEvent(&ev)
-			switch int(ev._type) {
-			case C.SDL_QUIT:
-				state.done = true
-				break
+			match int(ev._type) {
+				C.SDL_QUIT {
+					state.done = true
+					break
+				}
 			}
 		}
 
