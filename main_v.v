@@ -82,22 +82,24 @@ fn livemain() {
         ballm := 1
         mut balldir := ballm
         for !quit {
-                ev := SdlEvent{}
+                ev := vsdl2.SdlEvent{}
                 for 0 < C.SDL_PollEvent(&ev) {
-                        switch int(ev._type) {
-                                case C.SDL_QUIT:
+                        match int(ev._type) {
+                                C.SDL_QUIT {
                                         quit = true
-                                        break
-                                case C.SDL_KEYDOWN:
-                                        switch int(ev.key.keysym.sym) {
-                                                case C.SDLK_ESCAPE:
+                                }
+                                C.SDL_KEYDOWN {
+                                        match int(ev.key.keysym.sym) {
+                                                C.SDLK_ESCAPE {
                                                         quit = true
-                                                        break
-                                                case C.SDLK_SPACE:
+                                                }
+                                                C.SDLK_SPACE {
                                                         actx.audio_pos = actx.wav2_buffer
                                                         actx.audio_len = actx.wav2_length
                                                         C.SDL_PauseAudio(0)
+                                                }
                                         }
+                                }
                         }
                 }
                 if quit {

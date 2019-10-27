@@ -34,7 +34,7 @@ mut:
 [live]
 fn (s mut AppState) live_main() {
 //	mut
-	bg := NkColorF{0.10, 0.18, 0.24, 1.0}
+	bg := vnk.NkColorF{0.10, 0.18, 0.24, 1.0}
         if (C.nk_begin(s.ctx, "Hello, Vorld!", C.nk_rect(50, 50, 230, 250),
             C.NK_WINDOW_BORDER|C.NK_WINDOW_MOVABLE|C.NK_WINDOW_SCALABLE|
             C.NK_WINDOW_MINIMIZABLE|C.NK_WINDOW_TITLE)) {
@@ -127,7 +127,7 @@ fn main() {
 //    /*mut*/ bg = NkColorF{0.10, 0.18, 0.24, 1.0}
     mut running := true
     for running {
-        evt := SdlEvent{}
+        evt := vsdl2.SdlEvent{}
         C.nk_input_begin(s.ctx)
         for C.SDL_PollEvent(&evt) > 0 {
             if int(evt._type) == C.SDL_QUIT {

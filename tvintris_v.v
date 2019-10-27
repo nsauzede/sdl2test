@@ -341,13 +341,11 @@ fn main() {
 		g.draw_end()
 
 //		game.handle_events()            // CRASHES if done in function ???
-		ev := SdlEvent{}
+		ev := vsdl2.SdlEvent{}
 		for 0 < C.SDL_PollEvent(&ev) {
-			switch ev._type {
-				case C.SDL_QUIT:
-					should_close = true
-					break
-				case C.SDL_KEYDOWN:
+			match int(ev._type) {
+				C.SDL_QUIT { should_close = true }
+				C.SDL_KEYDOWN {
 					key := int(ev.key.keysym.sym)
 					if key == C.SDLK_ESCAPE {
 					        should_close = true
@@ -355,19 +353,22 @@ fn main() {
 					}
 					game.handle_key(key)
 					game2.handle_key(key)
-				case C.SDL_JOYBUTTONDOWN:
+				}
+				C.SDL_JOYBUTTONDOWN {
 					jb := int(ev.jbutton.button)
 					joyid := int(ev.jbutton.which)
 //					println('JOY BUTTON $jb $joyid')
 					game.handle_jbutton(jb, joyid)
 					game2.handle_jbutton(jb, joyid)
-				case C.SDL_JOYHATMOTION:
+				}
+				C.SDL_JOYHATMOTION {
 					jh := int(ev.jhat.hat)
 					jv := int(ev.jhat.value)
 					joyid := int(ev.jhat.which)
 //					println('JOY HAT $jh $jv $joyid')
 					game.handle_jhat(jh, jv, joyid)
 					game2.handle_jhat(jh, jv, joyid)
+				}
 			}
 		}
 		if should_close {
@@ -399,42 +400,39 @@ enum Action {
 fn (game mut Game) handle_key(key int) {
 	// global keys
 	mut action := Action(.idle)
-	switch key {
-		case C.SDLK_SPACE:
-			action = .space
-		case game.k_fire:
-			action = .fire
+	match key {
+		C.SDLK_SPACE { action = .space }
+		game.k_fire { action = .fire }
 	}
 
 	if action == .space {
-			switch game.state {
-				case .running:
+			match game.state {
+				.running {
 					C.Mix_PauseMusic()
 					game.state = .paused
-				case .paused:
+				}
+				.paused {
 					C.Mix_ResumeMusic()
 					game.state = .running
+				}
 			}
 	}
 
 	if action == .fire {
-			switch game.state {
-				case .gameover:
+			match game.state {
+				.gameover {
 					game.init_game()
 					game.state = .running
+				}
 			}
 	}
 	if game.state != .running { return }
 	// keys while game is running
-	switch key {
-		case game.k_up:
-			game.rotate_tetro()
-		case game.k_left:
-			game.move_right(-1)
-		case game.k_right:
-			game.move_right(1)
-		case game.k_down:
-			game.move_tetro() // drop faster when the player presses <down>
+	match key {
+		game.k_up { game.rotate_tetro() }
+		game.k_left { game.move_right(-1) }
+		game.k_right { game.move_right(1) }
+		game.k_down { game.move_tetro() } // drop faster when the player presses <down>
 	}
 }
 
@@ -444,16 +442,16 @@ fn (game mut Game) handle_jbutton(jb int, joyid int) {
 	}
 	// global buttons
 	mut action := Action(.idle)
-	switch jb {
-		case game.jb_fire:
-			action = .fire
+	match jb {
+		game.jb_fire { action = .fire }
 	}
 
 	if action == .fire {
-			switch game.state {
-				case .gameover:
+			match game.state {
+				.gameover {
 					game.init_game()
 					game.state = .running
+				}
 			}
 	}
 }
@@ -465,19 +463,11 @@ fn (game mut Game) handle_jhat(jh int, jv int, joyid int) {
 	if game.state != .running { return }
 //	println('testing hat values.. joyid=$joyid jh=$jh jv=$jv')
 	// hat values while game is running
-	switch jv {
-		case game.jh_up:
-//			println('UP')
-			game.rotate_tetro()
-		case game.jh_left:
-//			println('LEFT')
-			game.move_right(-1)
-		case game.jh_right:
-//			println('RIGHT')
-			game.move_right(1)
-		case game.jh_down:
-//			println('DOWN')
-			game.move_tetro() // drop faster when the player presses <down>
+	match jv {
+		game.jh_up { game.rotate_tetro() }
+		game.jh_left { game.move_right(-1) }
+		game.jh_right { game.move_right(1) }
+		game.jh_down { game.move_tetro() } // drop faster when the player presses <down>
 	}
 }
 

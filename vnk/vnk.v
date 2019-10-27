@@ -24,7 +24,7 @@ module vnk
 
 #flag windows -lopengl32 -lglew32
 
-struct NkColorF0 {
+pub struct NkColorF {
 pub:
 mut:
 	r f32
@@ -32,4 +32,4 @@ mut:
 	b f32
 	a f32
 }
-type NkColorF NkColorF0
+//type NkColorF NkColorF0
