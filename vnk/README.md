@@ -1,4 +1,4 @@
-# vig
+# vnk
 V Nuklear module -- nuklear wrapper
 
 If you are new to nuklear see [here](https://github.com/vurtun/nuklear)
