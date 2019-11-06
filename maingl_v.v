@@ -3,7 +3,7 @@
 // that can be found in the LICENSE_v.txt file.
 module main
 
-//import vsdl2
+import vsdl2
 import vsdl2gl
 [inline] fn sdl_fill_rect(s &SdlSurface,r &SdlRect,c &SdlColor) {vsdl2gl.fill_rect(s,r,c)}
 
@@ -12,8 +12,8 @@ fn C.atexit(atexit_func_t)
 
 const (
         Colors = [
-                SdlColor{byte(255), byte(255), byte(255), byte(0)},
-                SdlColor{byte(255), byte(0), byte(0), byte(0)}
+                vsdl2.SdlColor{byte(255), byte(255), byte(255), byte(0)},
+                vsdl2.SdlColor{byte(255), byte(0), byte(0), byte(0)}
         ]
 )
 
@@ -134,10 +134,10 @@ if glinit {
                 }
 
 		mut rect := SdlRect{}
-		mut col := SdlColor{}
+		mut col := vsdl2.SdlColor{}
 		// 2D part
 		rect = SdlRect {0, 0, w, h}
-		col = SdlColor{byte(0), byte(0), byte(0), byte(0)}
+		col = vsdl2.SdlColor{byte(0), byte(0), byte(0), byte(0)}
 		sdl_fill_rect(screen, &rect, &col)
 if show_3d {
 		// 3D part
@@ -163,7 +163,7 @@ if show_3d {
 
 		// 2D part
 		rect = SdlRect {ballx, bally, balld, balld}
-		col = SdlColor{byte(255), byte(0), byte(0), byte(0)}
+		col = vsdl2.SdlColor{byte(255), byte(0), byte(0), byte(0)}
 		sdl_fill_rect(screen, &rect, &col)
 
 		// 3D part

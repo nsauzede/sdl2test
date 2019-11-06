@@ -11,7 +11,7 @@ import vsdl2
 #include <SDL_opengl.h>
 #include <GL/glu.h>
 
-pub fn fill_rect(screen &SdlSurface, rect &SdlRect, col &SdlColor) {
+pub fn fill_rect(screen &vsdl2.SdlSurface, rect &vsdl2.SdlRect, col &vsdl2.SdlColor) {
         ww := screen.w
         hh := screen.h
         r := f32(col.r) / 255
