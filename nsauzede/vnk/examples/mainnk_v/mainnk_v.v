@@ -5,7 +5,7 @@
 // that can be found in the LICENSE file.
 module main
 import nsauzede.vsdl2
-import vnk
+import nsauzede.vnk
 import os
 import time
 
