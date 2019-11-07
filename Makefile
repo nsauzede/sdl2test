@@ -11,7 +11,7 @@ TARGET+=maingl_c.exe
 TARGET+=main_v.exe
 #TARGET+=tetris_v.exe
 #TARGET+=tetrisnomix_v.exe
-TARGET+=tvintris_v.exe
+TARGET+=tvintris.exe
 #TARGET+=tvintris0_v.exe
 #TARGET+=tvintrisgl_v.exe
 #TARGET+=maingl_v.exe
@@ -119,6 +119,11 @@ mainnk_v.c: vnk/examples/mainnk_v/mainnk_v.v | $(V)
 
 vsdlstub.o: vsdl/vsdlstub.c
 	$(CC) -c -o $@ $(CFLAGS) -g $^
+
+tvintris.tmp.c: nsauzede/vsdl2/examples/tvintris/tvintris.v | $(V)
+	$(V) -o $@ $(VFLAGS) $^
+tvintris.exe: tvintris.tmp.o
+	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 %_v.exe: CFLAGS+=$(VCFLAGS)
 #%_v.exe: LDLIBS+=vsdlstub.o

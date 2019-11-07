@@ -3,7 +3,7 @@
 // that can be found in the LICENSE_v.txt file.
 module main
 
-import vsdl2
+import nsauzede.vsdl2
 import vsdl2gl
 [inline] fn sdl_fill_rect(s &SdlSurface,r &SdlRect,c &SdlColor) {vsdl2gl.fill_rect(s,r,c)}
 

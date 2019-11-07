@@ -2,7 +2,7 @@
 // Use of this source code is governed by an MIT license
 // that can be found in the LICENSE_v.txt file.
 module main
-import vsdl2
+import nsauzede.vsdl2
 import time
 import os
 type atexit_func_t fn ()

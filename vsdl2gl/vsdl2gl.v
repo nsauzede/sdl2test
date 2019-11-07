@@ -4,7 +4,7 @@
 
 module vsdl2gl
 
-import vsdl2
+import nsauzede.vsdl2
 
 // apparently, following line also works on non-linux ? o_O
 #flag linux -lGL -lGLU

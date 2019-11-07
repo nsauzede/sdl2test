@@ -12,7 +12,6 @@ import rand
 import time
 import math
 //import nsauzede.vsdl2
-//import vsdl2
 //[inline]fn sdl_fill_rect(s &vsdl2.SdlSurface,r &vsdl2.SdlRect,c &vsdl2.SdlColor){vsdl2.fill_rect(s,r,c)}
 import vsdl2gl
 [inline]fn sdl_fill_rect(s &vsdl2.SdlSurface,r &vsdl2.SdlRect,c &vsdl2.SdlColor){vsdl2gl.fill_rect(s,r,c)}
