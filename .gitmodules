@@ -1,3 +1,6 @@
 [submodule "vsdl2"]
 	path = nsauzede/vsdl2
 	url = https://github.com/nsauzede/vsdl2.git
+[submodule "nsauzede/vig"]
+	path = nsauzede/vig
+	url = https://github.com/nsauzede/vig

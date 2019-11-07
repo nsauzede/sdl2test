@@ -43,9 +43,9 @@ endif
 GLADFLAGS:=-I ../v/thirdparty/ -I ../stb
 GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
 
-all: SDL_CHECK VSDL2_CHECK $(TARGET)
+all: SDL_CHECK SUBM_CHECK $(TARGET)
 
-VSDL2_CHECK:
+SUBM_CHECK:
 	git submodule update --init --recursive
 
 glfnt.exe: glfnt.cpp
