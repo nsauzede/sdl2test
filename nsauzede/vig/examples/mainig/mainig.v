@@ -5,7 +5,7 @@
 // that can be found in the LICENSE_v.txt file.
 module main
 import nsauzede.vsdl2
-import vig
+import nsauzede.vig
 import os
 import time
 

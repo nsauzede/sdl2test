@@ -85,17 +85,17 @@ $(V):
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
-%ig_v.exe: CFLAGS+=-Ivig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API= $(SDL_FLAGS)
+%ig_v.exe: CFLAGS+=-Insauzede/vig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API= $(SDL_FLAGS)
 %ig_v.exe: LDFLAGS=
-%ig_v.exe: LDLIBS=vig/imgui_impl_sdl.o vig/imgui_impl_opengl3.so vig/cimgui.so $(SDL_LIBS) -lGL -lGLEW -lm
+%ig_v.exe: LDLIBS=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.so nsauzede/vig/cimgui.so $(SDL_LIBS) -lGL -lGLEW -lm
 
-mainig.tmp.c: vig/examples/mainig/mainig.v | $(V) VIG_CHECK
+mainig.tmp.c: nsauzede/vig/examples/mainig/mainig.v | $(V) VIG_CHECK
 	$(V) -o $@ $(VFLAGS) $^
 mainig_v.exe: mainig.tmp.o
 	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 VIG_CHECK:
-	$(MAKE) -C vig
+	$(MAKE) -C nsauzede/vig
 
 %ig_v.exe: %ig_v.o | VIG_CHECK
 	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
