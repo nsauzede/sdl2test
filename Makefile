@@ -89,6 +89,11 @@ $(V):
 %ig_v.exe: LDFLAGS=
 %ig_v.exe: LDLIBS=vig/imgui_impl_sdl.o vig/imgui_impl_opengl3.so vig/cimgui.so $(SDL_LIBS) -lGL -lGLEW -lm
 
+mainig.tmp.c: vig/examples/mainig/mainig.v | $(V)
+	$(V) -o $@ $(VFLAGS) $^
+mainig_v.exe: mainig.tmp.o | VIG_CHECK
+	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
 VIG_CHECK:
 	$(MAKE) -C vig
 
