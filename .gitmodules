@@ -4,3 +4,6 @@
 [submodule "nsauzede/vig"]
 	path = nsauzede/vig
 	url = https://github.com/nsauzede/vig
+[submodule "nsauzede/vnk"]
+	path = nsauzede/vnk
+	url = https://github.com/nsauzede/vnk
