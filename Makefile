@@ -21,12 +21,27 @@ TARGET+=mainig_v.exe
 endif
 TARGET+=mainnk_v.exe
 
-CFLAGS:=
-CXXFLAGS:=-Wall -Werror
+#CFLAGS:=
+CFLAGS+=-Wall
+CFLAGS+=-Werror
+CFLAGS+=-Wextra
+#CFLAGS+=-pedantic
+CFLAGS+=-Wno-unused-variable
+CFLAGS+=-Wno-unused-parameter
+CFLAGS+=-Wno-unused-result
+
+CXXFLAGS:=
+CXXFLAGS+=-Wall
+CXXFLAGS+=-Werror
 CXXFLAGS+=-Wextra
 
-CXXFLAGS+=-g -O0
-CFLAGS+=-g -O0
+CXXFLAGS+=-g
+CFLAGS+=-g
+
+ifdef NOPT
+CXXFLAGS+=-O0
+CFLAGS+=-O0
+endif
 
 CXXFLAGS+=-I.
 
