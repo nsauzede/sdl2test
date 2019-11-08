@@ -266,7 +266,7 @@ if (!pause) {
 		SDL_RenderClear(sdlRenderer);
 		SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
 		if (font) {
-			SDL_Color color = { 0, 0, 0 };
+			SDL_Color color = { 0, 0, 0, 0 };
 			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL ttf/mixer", color);
 			SDL_Texture * texture = SDL_CreateTextureFromSurface(sdlRenderer, surface);
 			int texW = 0;

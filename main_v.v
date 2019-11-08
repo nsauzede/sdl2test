@@ -61,7 +61,7 @@ fn livemain() {
 //        println('font=$font')
         C.SDL_CreateWindowAndRenderer(w, h, 0, &sdl_window, &sdl_renderer)
 //        println('renderer=$sdl_renderer')
-        screen := C.SDL_CreateRGBSurface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
+        screen := vsdl2.create_rgb_surface(0, w, h, bpp, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
         sdl_texture := C.SDL_CreateTexture(sdl_renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING, w, h)
         mut actx := AudioContext{}
         C.SDL_zero(actx)
@@ -107,13 +107,12 @@ fn livemain() {
                 }
 //                rect := vsdl2.SdlRect {x: 0, y: 0, w: w, h: h }     // TODO doesn't compile ???
                 mut rect := vsdl2.SdlRect {0,0,w,h}
-                mut col := C.SDL_MapRGB(screen.format, 255, 255, 255)
-                C.SDL_FillRect(screen, &rect, col)
+                mut col := vsdl2.SdlColor{byte(255), byte(255), byte(255), byte(0)}
+                vsdl2.fill_rect(screen, &rect, col)
 
                 rect = vsdl2.SdlRect {ballx, bally, balld, balld}
-//                col = C.SDL_MapRGB(screen.format, 255, 0, 0)
-                col = C.SDL_MapRGB(screen.format, Colors[1].r, Colors[1].g, Colors[1].b)
-                C.SDL_FillRect(screen, &rect, col)
+                col = vsdl2.SdlColor{Colors[1].r, Colors[1].g, Colors[1].b, 0}
+                vsdl2.fill_rect(screen, &rect, col)
                 ballx += balldir
                 if balldir == ballm {
                         if ballx == w - balld * 4 {

@@ -17,7 +17,8 @@ typedef struct AudioCtx_s {
         Uint32 wav_length; // length of our sample
 } AudioCtx;
 
-void my_audio_callback(void *userdata, Uint8 *stream, int len) {
+void my_audio_callback(void *userdata, Uint8 *stream, int _len) {
+	Uint32 len = _len;
         AudioCtx *ctx = userdata;
         if (ctx->audio_len ==0)
                 return;
@@ -153,7 +154,7 @@ int main(int argc, char *argv[]) {
 		SDL_RenderClear(sdlRenderer);
 		SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
 		if (font) {
-			SDL_Color color = { 0, 0, 0 };
+			SDL_Color color = { 0, 0, 0, 0 };
 			SDL_Surface * surface = TTF_RenderText_Solid(font,"Hello SDL_ttf", color);
 			SDL_Texture * texture = SDL_CreateTextureFromSurface(sdlRenderer, surface);
 			int texW = 0;

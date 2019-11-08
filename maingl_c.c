@@ -19,7 +19,8 @@ typedef struct AudioCtx_s {
         Uint32 wav_length; // length of our sample
 } AudioCtx;
 
-void my_audio_callback(void *userdata, Uint8 *stream, int len) {
+void my_audio_callback(void *userdata, Uint8 *stream, int _len) {
+	Uint32 len = _len;
         AudioCtx *ctx = userdata;
         if (ctx->audio_len ==0)
                 return;
@@ -107,7 +108,9 @@ int main(int argc, char *argv[]) {
 #else
 	SDL_Window *sdlWindow = 0;
 	SDL_Renderer *sdlRenderer = 0;
+#ifdef USE2D
 	SDL_Texture *sdlTexture = 0;
+#endif
 	TTF_Font *font = 0;
 #endif
 
@@ -117,7 +120,9 @@ int main(int argc, char *argv[]) {
 #else
 	SDL_CreateWindowAndRenderer(w, h, 0, &sdlWindow, &sdlRenderer);
 	screen = SDL_CreateRGBSurface(0, w, h, bpp,0x00FF0000,0x0000FF00,0x000000FF,0xFF000000);
+#ifdef USE2D
 	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+#endif
 	// OpenGL
 	// Loosely followed the great SDL2+OpenGL2.1 tutorial here :
 	// http://lazyfoo.net/tutorials/OpenGL/01_hello_opengl/index2.php
