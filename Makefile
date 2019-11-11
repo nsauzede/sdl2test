@@ -160,3 +160,5 @@ clobber: clean
 
 mrproper: clobber
 	$(RM) -Rf v
+	$(MAKE) -C nsauzede/vig clobber
+	$(MAKE) -C nsauzede/vnk clobber
