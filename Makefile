@@ -89,7 +89,7 @@ CXXFLAGS+=$(SDL_FLAGS)
 ifeq ($(SDL_VER),1)
 LDLIBS+=$(SDL_LIBS) -lSDL_ttf -lSDL_mixer
 else
-LDLIBS+=$(SDL_LIBS) -lSDL2_ttf -lSDL2_mixer
+LDLIBS+=$(SDL_LIBS) -lSDL2_ttf -lSDL2_mixer -lSDL2_image
 endif
 
 CFLAGS+=-pthread

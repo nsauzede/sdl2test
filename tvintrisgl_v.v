@@ -706,7 +706,7 @@ fn (g &Game) draw_text(x int, y int, text string, tcol vsdl2.SdlColor) {
 	dstrect := vsdl2.SdlRect { x, y, texw, texh }
 	C.SDL_RenderCopy(g.sdl.renderer, ttext, 0, &dstrect)
 	C.SDL_DestroyTexture(ttext)
-	C.SDL_FreeSurface(tsurf)
+	vsdl2.free_surface(tsurf)
 }
 
 [inline] fn (g &Game) draw_ptext(x int, y int, text string, tcol vsdl2.SdlColor) {

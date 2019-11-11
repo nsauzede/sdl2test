@@ -13,8 +13,8 @@ fn C.atexit(atexit_func_t)
 
 const (
         Colors = [
-                vsdl2.SdlColor{byte(255), byte(255), byte(255), byte(0)},
-                vsdl2.SdlColor{byte(255), byte(0), byte(0), byte(0)}
+                vsdl2.Color{byte(255), byte(255), byte(255), byte(0)},
+                vsdl2.Color{byte(255), byte(0), byte(0), byte(0)}
         ]
 )
 
@@ -23,7 +23,7 @@ mut:
 //        audio_pos *byte
         audio_pos voidptr
         audio_len u32
-        wav_spec vsdl2.SdlAudioSpec
+        wav_spec vsdl2.AudioSpec
         wav_buffer &byte
         wav_length u32
         wav2_buffer &byte
@@ -82,7 +82,7 @@ fn livemain() {
         ballm := 1
         mut balldir := ballm
         for !quit {
-                ev := vsdl2.SdlEvent{}
+                ev := vsdl2.Event{}
                 for 0 < C.SDL_PollEvent(&ev) {
                         match int(ev._type) {
                                 C.SDL_QUIT {
@@ -105,13 +105,13 @@ fn livemain() {
                 if quit {
                         break
                 }
-//                rect := vsdl2.SdlRect {x: 0, y: 0, w: w, h: h }     // TODO doesn't compile ???
-                mut rect := vsdl2.SdlRect {0,0,w,h}
-                mut col := vsdl2.SdlColor{byte(255), byte(255), byte(255), byte(0)}
+//                rect := vsdl2.Rect {x: 0, y: 0, w: w, h: h }     // TODO doesn't compile ???
+                mut rect := vsdl2.Rect {0,0,w,h}
+                mut col := vsdl2.Color{byte(255), byte(255), byte(255), byte(0)}
                 vsdl2.fill_rect(screen, &rect, col)
 
-                rect = vsdl2.SdlRect {ballx, bally, balld, balld}
-                col = vsdl2.SdlColor{Colors[1].r, Colors[1].g, Colors[1].b, 0}
+                rect = vsdl2.Rect {ballx, bally, balld, balld}
+                col = vsdl2.Color{Colors[1].r, Colors[1].g, Colors[1].b, 0}
                 vsdl2.fill_rect(screen, &rect, col)
                 ballx += balldir
                 if balldir == ballm {
@@ -163,10 +163,10 @@ fn livemain() {
                 texw := 0
                 texh := 0
                 C.SDL_QueryTexture(ttext, 0, 0, &texw, &texh)
-                dstrect := vsdl2.SdlRect { 0, 0, texw, texh }
+                dstrect := vsdl2.Rect { 0, 0, texw, texh }
                 C.SDL_RenderCopy(sdl_renderer, ttext, 0, &dstrect)
                 C.SDL_DestroyTexture(ttext)
-                C.SDL_FreeSurface(tsurf)
+                vsdl2.free_surface(tsurf)
 
                 C.SDL_RenderPresent(sdl_renderer)
                 C.SDL_Delay(10)

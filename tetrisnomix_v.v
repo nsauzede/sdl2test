@@ -473,7 +473,7 @@ fn (g &Game) draw_text(x int, y int, text string, rr int, gg int, bb int) {
 	dstrect := SdlRect { x, y, texw, texh }
 	C.SDL_RenderCopy(g.sdl.renderer, ttext, 0, &dstrect)
 	C.SDL_DestroyTexture(ttext)
-	C.SDL_FreeSurface(tsurf)
+	vsdl2.free_surface(tsurf)
 }
 
 fn (g &Game) draw_score() {
