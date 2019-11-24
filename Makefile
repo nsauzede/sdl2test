@@ -58,7 +58,7 @@ endif
 GLADFLAGS:=-I ../v/thirdparty/ -I ../stb
 GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
 
-all: SDL_CHECK SUBM_CHECK $(TARGET)
+all: SDL_CHECK SUBM_CHECK VNK_CHECK $(TARGET)
 
 SUBM_CHECK:
 	git submodule update --init --recursive
