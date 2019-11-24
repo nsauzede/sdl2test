@@ -5,11 +5,6 @@ module main
 import nsauzede.vsdl2
 import time
 import os
-type atexit_func_t fn ()
-fn C.atexit(atexit_func_t)
-
-//fn C.TTF_Quit()
-//fn C.TTF_RenderText_Solid(voidptr, voidptr, SdlColor) voidptr
 
 const (
         Colors = [
