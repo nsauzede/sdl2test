@@ -105,6 +105,7 @@ $(V):
 %ig_v.exe: LDLIBS=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.so nsauzede/vig/cimgui.so $(SDL_LIBS) -lGL -lGLEW -lm
 
 mainig.tmp.c: nsauzede/vig/examples/mainig/mainig.v | $(V) VIG_CHECK
+	$(V) install nsauzede.vig
 	$(V) -o $@ $(VFLAGS) $^
 mainig_v.exe: mainig.tmp.o
 	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
@@ -129,6 +130,7 @@ VNK_CHECK:
 	$(MAKE) -C nsauzede/vnk
 
 mainnk_v.c: nsauzede/vnk/examples/mainnk_v/mainnk_v.v | $(V)
+	$(V) install nsauzede.vnk
 	$(V) -o $@ $(VFLAGS) $^
 
 %nk_v.exe: %nk_v.o | VNK_CHECK
@@ -141,6 +143,7 @@ vsdlstub.o: vsdl/vsdlstub.c
 	$(CC) -c -o $@ $(CFLAGS) -g $^
 
 tvintris.tmp.c: nsauzede/vsdl2/examples/tvintris/tvintris.v | $(V)
+	$(V) install nsauzede.vsdl2
 	$(V) -o $@ $(VFLAGS) $^
 tvintris.exe: tvintris.tmp.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
