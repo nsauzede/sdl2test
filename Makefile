@@ -18,8 +18,8 @@ TARGET+=tvintris.exe
 ifndef WIN32
 TARGET+=glfnt.exe
 TARGET+=mainig_v.exe
-endif
 TARGET+=mainnk_v.exe
+endif
 
 #CFLAGS:=
 CFLAGS+=-Wall
