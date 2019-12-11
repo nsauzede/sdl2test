@@ -142,6 +142,10 @@ mainnk_v.c: nsauzede/vnk/examples/mainnk_v/mainnk_v.v | $(V)
 vsdlstub.o: vsdl/vsdlstub.c
 	$(CC) -c -o $@ $(CFLAGS) -g $^
 
+ifdef WIN32
+CFLAGS+=-Wno-incompatible-pointer-types
+endif
+
 tvintris.tmp.c: nsauzede/vsdl2/examples/tvintris/tvintris.v | $(V)
 	$(V) install nsauzede.vsdl2
 	$(V) -o $@ $(VFLAGS) $^
