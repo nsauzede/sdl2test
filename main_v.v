@@ -93,8 +93,10 @@ fn livemain() {
                                                         actx.audio_len = actx.wav2_length
                                                         C.SDL_PauseAudio(0)
                                                 }
+                                                else {}
                                         }
                                 }
+                                else {}
                         }
                 }
                 if quit {
