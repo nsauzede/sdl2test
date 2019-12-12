@@ -15,8 +15,8 @@ TARGET+=tvintris.exe
 #TARGET+=tvintris0_v.exe
 #TARGET+=tvintrisgl_v.exe
 #TARGET+=maingl_v.exe
-ifndef WIN32
 TARGET+=glfnt.exe
+ifndef WIN32
 TARGET+=mainig_v.exe
 TARGET+=mainnk_v.exe
 endif
@@ -63,8 +63,13 @@ all: SDL_CHECK SUBM_CHECK VNK_CHECK $(TARGET)
 SUBM_CHECK:
 	git submodule update --init --recursive
 
+ifdef WIN32
+GLLIBS:=-lGLEW32 -lopengl32 -lfreetype -lglfw3 -pthread
+else
+GLLIBS:=-lGLEW -lGL -lfreetype -lglfw  -ldl -lX11 -pthread
+endif
 glfnt.exe: glfnt.cpp
-	g++ $^ -o $@ -I /usr/include/freetype2/ -I v/thirdparty/ -lGLEW -lGL -lfreetype -lglfw  -ldl -lX11 -pthread
+	g++ $^ $(CXXFLAGS) -o $@ `freetype-config --cflags` -I v/thirdparty/ $(GLLIBS)
 
 %gl_c.exe: LDLIBS+=$(GLLDLIBS)
 %glsl_c.exe: LDLIBS+=$(GLLDLIBS)
@@ -83,8 +88,12 @@ else
 SDL_FLAGS+=-DSDL2
 endif
 
-CFLAGS+=$(SDL_FLAGS)
-CXXFLAGS+=$(SDL_FLAGS)
+#CFLAGS+=$(SDL_FLAGS)
+#CXXFLAGS+=$(SDL_FLAGS)
+%_cpp.exe: CXXFLAGS+=$(SDL_FLAGS)
+%_c.exe: CFLAGS+=$(SDL_FLAGS)
+%_v.exe: CFLAGS+=$(SDL_FLAGS)
+tvintris.exe: CFLAGS+=$(SDL_FLAGS)
 
 ifeq ($(SDL_VER),1)
 LDLIBS+=$(SDL_LIBS) -lSDL_ttf -lSDL_mixer
