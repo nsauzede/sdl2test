@@ -52,7 +52,7 @@ fn livemain() {
         C.atexit(C.SDL_Quit)
         C.TTF_Init()
         C.atexit(C.TTF_Quit)
-        font := C.TTF_OpenFont('RobotoMono-Regular.ttf', 16)
+        font := C.TTF_OpenFont('fonts/RobotoMono-Regular.ttf', 16)
 //        println('font=$font')
         C.SDL_CreateWindowAndRenderer(w, h, 0, &sdl_window, &sdl_renderer)
 //        println('renderer=$sdl_renderer')

@@ -18,7 +18,7 @@ import vsdl2gl
 
 const (
 	Title = 'tVintrisGl'
-	FontName = 'RobotoMono-Regular.ttf'
+	FontName = 'fonts/RobotoMono-Regular.ttf'
 	MusicName = 'sounds/TwintrisThosenine.mod'
 	SndBlockName = 'sounds/block.wav'
 	SndLineName = 'sounds/single.wav'

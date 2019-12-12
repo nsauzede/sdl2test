@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	atexit(TTF_Quit);
-	font = TTF_OpenFont("RobotoMono-Regular.ttf", 16);
+	font = TTF_OpenFont("fonts/RobotoMono-Regular.ttf", 16);
 #endif
         int audio_rate,audio_channels;
         Uint16 audio_format;

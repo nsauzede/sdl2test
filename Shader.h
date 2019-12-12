@@ -59,6 +59,7 @@ public:
         catch (...)
         {
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+            exit(1);
         }
         const char* vShaderCode = vertexCode.c_str();
         const char * fShaderCode = fragmentCode.c_str();
@@ -75,7 +76,7 @@ public:
         glCompileShader(fragment);
         checkCompileErrors(fragment, "FRAGMENT");
         // if geometry shader is given, compile geometry shader
-        unsigned int geometry;
+        unsigned int geometry = 0;
         if(geometryPath != nullptr)
         {
             const char * gShaderCode = geometryCode.c_str();

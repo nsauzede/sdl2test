@@ -11,7 +11,7 @@ import vsdl
 
 const (
 	Title = 'V Tetris'
-	FontName = 'RobotoMono-Regular.ttf'
+	FontName = 'fonts/RobotoMono-Regular.ttf'
 	BlockSize = 20 // pixels
 	FieldHeight = 20 // # of blocks
 	FieldWidth = 10

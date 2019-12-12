@@ -202,7 +202,7 @@ const char *fragmentShaderSource = "#version 330 core\n"
 		exit(1);
 	}
 	atexit(TTF_Quit);
-	font = TTF_OpenFont("RobotoMono-Regular.ttf", 16);
+	font = TTF_OpenFont("fonts/RobotoMono-Regular.ttf", 16);
 #endif
 
         AudioCtx actx;
