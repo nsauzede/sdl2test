@@ -93,6 +93,10 @@ void GlTestTexture(SDL_Surface *screen) {
 }
 
 int main(int argc, char *argv[]) {
+#ifdef WIN32
+	setbuf(stdout, 0);
+#endif
+
 #ifdef SDL1
 #define SDLV 1
 #else
