@@ -5,15 +5,15 @@ module main
 
 import nsauzede.vsdl2
 import vsdl2gl
-[inline] fn sdl_fill_rect(s &SdlSurface,r &SdlRect,c &SdlColor) {vsdl2gl.fill_rect(s,r,c)}
+[inline] fn sdl_fill_rect(s &vsdl2.Surface,r &vsdl2.Rect,c &vsdl2.Color) {vsdl2gl.fill_rect(s,r,c)}
 
 type atexit_func_t fn ()
-fn C.atexit(atexit_func_t)
+//fn C.atexit(atexit_func_t)
 
 const (
         Colors = [
-                vsdl2.SdlColor{byte(255), byte(255), byte(255), byte(0)},
-                vsdl2.SdlColor{byte(255), byte(0), byte(0), byte(0)}
+                vsdl2.Color{byte(255), byte(255), byte(255), byte(0)},
+                vsdl2.Color{byte(255), byte(0), byte(0), byte(0)}
         ]
 )
 
