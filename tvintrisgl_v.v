@@ -273,7 +273,7 @@ fn main() {
 	game.sdl.set_sdl_context(WinWidth, WinHeight, Title)
 //	game.font = C.TTF_OpenFont(FontName.str, TextSize)
 	game.font = voidptr(0)
-	seed := time.now().uni
+	seed := time.now().unix
 	mut game2 := &Game{}
 	game2.sdl = game.sdl
 	game2.font = game.font
