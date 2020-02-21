@@ -17,13 +17,13 @@ TARGET+=tvintris.exe
 #TARGET+=maingl_v.exe
 TARGET+=glfnt.exe
 ifndef WIN32
-TARGET+=mainig_v.exe
 TARGET+=mainnk_v.exe
+TARGET+=mainig_v.exe
 endif
 
 #CFLAGS:=
 CFLAGS+=-Wall
-CFLAGS+=-Werror
+#CFLAGS+=-Werror
 CFLAGS+=-Wextra
 #CFLAGS+=-pedantic
 CFLAGS+=-Wno-unused-variable
