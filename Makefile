@@ -58,7 +58,9 @@ endif
 GLADFLAGS:=-I ../v/thirdparty/ -I ../stb
 GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
 
-all: SDL_CHECK SUBM_CHECK VNK_CHECK $(TARGET)
+all: SDL_CHECK SUBM_CHECK VMOD_CHECK $(TARGET)
+
+VMOD_CHECK: V_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
 
 SUBM_CHECK:
 	git submodule update --init --recursive
@@ -76,10 +78,6 @@ glfnt.exe: glfnt.cpp
 %gl_v.exe: LDLIBS+=$(GLLDLIBS)
 %glad.exe: CXXFLAGS+=$(GLADFLAGS)
 %glad.exe: LDLIBS+=$(GLADLIBS)
-
-VMOD_CHECK: $(V) $(HOME)/.vmodules/nsauzede/vsdl2/v.mod
-$(HOME)/.vmodules/nsauzede/vsdl2/v.mod:
-	$(V) install nsauzede.vsdl2
 
 include sdl.mak
 ifeq ($(SDL_VER),1)
@@ -105,6 +103,8 @@ CFLAGS+=-pthread
 CXXFLAGS+=-pthread
 LDFLAGS+=-pthread
 
+V_CHECK: $(V)
+
 $(V):
 	git clone https://github.com/nsauzede/v
 	(cd $(@D) ; $(MAKE) ; cd -)
@@ -113,13 +113,19 @@ $(V):
 %ig_v.exe: LDFLAGS=
 %ig_v.exe: LDLIBS=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.so nsauzede/vig/cimgui.so $(SDL_LIBS) -lGL -lGLEW -lm
 
-mainig.tmp.c: nsauzede/vig/examples/mainig/mainig.v | $(V) VIG_CHECK
-	$(V) install nsauzede.vig
+mainig.tmp.c: nsauzede/vig/examples/mainig/mainig.v | VIG_CHECK
 	$(V) -o $@ $(VFLAGS) $^
 mainig_v.exe: mainig.tmp.o
 	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-VIG_CHECK:
+$(HOME)/.vmodules/nsauzede/vig/v.mod:
+	$(V) install nsauzede.vig
+
+#.PHONY: _VIG_CHECK VIG_CHECK
+_VIG_CHECK:
+	touch nsauzede/vig/v.mod
+
+VIG_CHECK: _VIG_CHECK $(HOME)/.vmodules/nsauzede/vig/v.mod
 	$(MAKE) -C nsauzede/vig
 
 %ig_v.exe: %ig_v.o | VIG_CHECK
@@ -135,11 +141,26 @@ endif
 %nk_v.exe: LDFLAGS=
 %nk_v.exe: LDLIBS=$(SDL_LIBS) $(NKLDLIBS) -lm
 
-VNK_CHECK:
+$(HOME)/.vmodules/nsauzede/vsdl2/v.mod:
+	$(V) install nsauzede.vsdl2
+
+#.PHONY: _VSDL2_CHECK VSDL2_CHECK
+_VSDL2_CHECK:
+	touch nsauzede/vsdl2/v.mod
+
+VSDL2_CHECK: _VSDL2_CHECK $(HOME)/.vmodules/nsauzede/vsdl2/v.mod
+
+$(HOME)/.vmodules/nsauzede/vnk/v.mod:
+	$(V) install nsauzede.vnk
+
+#.PHONY: _VNK_CHECK VNK_CHECK
+_VNK_CHECK:
+	touch nsauzede/vnk/v.mod
+
+VNK_CHECK: _VNK_CHECK $(HOME)/.vmodules/nsauzede/vnk/v.mod
 	$(MAKE) -C nsauzede/vnk
 
-mainnk_v.c: nsauzede/vnk/examples/mainnk_v/mainnk_v.v | $(V)
-	$(V) install nsauzede.vnk
+mainnk_v.c: nsauzede/vnk/examples/mainnk_v/mainnk_v.v
 	$(V) -o $@ $(VFLAGS) $^
 
 %nk_v.exe: %nk_v.o | VNK_CHECK
@@ -155,16 +176,15 @@ ifdef WIN32
 CFLAGS+=-Wno-incompatible-pointer-types
 endif
 
-tvintris.tmp.c: nsauzede/vsdl2/examples/tvintris/tvintris.v | $(V)
-	$(V) install nsauzede.vsdl2
+tvintris.tmp.c: nsauzede/vsdl2/examples/tvintris/tvintris.v
 	$(V) -o $@ $(VFLAGS) $^
 tvintris.exe: tvintris.tmp.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 %_v.exe: CFLAGS+=$(VCFLAGS)
 #%_v.exe: LDLIBS+=vsdlstub.o
-#%.c: %.v | $(V) vsdlstub.o
-%.c: %.v | $(V)
+#%.c: %.v | vsdlstub.o
+%.c: %.v
 #	$(MAKE) -s $(V)
 	$(V) -o $@ $(VFLAGS) $^
 
