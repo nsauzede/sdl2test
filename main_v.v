@@ -48,8 +48,8 @@ fn livemain() {
         w := 200
         h := 400
         bpp := 32
-        sdl_window := *voidptr(0)
-        sdl_renderer := *voidptr(0)
+        sdl_window := voidptr(0)
+        sdl_renderer := voidptr(0)
         C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO)
         C.atexit(C.SDL_Quit)
         C.TTF_Init()

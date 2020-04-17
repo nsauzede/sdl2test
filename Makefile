@@ -11,14 +11,14 @@ TARGET+=maingl_c.exe
 TARGET+=main_v.exe
 #TARGET+=tetris_v.exe
 #TARGET+=tetrisnomix_v.exe
-TARGET+=tvintris.exe
+#TARGET+=tvintris.exe
 #TARGET+=tvintris0_v.exe
 #TARGET+=tvintrisgl_v.exe
 #TARGET+=maingl_v.exe
 TARGET+=glfnt.exe
 ifndef WIN32
-TARGET+=mainnk_v.exe
-TARGET+=mainig_v.exe
+#TARGET+=mainnk_v.exe
+#TARGET+=mainig_v.exe
 endif
 
 #CFLAGS:=
