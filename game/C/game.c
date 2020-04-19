@@ -8,6 +8,7 @@
 #define dbgprintf(...) do{}while(0)
 
 typedef struct state {
+	int quit;
 	int w;
 	int h;
 	int bpp;
@@ -131,7 +132,8 @@ void process_one_frame(state_t *s, input_t *user_input) {
 	dbgprintf("PROCESS\n");
 	if (user_input->quit) {
 		dbgprintf("QUITTING !!\n");
-		exit(0);
+		s->quit = 1;
+		return;
 	}
 	dbgprintf("PROCESS DONE\n");
 //	s->score = s->tick;
@@ -162,7 +164,7 @@ void wait_until_frame_time_elapsed() {
 int main() {
 	state_t state;
 	init_state(&state);
-	while (1) {
+	while (!state.quit) {
 		input_t user_input;
 		get_user_input(&user_input);
 		process_one_frame(&state, &user_input);
