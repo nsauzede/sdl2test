@@ -1,6 +1,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include <SDL.h>
 
@@ -12,7 +13,10 @@ typedef struct state {
 	int bpp;
 	int scale;
 	int score;
+	int fps;
 	uint64_t tick;
+	uint64_t last_tick;
+	struct timespec last_ts;
 
 	SDL_Surface *screen;
 	SDL_Window *sdlWindow;
@@ -45,6 +49,7 @@ void init_state(state_t *s) {
 	s->white = SDL_MapRGB(s->screen->format, 255, 255, 255);
 	s->black = SDL_MapRGB(s->screen->format, 0, 0, 0);
 	s->score = 42;
+	clock_gettime(CLOCK_REALTIME, &s->last_ts);
 }
 
 void draw_clear(state_t *s, Uint32 col) {
@@ -62,7 +67,6 @@ void draw_score(state_t *s, Uint32 col, int score) {
 	rect.y = 0;
 	rect.w = s->scale;
 	rect.h = s->scale;
-	score = 1234567890;
 	char sscore[1024];
 	int ndigits = sprintf(sscore, "%d", score);
 	// 4x5 font
@@ -130,6 +134,15 @@ void process_one_frame(state_t *s, input_t *user_input) {
 		exit(0);
 	}
 	dbgprintf("PROCESS DONE\n");
+//	s->score = s->tick;
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	if (ts.tv_sec > s->last_ts.tv_sec) {
+		s->fps = (s->tick - s->last_tick) / (ts.tv_sec - s->last_ts.tv_sec);
+		s->last_tick = s->tick;
+		s->last_ts = ts;
+	}
+	s->score = s->fps;
 	s->tick++;
 }
 
@@ -142,7 +155,7 @@ void draw_everything_on_screen(state_t *s) {
 
 void wait_until_frame_time_elapsed() {
 	dbgprintf("SDL DELAY\n");
-	SDL_Delay(10);
+	SDL_Delay(16);
 	dbgprintf("SDL DELAY DONE\n");
 }
 
