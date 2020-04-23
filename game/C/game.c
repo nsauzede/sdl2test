@@ -143,8 +143,9 @@ void process_one_frame(state_t *s, input_t *user_input) {
 		s->fps = (s->tick - s->last_tick) / (ts.tv_sec - s->last_ts.tv_sec);
 		s->last_tick = s->tick;
 		s->last_ts = ts;
+		// HACK
+		s->score = s->fps;
 	}
-	s->score = s->fps;
 	s->tick++;
 }
 
