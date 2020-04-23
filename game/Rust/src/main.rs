@@ -2,7 +2,6 @@ extern crate sdl2;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-//use sdl2::render::Canvas;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use std::time::Duration;
@@ -14,7 +13,6 @@ struct State {
 	score: u32,
 	fps: u32,
 	sdl_context: sdl2::Sdl,
-//	window: sdl2::video::Window,
 	canvas: sdl2::render::Canvas<sdl2::video::Window>,
 	quit: bool,
 	tick: u64,
@@ -36,7 +34,7 @@ fn init_state() -> Result<State, String> {
 		.opengl()
 		.build()
 		.map_err(|e| e.to_string())?;
-	let /*mut*/ canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+	let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
 
 	Ok(State {
 		w: w,
@@ -45,9 +43,7 @@ fn init_state() -> Result<State, String> {
 		score: 42,
 		fps: 0,
 		sdl_context: sdl_context,
-//		window: window,
 		canvas: canvas,
-//		video_subsystem: sdl_context.video()?,
 		quit: false,
 		tick: 0,
 		last_tick: 0,
@@ -65,7 +61,6 @@ fn draw_clear(s: &mut State) -> Result<(), String> {
 fn draw_score(s: &mut State) -> Result<(), String> {
 	s.canvas.set_draw_color(Color::RGB(255, 255, 255));
 	let mut rect = Rect::new(0,0,s.scale,s.scale);
-//	let sscore = "1024";
 	let score = s.score;
 	let sscore = format!("{}", score);
 	let ndigits = sscore.len();
@@ -74,17 +69,17 @@ fn draw_score(s: &mut State) -> Result<(), String> {
 	let fh = 5;
 	let stride = (fw + 7) / 8 * fh; // bytes per font element
 	let font = [
-                /*0-9*/
-                0x2,0x5,0x5,0x2,0x0,
-                0x2,0x6,0x2,0x7,0x0,
-                0x6,0x1,0x2,0x7,0x0,
-                0x7,0x3,0x1,0x6,0x0,
-                0x4,0x6,0x7,0x2,0x0,
-                0x7,0x4,0x1,0x6,0x0,
-                0x3,0x6,0x5,0x2,0x0,
-                0x7,0x1,0x2,0x4,0x0,
-                0x5,0x2,0x5,0x2,0x0,
-                0x2,0x5,0x3,0x6,0x0,
+		/*0-9*/
+		0x2,0x5,0x5,0x2,0x0,
+		0x2,0x6,0x2,0x7,0x0,
+		0x6,0x1,0x2,0x7,0x0,
+		0x7,0x3,0x1,0x6,0x0,
+		0x4,0x6,0x7,0x2,0x0,
+		0x7,0x4,0x1,0x6,0x0,
+		0x3,0x6,0x5,0x2,0x0,
+		0x7,0x1,0x2,0x4,0x0,
+		0x5,0x2,0x5,0x2,0x0,
+		0x2,0x5,0x3,0x6,0x0,
 	];
 	for n in 0..ndigits {
 		let digit = sscore.chars().nth(n).unwrap() as i32 - '0' as i32;
@@ -147,9 +142,7 @@ fn draw_everything_on_screen(s: &mut State) -> Result<(), String> {
 }
 
 fn wait_until_frame_time_elapsed(_s: &State) {
-//	sdl2::sys::SDL_Delay(16);
 	::std::thread::sleep(Duration::new(0, 16_666_666u32));
-//	sdl2::TimerSubsystem::delay(16);
 }
 
 fn main() -> Result<(), String> {

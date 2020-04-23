@@ -5,8 +5,6 @@
 
 #include <SDL.h>
 
-#define dbgprintf(...) do{}while(0)
-
 typedef struct state {
 	int quit;
 	int w;
@@ -111,10 +109,8 @@ void draw_update(state_t *s) {
 void get_user_input(input_t *ui) {
 	memset(ui, 0, sizeof(input_t));
 	SDL_Event ev;
-	dbgprintf("SDL POLLING\n");
 	while (SDL_PollEvent(&ev)) {
 		if (ev.type == SDL_QUIT) {
-			dbgprintf("SDL QUIT\n");
 			ui->quit = 1;
 			break;
 		}
@@ -125,18 +121,13 @@ void get_user_input(input_t *ui) {
 			}
 		}
 	}
-	dbgprintf("SDL POLLING DONE\n");
 }
 
 void process_one_frame(state_t *s, input_t *user_input) {
-	dbgprintf("PROCESS\n");
 	if (user_input->quit) {
-		dbgprintf("QUITTING !!\n");
 		s->quit = 1;
 		return;
 	}
-	dbgprintf("PROCESS DONE\n");
-//	s->score = s->tick;
 	struct timespec ts;
 	clock_gettime(CLOCK_REALTIME, &ts);
 	if (ts.tv_sec > s->last_ts.tv_sec) {
@@ -150,16 +141,13 @@ void process_one_frame(state_t *s, input_t *user_input) {
 }
 
 void draw_everything_on_screen(state_t *s) {
-	dbgprintf("DRAW\n");
 	draw_clear(s, s->black);
 	draw_score(s, s->white, s->score);
 	draw_update(s);
 }
 
 void wait_until_frame_time_elapsed() {
-	dbgprintf("SDL DELAY\n");
 	SDL_Delay(16);
-	dbgprintf("SDL DELAY DONE\n");
 }
 
 int main() {
