@@ -5,6 +5,7 @@
 #include <SDL.h>
 #ifdef SDL2
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 #endif
 
 typedef struct AudioCtx_s {
@@ -94,6 +95,13 @@ int main(int argc, char *argv[]) {
                 exit(-1);
         }
 
+#ifdef SDL2
+	IMG_Init(IMG_INIT_PNG);
+	SDL_Surface *img = IMG_Load("images/gb_head.png");
+	SDL_Texture *imgtex = SDL_CreateTextureFromSurface(sdlRenderer, img);
+	printf("img=%p imgtex=%p\n", img, imgtex);
+#endif
+
 	int quit = 0;
 	int ballx = 0, bally = h / 2, balld = 10, balldir = 1;
 	while (!quit) {
@@ -165,6 +173,15 @@ int main(int argc, char *argv[]) {
 			SDL_DestroyTexture(texture);
 			SDL_FreeSurface(surface);
 		}
+#ifdef SDL2
+		rect.w = 32;
+		rect.h = 32;
+		rect.x = (w - rect.w) / 2;
+		rect.y = (h - rect.h) / 2;
+		SDL_RenderCopy(sdlRenderer, imgtex, NULL, &rect);
+//		SDL_RenderCopy(sdlRenderer, imgtex, NULL, NULL);
+#endif
+
 		SDL_RenderPresent(sdlRenderer);
 #endif
 		SDL_Delay(10);
