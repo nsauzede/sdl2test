@@ -71,7 +71,7 @@ else
 GLLIBS:=-lGLEW -lGL -lfreetype -lglfw  -ldl -lX11 -pthread
 endif
 glfnt.exe: glfnt.cpp
-	g++ $^ $(CXXFLAGS) -o $@ `freetype-config --cflags` -I v/thirdparty/ $(GLLIBS)
+	g++ $^ $(CXXFLAGS) -o $@ `pkg-config freetype2 --cflags` -I v/thirdparty/ $(GLLIBS)
 
 %gl_c.exe: LDLIBS+=$(GLLDLIBS)
 %glsl_c.exe: LDLIBS+=$(GLLDLIBS)
