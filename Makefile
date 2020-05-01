@@ -17,7 +17,7 @@ TARGET+=main_v.exe
 #TARGET+=maingl_v.exe
 TARGET+=glfnt.exe
 ifndef WIN32
-#TARGET+=mainnk_v.exe
+TARGET+=mainnk_v.exe
 #TARGET+=mainig_v.exe
 endif
 

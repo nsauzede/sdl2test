@@ -81,7 +81,7 @@ fn livemain() {
         for !quit {
                 ev := vsdl2.Event{}
                 for 0 < C.SDL_PollEvent(&ev) {
-                        match int(ev._type) {
+                        match int(ev.@type) {
                                 C.SDL_QUIT {
                                         quit = true
                                 }
