@@ -37,6 +37,8 @@ Colors, Music and Sounds ripped from amiga title <a href='http://hol.abime.net/5
 # Dependencies
 Ubuntu :
 `$ sudo apt install libsdl2-ttf-dev libsdl2-mixer-dev`
+And optionally for extra tests :
+`$ sudo apt install libglfw3-dev libglm-dev libfreetype-dev`
 
 ClearLinux :
 `$ sudo swupd bundle-add devpkg-SDL2_ttf devpkg-SDL2_mixer`
