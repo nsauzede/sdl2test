@@ -1,0 +1,16 @@
+[package]
+name = "cratesan"
+version = "0.1.0"
+authors = ["Nicolas Sauzede <nsauzede@laposte.net>"]
+edition = "2018"
+build = "build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.7.*"
+
+[dependencies.sdl2]
+version = "0.34.*"
+default-features = false
+features = ["image", "ttf"]
