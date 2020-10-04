@@ -25,8 +25,6 @@ mut:
         wav2_length u32
 }
 
-fn C.atexit()
-
 fn acb(userdata voidptr, stream &byte, _len int) {
         mut ctx := &AudioContext(userdata)
 //        println('acb!!! wav_buffer=${ctx.wav_buffer} audio_len=${ctx.audio_len}')
