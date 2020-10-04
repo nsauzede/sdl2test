@@ -62,8 +62,11 @@ all: SDL_CHECK SUBM_CHECK VMOD_CHECK $(TARGET)
 
 VMOD_CHECK: V_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
 
-SUBM_CHECK:
+nsauzede/vig/README.md:
+	git submodule deinit --force --all
 	git submodule update --init --recursive
+
+SUBM_CHECK: nsauzede/vig/README.md
 
 ifdef WIN32
 GLLIBS:=-lGLEW32 -lopengl32 -lfreetype -lglfw3 -pthread
