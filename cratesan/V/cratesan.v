@@ -8,6 +8,7 @@ const (
 	wall    = 0x8
 	width   = 320
 	height  = 200
+	bpp     = 32
 	level1  = '
 ....wwwww
 ....w...w
@@ -32,10 +33,20 @@ mut:
 	boxes         int
 	stored        int
 	current_level int
+	// map dims
 	w             int
 	h             int
+	// block dims
+	bw            int
+	bh            int
+	// player pos
 	px            int
 	py            int
+	// SDL
+	window        voidptr
+	renderer      voidptr
+	screen        &vsdl2.Surface
+	texture       voidptr
 }
 
 fn new_game() Game {
@@ -53,7 +64,6 @@ fn new_game() Game {
 			w = line.len
 		}
 	}
-	println('w=$w')
 	for line in level1.split_into_lines() {
 		if line.len == 0 {
 			continue
@@ -114,7 +124,7 @@ fn new_game() Game {
 	if !player_found {
 		panic('Player not found in level')
 	}
-	return Game{
+	mut game := Game{
 		quit: false
 		win: false
 		map: map
@@ -126,7 +136,19 @@ fn new_game() Game {
 		px: px
 		py: py
 		current_level: 1
+		screen: 0
 	}
+	C.SDL_Init(C.SDL_INIT_VIDEO)
+	C.atexit(C.SDL_Quit)
+	vsdl2.create_window_and_renderer(width, height, 0, &game.window, &game.renderer)
+	C.SDL_SetWindowTitle(game.window, 'クレートさん')
+	game.screen = vsdl2.create_rgb_surface(0, width, height, bpp, 0x00FF0000, 0x0000FF00,
+		0x000000FF, 0xFF000000)
+	game.texture = C.SDL_CreateTexture(game.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING,
+		width, height)
+	game.bw = width / w
+	game.bh = height / h
+	return game
 }
 
 fn (mut g Game) can_move(x, y int) bool {
@@ -173,38 +195,39 @@ fn (mut g Game) try_move(dx, dy int) {
 
 fn (mut g Game) draw_map() {
 	if g.must_draw {
+		C.SDL_RenderClear(g.renderer)
+		mut rect := vsdl2.Rect{0, 0, g.w, g.h}
+		mut col := vsdl2.Color{byte(0), byte(0), byte(0), byte(255)}
+		vsdl2.fill_rect(g.screen, &rect, col)
 		for j, line in g.map {
 			for i, e in line {
-				c := match e {
+				col = match e {
 					empty {
-						if g.px == i && g.py == j { `p` } else { `.` }
+						if g.px == i && g.py == j { vsdl2.Color{byte(255), byte(255), byte(255), byte(0)} } else { vsdl2.Color{byte(66), byte(66), byte(66), byte(0)} }
 					}
 					storage {
-						if g.px == i && g.py == j { `P` } else { `s` }
+						if g.px == i && g.py == j { vsdl2.Color{byte(190), byte(190), byte(190), byte(0)} } else { vsdl2.Color{byte(105), byte(105), byte(105), byte(0)} }
 					}
 					box {
-						`b`
+						vsdl2.Color{byte(156), byte(100), byte(63), byte(0)}
 					}
 					wall {
-						`w`
-					}
-					player {
-						`p`
+						vsdl2.Color{byte(255), byte(0), byte(0), byte(0)}
 					}
 					box | storage {
-						`B`
-					}
-					player | storage {
-						`P`
+						vsdl2.Color{byte(109), byte(69), byte(43), byte(0)}
 					}
 					else {
-						`?`
+						vsdl2.Color{byte(0), byte(255), byte(0), byte(0)}
 					}
 				}
-				print(c)
+				rect = vsdl2.Rect{i * g.bw, j * g.bh, g.bw, g.bh}
+				vsdl2.fill_rect(g.screen, &rect, col)
 			}
-			println('')
 		}
+		C.SDL_UpdateTexture(g.texture, 0, g.screen.pixels, g.screen.pitch)
+		C.SDL_RenderCopy(g.renderer, g.texture, voidptr(0), voidptr(0))
+		C.SDL_RenderPresent(g.renderer)
 		g.must_draw = false
 	}
 }
@@ -249,17 +272,15 @@ fn (mut g Game) handle_events() {
 	}
 }
 
+fn (g Game) sleep() {
+	vsdl2.delay(1000 / 60)
+}
+
 fn main() {
-	C.SDL_Init(C.SDL_INIT_VIDEO)
-	C.atexit(C.SDL_Quit)
-	window := voidptr(0)
-	renderer := voidptr(0)
-	vsdl2.create_window_and_renderer(width, height, 0, &window, &renderer)
-	C.SDL_SetWindowTitle(window, 'クレートさん')
 	mut game := new_game()
 	for !game.quit {
 		game.handle_events()
 		game.draw_map()
-		vsdl2.delay(1000 / 60)
+		game.sleep()
 	}
 }
