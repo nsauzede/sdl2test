@@ -207,6 +207,8 @@ fn (mut g Game) draw_map() {
 		mut rect := vsdl2.Rect{0, 0, g.w, g.h}
 		mut col := vsdl2.Color{byte(0), byte(0), byte(0), byte(255)}
 		vsdl2.fill_rect(g.screen, &rect, col)
+		x := (width - g.w * g.bw) / 2
+		y := (height - g.h * g.bh) / 2
 		for j, line in g.map {
 			for i, e in line {
 				col = match e {
@@ -229,7 +231,7 @@ fn (mut g Game) draw_map() {
 						vsdl2.Color{byte(0), byte(255), byte(0), byte(0)}
 					}
 				}
-				rect = vsdl2.Rect{i * g.bw, j * g.bh, g.bw, g.bh}
+				rect = vsdl2.Rect{x + i * g.bw, y + j * g.bh, g.bw, g.bh}
 				vsdl2.fill_rect(g.screen, &rect, col)
 			}
 		}
