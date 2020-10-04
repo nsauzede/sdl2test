@@ -24,10 +24,16 @@ wwwww.wwww.w.wwww..ssw
 '
 )
 
+enum Status {
+	play
+	win
+}
+
 struct Game {
 mut:
+	title         string
 	quit          bool
-	win           bool
+	status        Status
 	map           [][]byte
 	must_draw     bool
 	boxes         int
@@ -49,7 +55,7 @@ mut:
 	texture       voidptr
 }
 
-fn new_game() Game {
+fn new_game(title string) Game {
 	mut map := [][]byte{}
 	mut boxes := 0
 	mut storages := 0
@@ -125,8 +131,9 @@ fn new_game() Game {
 		panic('Player not found in level')
 	}
 	mut game := Game{
+		title: title
 		quit: false
-		win: false
+		status: .play
 		map: map
 		must_draw: true
 		boxes: boxes
@@ -141,7 +148,7 @@ fn new_game() Game {
 	C.SDL_Init(C.SDL_INIT_VIDEO)
 	C.atexit(C.SDL_Quit)
 	vsdl2.create_window_and_renderer(width, height, 0, &game.window, &game.renderer)
-	C.SDL_SetWindowTitle(game.window, 'クレートさん')
+	C.SDL_SetWindowTitle(game.window, game.title.str)
 	game.screen = vsdl2.create_rgb_surface(0, width, height, bpp, 0x00FF0000, 0x0000FF00,
 		0x000000FF, 0xFF000000)
 	game.texture = C.SDL_CreateTexture(game.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING,
@@ -178,7 +185,8 @@ fn (mut g Game) try_move(dx, dy int) {
 			if g.map[to_y][to_x] & storage == storage {
 				g.stored++
 				if g.stored == g.boxes {
-					g.win = true
+					g.status = .win
+					println('You win level $g.current_level, $g.title !!! :-)')
 				}
 			}
 			do_it = true
@@ -215,7 +223,7 @@ fn (mut g Game) draw_map() {
 						vsdl2.Color{byte(255), byte(0), byte(0), byte(0)}
 					}
 					box | storage {
-						vsdl2.Color{byte(109), byte(69), byte(43), byte(0)}
+						if g.status == .win { vsdl2.Color{byte(235), byte(178), byte(0), byte(0)} } else { vsdl2.Color{byte(109), byte(69), byte(43), byte(0)} }
 					}
 					else {
 						vsdl2.Color{byte(0), byte(255), byte(0), byte(0)}
@@ -233,43 +241,70 @@ fn (mut g Game) draw_map() {
 }
 
 fn (mut g Game) handle_events() {
-	if g.win {
-		println('YOU WIN level $g.current_level !!!')
-		g.quit = true
-		return
-	}
 	ev := vsdl2.Event{}
-	for 0 < vsdl2.poll_event(&ev) {
-		match int(ev.@type) {
-			C.SDL_QUIT {
-				g.quit = true
-				break
-			}
-			C.SDL_KEYDOWN {
-				key := ev.key.keysym.sym
-				match key {
-					C.SDLK_ESCAPE {
-						g.quit = true
-						break
-					}
-					C.SDLK_UP {
-						g.try_move(0, -1)
-					}
-					C.SDLK_DOWN {
-						g.try_move(0, 1)
-					}
-					C.SDLK_LEFT {
-						g.try_move(-1, 0)
-					}
-					C.SDLK_RIGHT {
-						g.try_move(1, 0)
-					}
-					else {}
-				}
-			}
-			else {}
+	mut cont := true
+	for cont && 0 < vsdl2.poll_event(&ev) {
+		cont = match g.status {
+			.win { g.handle_event_win(ev) }
+			.play { g.handle_event_play(ev) }
 		}
 	}
+}
+
+fn (mut g Game) handle_event_play(ev vsdl2.Event) bool {
+	mut cont := true
+	match int(ev.@type) {
+		C.SDL_QUIT {
+			g.quit = true
+			cont = false
+		}
+		C.SDL_KEYDOWN {
+			key := ev.key.keysym.sym
+			match key {
+				C.SDLK_ESCAPE {
+					g.quit = true
+					cont = false
+				}
+				C.SDLK_UP {
+					g.try_move(0, -1)
+				}
+				C.SDLK_DOWN {
+					g.try_move(0, 1)
+				}
+				C.SDLK_LEFT {
+					g.try_move(-1, 0)
+				}
+				C.SDLK_RIGHT {
+					g.try_move(1, 0)
+				}
+				else {}
+			}
+		}
+		else {}
+	}
+	return cont
+}
+
+fn (mut g Game) handle_event_win(ev vsdl2.Event) bool {
+	mut cont := true
+	match int(ev.@type) {
+		C.SDL_QUIT {
+			g.quit = true
+			cont = false
+		}
+		C.SDL_KEYDOWN {
+			key := ev.key.keysym.sym
+			match key {
+				C.SDLK_ESCAPE {
+					g.quit = true
+					cont = false
+				}
+				else {}
+			}
+		}
+		else {}
+	}
+	return cont
 }
 
 fn (g Game) sleep() {
@@ -277,7 +312,7 @@ fn (g Game) sleep() {
 }
 
 fn main() {
-	mut game := new_game()
+	mut game := new_game('クレートさん')
 	for !game.quit {
 		game.handle_events()
 		game.draw_map()
