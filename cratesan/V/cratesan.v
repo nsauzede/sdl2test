@@ -1,4 +1,5 @@
 import nsauzede.vsdl2
+import os
 
 const (
 	empty       = 0x0
@@ -16,20 +17,7 @@ const (
 	c_splayer   = `&`
 	c_wall      = `#`
 	bpp         = 32
-	levels_file = 'levels.txt'
-	level1      = '
-    #####
-    #   #
-    #$  #
-  ###  $##
-  #  $ $ #
-### # ## #   ######
-#   # ## #####  ..#
-# $  $          ..#
-##### ### #@##  ..#
-    #     #########
-    #######
-'
+	levels_file = os.resource_abs_path('../res/levels/levels.txt')
 )
 
 enum Status {
@@ -81,7 +69,27 @@ mut:
 
 fn load_levels() []Level {
 	mut levels := []Level{}
-	mut vlevels := [level1]
+	mut vlevels := []string{}
+	mut slevel := ''
+	slevels := os.read_file(levels_file.trim_space()) or {
+		panic('Failed to open levels file')
+	}
+	for line in slevels.split_into_lines() {
+		if line.len == 0 {
+			if slevel.len > 0 {
+				vlevels << slevel
+				slevel = ''
+			}
+			continue
+		}
+		if line.starts_with(';') {
+			continue
+		}
+		slevel = slevel + '\n' + line
+	}
+	if slevel.len > 0 {
+		vlevels << slevel
+	}
 	for s in vlevels {
 		mut map := [][]byte{}
 		mut crates := 0
@@ -172,6 +180,8 @@ fn load_levels() []Level {
 
 fn (mut g Game) set_level(level int) bool {
 	if level < g.levels.len {
+		g.status = .play
+		g.must_draw = true
 		g.level = level
 		g.crates = g.levels[level].crates
 		g.stored = g.levels[level].stored
@@ -239,7 +249,7 @@ fn (mut g Game) try_move(dx, dy int) {
 				g.stored++
 				if g.stored == g.crates {
 					g.status = .win
-					println('You win level $g.level, $g.title !!! :-)')
+					println('You win level ${g.level+1}, $g.title !!! :-)')
 				}
 			}
 			do_it = true
@@ -257,7 +267,7 @@ fn (mut g Game) try_move(dx, dy int) {
 fn (mut g Game) draw_map() {
 	if g.must_draw {
 		C.SDL_RenderClear(g.renderer)
-		mut rect := vsdl2.Rect{0, 0, g.w, g.h}
+		mut rect := vsdl2.Rect{0, 0, g.width, g.height}
 		mut col := vsdl2.Color{byte(0), byte(0), byte(0), byte(255)}
 		vsdl2.fill_rect(g.screen, &rect, col)
 		x := (width - g.w * g.bw) / 2
@@ -353,6 +363,12 @@ fn (mut g Game) handle_event_win(ev vsdl2.Event) bool {
 				C.SDLK_ESCAPE {
 					g.quit = true
 					cont = false
+				}
+				C.SDLK_RETURN {
+					if g.set_level(g.level + 1) {
+					} else {
+						cont = false
+					}
 				}
 				else {}
 			}
