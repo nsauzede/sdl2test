@@ -11,7 +11,7 @@ use std::time::Duration;
 
 const EMPTY: u8 = 0x0;
 const STORE: u8 = 0x1;
-const BOX: u8 = 0x2;
+const CRATE: u8 = 0x2;
 const PLAYER: u8 = 0x4;
 const WALL: u8 = 0x8;
 const WIDTH: u32 = 320;
@@ -28,7 +28,7 @@ const LEVELS_FILE: &str = "levels.txt";
 type Map = Vec<Vec<u8>>;
 struct Level {
     map: Map,
-    boxes: u32,
+    crates: u32,
     stored: u32,
     w: usize,
     h: usize,
@@ -42,7 +42,7 @@ struct Game {
     levels: Vec<Level>,
     level: usize,
     // following are copies of current level's
-    boxes: u32,
+    crates: u32,
     stored: u32,
     w: usize,
     h: usize,
@@ -88,7 +88,7 @@ impl Game {
         }
         for s in vlevels {
             let mut map = Vec::new();
-            let mut boxes = 0;
+            let mut crates = 0;
             let mut storages = 0;
             let mut stored = 0;
             let mut w = 0;
@@ -116,13 +116,13 @@ impl Game {
                             storages += 1;
                         }
                         C_CRATE => {
-                            v[i] = BOX;
-                            boxes += 1;
+                            v[i] = CRATE;
+                            crates += 1;
                         }
                         C_STORED => {
-                            v[i] = BOX | STORE;
+                            v[i] = CRATE | STORE;
                             storages += 1;
-                            boxes += 1;
+                            crates += 1;
                             stored += 1;
                         }
                         C_PLAYER => {
@@ -155,10 +155,10 @@ impl Game {
                 map.push(v);
                 h += 1;
             }
-            if boxes != storages {
+            if crates != storages {
                 panic!(
-                    "Mismatch between boxes={} and storages={} in level",
-                    boxes, storages
+                    "Mismatch between crates={} and storages={} in level",
+                    crates, storages
                 );
             }
             if !player_found {
@@ -167,7 +167,7 @@ impl Game {
             }
             levels.push(Level {
                 map,
-                boxes,
+                crates,
                 stored,
                 w,
                 h,
@@ -186,7 +186,7 @@ impl Game {
             must_draw: true,
             levels,
             level: 0,
-            boxes: 0,
+            crates: 0,
             stored: 0,
             w: 0,
             h: 0,
@@ -201,7 +201,7 @@ impl Game {
             self.win = false;
             self.must_draw = true;
             self.level = level;
-            self.boxes = self.levels[level].boxes;
+            self.crates = self.levels[level].crates;
             self.stored = self.levels[level].stored;
             self.w = self.levels[level].w;
             self.h = self.levels[level].h;
@@ -234,18 +234,18 @@ impl Game {
         if x >= self.w || y >= self.h {
             return;
         }
-        if self.levels[self.level].map[y][x] & BOX == BOX {
+        if self.levels[self.level].map[y][x] & CRATE == CRATE {
             let to_x = (x as isize + dx) as usize;
             let to_y = (y as isize + dy) as usize;
             if self.can_move(to_x, to_y) {
-                self.levels[self.level].map[y][x] &= !BOX;
+                self.levels[self.level].map[y][x] &= !CRATE;
                 if self.levels[self.level].map[y][x] & STORE == STORE {
                     self.stored -= 1;
                 }
-                self.levels[self.level].map[to_y][to_x] |= BOX;
+                self.levels[self.level].map[to_y][to_x] |= CRATE;
                 if self.levels[self.level].map[to_y][to_x] & STORE == STORE {
                     self.stored += 1;
-                    if self.stored == self.boxes {
+                    if self.stored == self.crates {
                         self.win = true;
                     }
                 }
@@ -276,13 +276,13 @@ impl Game {
                         } else {
                             C_STORE
                         }
-                    } else if e == BOX {
+                    } else if e == CRATE {
                         C_CRATE
                     } else if e == WALL {
                         C_WALL
                     } else if e == PLAYER {
                         C_PLAYER
-                    } else if e == BOX | STORE {
+                    } else if e == CRATE | STORE {
                         C_STORED
                     } else if e == PLAYER | STORE {
                         C_SPLAYER
