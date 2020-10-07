@@ -37,13 +37,26 @@ enum Status {
 	win
 }
 
+struct Level {
+mut:
+	map    [][]byte
+	crates int
+	stored int
+	// map dims
+	w      int
+	h      int
+	// player pos
+	px     int
+	py     int
+}
+
 struct Game {
 mut:
 	title     string
 	quit      bool
 	status    Status
 	must_draw bool
-	map       [][]byte
+	levels    []Level
 	level     int
 	// following are copies of current level's
 	crates    int
@@ -51,107 +64,137 @@ mut:
 	// map dims
 	w         int
 	h         int
-	// block dims
-	bw        int
-	bh        int
 	// player pos
 	px        int
 	py        int
+	// block dims
+	bw        int
+	bh        int
 	// SDL
 	window    voidptr
 	renderer  voidptr
 	screen    &vsdl2.Surface
 	texture   voidptr
+	width     int
+	height    int
+}
+
+fn load_levels() []Level {
+	mut levels := []Level{}
+	mut vlevels := [level1]
+	for s in vlevels {
+		mut map := [][]byte{}
+		mut crates := 0
+		mut stores := 0
+		mut stored := 0
+		mut w := 0
+		mut h := 0
+		mut px := 0
+		mut py := 0
+		mut player_found := false
+		for line in s.split_into_lines() {
+			if line.len > w {
+				w = line.len
+			}
+		}
+		for line in s.split_into_lines() {
+			if line.len == 0 {
+				continue
+			}
+			mut v := [byte(empty)].repeat(w)
+			for i, e in line {
+				match e {
+					c_empty {
+						v[i] = empty
+					}
+					c_store {
+						v[i] = store
+						stores++
+					}
+					c_crate {
+						v[i] = crate
+						crates++
+					}
+					c_stored {
+						v[i] = crate | store
+						stores++
+						crates++
+						stored++
+					}
+					c_player {
+						if player_found {
+							panic('Player found multiple times in level')
+						}
+						px = i
+						py = h
+						player_found = true
+						v[i] = empty
+					}
+					c_splayer {
+						if player_found {
+							panic('Player found multiple times in level')
+						}
+						px = i
+						py = h
+						player_found = true
+						v[i] = store
+						stores++
+					}
+					c_wall {
+						v[i] = wall
+					}
+					else {
+						panic('Invalid element [$e.str()] in level')
+					}
+				}
+			}
+			map << v
+			h++
+		}
+		if crates != stores {
+			panic('Mismatch between crates=$crates and stores=$stores in level')
+		}
+		if !player_found {
+			panic('Player not found in level')
+		}
+		levels << Level{
+			map: map
+			crates: crates
+			stored: stored
+			w: w
+			h: h
+			px: px
+			py: py
+		}
+	}
+	return levels
+}
+
+fn (mut g Game) set_level(level int) bool {
+	if level < g.levels.len {
+		g.level = level
+		g.crates = g.levels[level].crates
+		g.stored = g.levels[level].stored
+		g.w = g.levels[level].w
+		g.h = g.levels[level].h
+		g.px = g.levels[level].px
+		g.py = g.levels[level].py
+		g.bw = g.width / g.w
+		g.bh = g.height / g.h
+		return true
+	} else {
+		return false
+	}
 }
 
 fn new_game(title string) Game {
-	mut map := [][]byte{}
-	mut crates := 0
-	mut stores := 0
-	mut stored := 0
-	mut w := 0
-	mut h := 0
-	mut px := 0
-	mut py := 0
-	mut player_found := false
-	for line in level1.split_into_lines() {
-		if line.len > w {
-			w = line.len
-		}
-	}
-	for line in level1.split_into_lines() {
-		if line.len == 0 {
-			continue
-		}
-		mut v := [byte(empty)].repeat(w)
-		for i, e in line {
-			match e {
-				c_empty {
-					v[i] = empty
-				}
-				c_store {
-					v[i] = store
-					stores++
-				}
-				c_crate {
-					v[i] = crate
-					crates++
-				}
-				c_stored {
-					v[i] = crate | store
-					stores++
-					crates++
-					stored++
-				}
-				c_player {
-					if player_found {
-						panic('Player found multiple times in level')
-					}
-					px = i
-					py = h
-					player_found = true
-					v[i] = empty
-				}
-				c_splayer {
-					if player_found {
-						panic('Player found multiple times in level')
-					}
-					px = i
-					py = h
-					player_found = true
-					v[i] = store
-					stores++
-				}
-				c_wall {
-					v[i] = wall
-				}
-				else {
-					panic('Invalid element [$e.str()] in level')
-				}
-			}
-		}
-		map << v
-		h++
-	}
-	if crates != stores {
-		panic('Mismatch between crates=$crates and stores=$stores in level')
-	}
-	if !player_found {
-		panic('Player not found in level')
-	}
+	levels := load_levels()
 	mut game := Game{
 		title: title
 		quit: false
 		status: .play
-		map: map
 		must_draw: true
-		crates: crates
-		stored: stored
-		w: w
-		h: h
-		px: px
-		py: py
-		level: 1
+		levels: levels
 		screen: 0
 	}
 	C.SDL_Init(C.SDL_INIT_VIDEO)
@@ -162,14 +205,15 @@ fn new_game(title string) Game {
 		0x000000FF, 0xFF000000)
 	game.texture = C.SDL_CreateTexture(game.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING,
 		width, height)
-	game.bw = width / w
-	game.bh = height / h
+	game.width = width
+	game.height = height
+	game.set_level(0)
 	return game
 }
 
 fn (mut g Game) can_move(x, y int) bool {
 	if x < g.w && y < g.h {
-		e := g.map[y][x]
+		e := g.levels[g.level].map[y][x]
 		if e == empty || e == store {
 			return true
 		}
@@ -182,16 +226,16 @@ fn (mut g Game) try_move(dx, dy int) {
 	mut do_it := false
 	x := g.px + dx
 	y := g.py + dy
-	if g.map[y][x] & crate == crate {
+	if g.levels[g.level].map[y][x] & crate == crate {
 		to_x := x + dx
 		to_y := y + dy
 		if g.can_move(to_x, to_y) {
-			g.map[y][x] &= ~crate
-			if g.map[y][x] & store == store {
+			g.levels[g.level].map[y][x] &= ~crate
+			if g.levels[g.level].map[y][x] & store == store {
 				g.stored--
 			}
-			g.map[to_y][to_x] |= crate
-			if g.map[to_y][to_x] & store == store {
+			g.levels[g.level].map[to_y][to_x] |= crate
+			if g.levels[g.level].map[to_y][to_x] & store == store {
 				g.stored++
 				if g.stored == g.crates {
 					g.status = .win
@@ -218,7 +262,7 @@ fn (mut g Game) draw_map() {
 		vsdl2.fill_rect(g.screen, &rect, col)
 		x := (width - g.w * g.bw) / 2
 		y := (height - g.h * g.bh) / 2
-		for j, line in g.map {
+		for j, line in g.levels[g.level].map {
 			for i, e in line {
 				col = match e {
 					empty {
