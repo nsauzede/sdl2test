@@ -3,38 +3,47 @@ extern crate sdl2;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
+use std::env::current_exe;
+use std::fs::File;
+use std::io::Read;
 use std::thread::sleep;
 use std::time::Duration;
 
 const EMPTY: u8 = 0x0;
-const STORAGE: u8 = 0x1;
+const STORE: u8 = 0x1;
 const BOX: u8 = 0x2;
 const PLAYER: u8 = 0x4;
 const WALL: u8 = 0x8;
 const WIDTH: u32 = 320;
 const HEIGHT: u32 = 200;
-const LEVEL1: &str = "
-....wwwww
-....w...w
-....wb.bw
-..www...www
-..w...b...w
-www.wbwww.w.....wwwwww
-w...w.www.wwwwwww..ssw
-w.b................PBw
-wwwww.wwww.w.wwww..ssw
-....w......www..wwwwww
-....wwwwwwww
-";
+const C_EMPTY: char = ' ';
+const C_STORE: char = '.';
+const C_STORED: char = '*';
+const C_CRATE: char = '$';
+const C_PLAYER: char = '@';
+const C_SPLAYER: char = '&';
+const C_WALL: char = '#';
+const LEVELS_FILE: &str = "levels.txt";
 
+type Map = Vec<Vec<u8>>;
+struct Level {
+    map: Map,
+    boxes: u32,
+    stored: u32,
+    w: usize,
+    h: usize,
+    px: usize,
+    py: usize,
+}
 struct Game {
     quit: bool,
     win: bool,
-    map: Vec<Vec<u8>>,
     must_draw: bool,
+    levels: Vec<Level>,
+    level: usize,
+    // following are copies of current level's
     boxes: u32,
     stored: u32,
-    current_level: u32,
     w: usize,
     h: usize,
     px: usize,
@@ -42,102 +51,171 @@ struct Game {
 }
 
 impl Game {
-    fn new() -> Game {
-        let mut map = Vec::new();
-        let mut boxes = 0;
-        let mut storages = 0;
-        let mut stored = 0;
-        let mut w = 0;
-        let mut h = 0;
-        let mut px = 0;
-        let mut py = 0;
-        let mut player_found = false;
-        for line in LEVEL1.lines() {
-            if line.len() > w {
-                w = line.len();
-            }
-        }
-        for line in LEVEL1.lines() {
+    fn load_levels() -> Vec<Level> {
+        let root_dir = current_exe().unwrap();
+        let root_dir = root_dir
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap();
+        let parent_dir = root_dir.parent().unwrap();
+        let levels_file = parent_dir.join("res").join("levels").join(LEVELS_FILE);
+        let levels_file = levels_file.to_str().unwrap();
+        let mut levels = Vec::new();
+        let mut vlevels = Vec::new();
+        let mut slevel = String::new();
+        let mut level = 1;
+        let mut slevels = String::new();
+        let mut f = File::open(levels_file).unwrap();
+        f.read_to_string(&mut slevels).unwrap();
+        for line in slevels.lines() {
             if line.is_empty() {
+                if !slevel.is_empty() {
+                    vlevels.push(slevel);
+                    slevel = "".to_string();
+                }
                 continue;
             }
-            let mut v = vec![EMPTY; w];
-            for (i, e) in line.chars().enumerate() {
-                match e {
-                    '.' | ' ' => {
-                        v[i] = EMPTY;
-                    }
-                    's' => {
-                        v[i] = STORAGE;
-                        storages += 1;
-                    }
-                    'b' => {
-                        v[i] = BOX;
-                        boxes += 1;
-                    }
-                    'B' => {
-                        v[i] = BOX | STORAGE;
-                        storages += 1;
-                        boxes += 1;
-                        stored += 1;
-                    }
-                    'p' => {
-                        if player_found {
-                            panic!("Player found multiple times in level");
-                        };
-                        px = i;
-                        py = h;
-                        player_found = true;
-                        v[i] = EMPTY;
-                    }
-                    'P' => {
-                        if player_found {
-                            panic!("Player found multiple times in level");
-                        };
-                        px = i;
-                        py = h;
-                        player_found = true;
-                        v[i] = STORAGE;
-                        storages += 1;
-                    }
-                    'w' => {
-                        v[i] = WALL;
-                    }
-                    _ => {
-                        panic!("Invalid element [{}] in level", e);
-                    }
+            if line.starts_with(';') {
+                continue;
+            }
+            slevel = format!("{}\n{}", slevel, line);
+        }
+        if !slevel.is_empty() {
+            vlevels.push(slevel);
+        }
+        for s in vlevels {
+            let mut map = Vec::new();
+            let mut boxes = 0;
+            let mut storages = 0;
+            let mut stored = 0;
+            let mut w = 0;
+            let mut h = 0;
+            let mut px = 0;
+            let mut py = 0;
+            let mut player_found = false;
+            for line in s.lines() {
+                if line.len() > w {
+                    w = line.len();
                 }
             }
-            map.push(v);
-            h += 1;
+            for line in s.lines() {
+                if line.is_empty() {
+                    continue;
+                }
+                let mut v = vec![EMPTY; w];
+                for (i, e) in line.chars().enumerate() {
+                    match e {
+                        C_EMPTY => {
+                            v[i] = EMPTY;
+                        }
+                        C_STORE => {
+                            v[i] = STORE;
+                            storages += 1;
+                        }
+                        C_CRATE => {
+                            v[i] = BOX;
+                            boxes += 1;
+                        }
+                        C_STORED => {
+                            v[i] = BOX | STORE;
+                            storages += 1;
+                            boxes += 1;
+                            stored += 1;
+                        }
+                        C_PLAYER => {
+                            if player_found {
+                                panic!("Player found multiple times in level {}", level);
+                            };
+                            px = i;
+                            py = h;
+                            player_found = true;
+                            v[i] = EMPTY;
+                        }
+                        C_SPLAYER => {
+                            if player_found {
+                                panic!("Player found multiple times in level {}", level);
+                            };
+                            px = i;
+                            py = h;
+                            player_found = true;
+                            v[i] = STORE;
+                            storages += 1;
+                        }
+                        C_WALL => {
+                            v[i] = WALL;
+                        }
+                        _ => {
+                            panic!("Invalid element [{}] in level", e);
+                        }
+                    }
+                }
+                map.push(v);
+                h += 1;
+            }
+            if boxes != storages {
+                panic!(
+                    "Mismatch between boxes={} and storages={} in level",
+                    boxes, storages
+                );
+            }
+            if !player_found {
+                panic!("Player not found in level {}", level);
+            } else {
+            }
+            levels.push(Level {
+                map,
+                boxes,
+                stored,
+                w,
+                h,
+                px,
+                py,
+            });
+            level += 1;
         }
-        if boxes != storages {
-            panic!(
-                "Mismatch between boxes={} and storages={} in level",
-                boxes, storages
-            );
-        }
-        if !player_found {
-            panic!("Player not found in level");
-        }
-        Game {
+        levels
+    }
+    fn new() -> Game {
+        let levels = Game::load_levels();
+        let mut g = Game {
             quit: false,
             win: false,
-            map,
             must_draw: true,
-            boxes,
-            stored,
-            w,
-            h,
-            px,
-            py,
-            current_level: 1,
+            levels,
+            level: 0,
+            boxes: 0,
+            stored: 0,
+            w: 0,
+            h: 0,
+            px: 0,
+            py: 0,
+        };
+        g.set_level(0);
+        g
+    }
+    fn set_level(&mut self, level: usize) -> bool {
+        if level < self.levels.len() {
+            self.win = false;
+            self.must_draw = true;
+            self.level = level;
+            self.boxes = self.levels[level].boxes;
+            self.stored = self.levels[level].stored;
+            self.w = self.levels[level].w;
+            self.h = self.levels[level].h;
+            self.px = self.levels[level].px;
+            self.py = self.levels[level].py;
+            true
+        } else {
+            false
         }
     }
     fn can_move(&self, x: usize, y: usize) -> bool {
         if x < self.w && y < self.h {
-            let e = self.map[y][x];
-            if e == EMPTY || e == STORAGE {
+            let e = self.levels[self.level].map[y][x];
+            if e == EMPTY || e == STORE {
                 return true;
             }
         }
@@ -146,18 +224,26 @@ impl Game {
     /// Try to move to x+dx:y+dy and also push to x+2dx:y+2dy
     fn try_move(&mut self, dx: isize, dy: isize) {
         let mut do_it = false;
-        let x = (self.px as isize + dx) as usize;
-        let y = (self.py as isize + dy) as usize;
-        if self.map[y][x] & BOX == BOX {
+        let x = self.px as isize + dx;
+        let y = self.py as isize + dy;
+        if x < 0 || y < 0 {
+            return;
+        }
+        let x = x as usize;
+        let y = y as usize;
+        if x >= self.w || y >= self.h {
+            return;
+        }
+        if self.levels[self.level].map[y][x] & BOX == BOX {
             let to_x = (x as isize + dx) as usize;
             let to_y = (y as isize + dy) as usize;
             if self.can_move(to_x, to_y) {
-                self.map[y][x] &= !BOX;
-                if self.map[y][x] & STORAGE == STORAGE {
+                self.levels[self.level].map[y][x] &= !BOX;
+                if self.levels[self.level].map[y][x] & STORE == STORE {
                     self.stored -= 1;
                 }
-                self.map[to_y][to_x] |= BOX;
-                if self.map[to_y][to_x] & STORAGE == STORAGE {
+                self.levels[self.level].map[to_y][to_x] |= BOX;
+                if self.levels[self.level].map[to_y][to_x] & STORE == STORE {
                     self.stored += 1;
                     if self.stored == self.boxes {
                         self.win = true;
@@ -176,30 +262,30 @@ impl Game {
     }
     fn draw_map(&mut self) {
         if self.must_draw {
-            for (j, line) in self.map.iter().enumerate() {
+            for (j, line) in self.levels[self.level].map.iter().enumerate() {
                 for (i, &e) in line.iter().enumerate() {
                     let c = if e == EMPTY {
                         if self.px == i && self.py == j {
-                            'p'
+                            C_PLAYER
                         } else {
-                            '.'
+                            C_EMPTY
                         }
-                    } else if e == STORAGE {
+                    } else if e == STORE {
                         if self.px == i && self.py == j {
-                            'P'
+                            C_SPLAYER
                         } else {
-                            's'
+                            C_STORE
                         }
                     } else if e == BOX {
-                        'b'
+                        C_CRATE
                     } else if e == WALL {
-                        'w'
+                        C_WALL
                     } else if e == PLAYER {
-                        'p'
-                    } else if e == BOX | STORAGE {
-                        'B'
-                    } else if e == PLAYER | STORAGE {
-                        'P'
+                        C_PLAYER
+                    } else if e == BOX | STORE {
+                        C_STORED
+                    } else if e == PLAYER | STORE {
+                        C_SPLAYER
                     } else {
                         '?'
                     };
@@ -213,8 +299,11 @@ impl Game {
 
     fn handle_events(&mut self, event_pump: &mut sdl2::EventPump) {
         if self.win {
-            println!("YOU WIN level {} !!!!", self.current_level);
-            self.quit = true;
+            println!("YOU WIN level {} !!!!", self.level + 1);
+            if self.set_level(self.level + 1) {
+            } else {
+                self.quit = true;
+            }
             return;
         }
         for event in event_pump.poll_iter() {
