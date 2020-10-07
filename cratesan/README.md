@@ -15,3 +15,6 @@ In V :
 $ cd V
 $ v run cratesan.v
 ```
+
+# Credits
+All the levels are Copyright Thinking Rabbit, downloaded from this [URL](https://www.sourcecode.se/sokoban/levels?act=dnl_text&file=Original.slc).
