@@ -1,26 +1,34 @@
 import nsauzede.vsdl2
 
 const (
-	empty   = 0x0
-	storage = 0x1
-	box     = 0x2
-	player  = 0x4
-	wall    = 0x8
-	width   = 320
-	height  = 200
-	bpp     = 32
-	level1  = '
-....wwwww
-....w...w
-....wb.bw
-..www...www
-..w...b...w
-www.wbwww.w.....wwwwww
-w...w.www.wwwwwww..ssw
-w.b................PBw
-wwwww.wwww.w.wwww..ssw
-....w......www..wwwwww
-....wwwwwwww
+	empty       = 0x0
+	store       = 0x1
+	crate       = 0x2
+	player      = 0x4
+	wall        = 0x8
+	width       = 320
+	height      = 200
+	c_empty     = ` `
+	c_store     = `.`
+	c_stored    = `*`
+	c_crate     = `$`
+	c_player    = `@`
+	c_splayer   = `&`
+	c_wall      = `#`
+	bpp         = 32
+	levels_file = 'levels.txt'
+	level1      = '
+    #####
+    #   #
+    #$  #
+  ###  $##
+  #  $ $ #
+### # ## #   ######
+#   # ## #####  ..#
+# $  $          ..#
+##### ### #@##  ..#
+    #     #########
+    #######
 '
 )
 
@@ -31,34 +39,35 @@ enum Status {
 
 struct Game {
 mut:
-	title         string
-	quit          bool
-	status        Status
-	map           [][]byte
-	must_draw     bool
-	boxes         int
-	stored        int
-	current_level int
+	title     string
+	quit      bool
+	status    Status
+	must_draw bool
+	map       [][]byte
+	level     int
+	// following are copies of current level's
+	crates    int
+	stored    int
 	// map dims
-	w             int
-	h             int
+	w         int
+	h         int
 	// block dims
-	bw            int
-	bh            int
+	bw        int
+	bh        int
 	// player pos
-	px            int
-	py            int
+	px        int
+	py        int
 	// SDL
-	window        voidptr
-	renderer      voidptr
-	screen        &vsdl2.Surface
-	texture       voidptr
+	window    voidptr
+	renderer  voidptr
+	screen    &vsdl2.Surface
+	texture   voidptr
 }
 
 fn new_game(title string) Game {
 	mut map := [][]byte{}
-	mut boxes := 0
-	mut storages := 0
+	mut crates := 0
+	mut stores := 0
 	mut stored := 0
 	mut w := 0
 	mut h := 0
@@ -77,24 +86,24 @@ fn new_game(title string) Game {
 		mut v := [byte(empty)].repeat(w)
 		for i, e in line {
 			match e {
-				`.`, ` ` {
+				c_empty {
 					v[i] = empty
 				}
-				`s` {
-					v[i] = storage
-					storages++
+				c_store {
+					v[i] = store
+					stores++
 				}
-				`b` {
-					v[i] = box
-					boxes++
+				c_crate {
+					v[i] = crate
+					crates++
 				}
-				`B` {
-					v[i] = box | storage
-					storages++
-					boxes++
+				c_stored {
+					v[i] = crate | store
+					stores++
+					crates++
 					stored++
 				}
-				`p` {
+				c_player {
 					if player_found {
 						panic('Player found multiple times in level')
 					}
@@ -103,17 +112,17 @@ fn new_game(title string) Game {
 					player_found = true
 					v[i] = empty
 				}
-				`P` {
+				c_splayer {
 					if player_found {
 						panic('Player found multiple times in level')
 					}
 					px = i
 					py = h
 					player_found = true
-					v[i] = storage
-					storages++
+					v[i] = store
+					stores++
 				}
-				`w` {
+				c_wall {
 					v[i] = wall
 				}
 				else {
@@ -124,8 +133,8 @@ fn new_game(title string) Game {
 		map << v
 		h++
 	}
-	if boxes != storages {
-		panic('Mismatch between boxes=$boxes and storages=$storages in level')
+	if crates != stores {
+		panic('Mismatch between crates=$crates and stores=$stores in level')
 	}
 	if !player_found {
 		panic('Player not found in level')
@@ -136,13 +145,13 @@ fn new_game(title string) Game {
 		status: .play
 		map: map
 		must_draw: true
-		boxes: boxes
+		crates: crates
 		stored: stored
 		w: w
 		h: h
 		px: px
 		py: py
-		current_level: 1
+		level: 1
 		screen: 0
 	}
 	C.SDL_Init(C.SDL_INIT_VIDEO)
@@ -161,7 +170,7 @@ fn new_game(title string) Game {
 fn (mut g Game) can_move(x, y int) bool {
 	if x < g.w && y < g.h {
 		e := g.map[y][x]
-		if e == empty || e == storage {
+		if e == empty || e == store {
 			return true
 		}
 	}
@@ -173,20 +182,20 @@ fn (mut g Game) try_move(dx, dy int) {
 	mut do_it := false
 	x := g.px + dx
 	y := g.py + dy
-	if g.map[y][x] & box == box {
+	if g.map[y][x] & crate == crate {
 		to_x := x + dx
 		to_y := y + dy
 		if g.can_move(to_x, to_y) {
-			g.map[y][x] &= ~box
-			if g.map[y][x] & storage == storage {
+			g.map[y][x] &= ~crate
+			if g.map[y][x] & store == store {
 				g.stored--
 			}
-			g.map[to_y][to_x] |= box
-			if g.map[to_y][to_x] & storage == storage {
+			g.map[to_y][to_x] |= crate
+			if g.map[to_y][to_x] & store == store {
 				g.stored++
-				if g.stored == g.boxes {
+				if g.stored == g.crates {
 					g.status = .win
-					println('You win level $g.current_level, $g.title !!! :-)')
+					println('You win level $g.level, $g.title !!! :-)')
 				}
 			}
 			do_it = true
@@ -215,16 +224,16 @@ fn (mut g Game) draw_map() {
 					empty {
 						if g.px == i && g.py == j { vsdl2.Color{byte(255), byte(255), byte(255), byte(0)} } else { vsdl2.Color{byte(66), byte(66), byte(66), byte(0)} }
 					}
-					storage {
+					store {
 						if g.px == i && g.py == j { vsdl2.Color{byte(190), byte(190), byte(190), byte(0)} } else { vsdl2.Color{byte(105), byte(105), byte(105), byte(0)} }
 					}
-					box {
+					crate {
 						vsdl2.Color{byte(156), byte(100), byte(63), byte(0)}
 					}
 					wall {
 						vsdl2.Color{byte(255), byte(0), byte(0), byte(0)}
 					}
-					box | storage {
+					crate | store {
 						if g.status == .win { vsdl2.Color{byte(235), byte(178), byte(0), byte(0)} } else { vsdl2.Color{byte(109), byte(69), byte(43), byte(0)} }
 					}
 					else {
