@@ -307,7 +307,7 @@ fn (mut g Game) try_move(dx, dy int) {
 				g.stored++
 				if g.stored == g.crates {
 					g.status = .win
-					println('You win level ${g.level+1}, $g.title !!! :-)')
+					println('You win level ${g.level+1} ! Press RETURN to proceed..')
 				}
 			}
 			do_it = true
@@ -469,7 +469,7 @@ fn (g Game) sleep() {
 }
 
 fn main() {
-	mut game := new_game('クレートさん')
+	mut game := new_game('クレートさん V')
 	for !game.quit {
 		game.handle_events()
 		game.draw_map()
