@@ -60,12 +60,19 @@ enum Status {
 	Win,
 }
 
+struct UndoState {
+	map: Option<Map>, // only store map if it changed during the move
+	px: usize,
+	py: usize,
+}
+
 struct Game {
 	quit: bool,
 	status: Status,
 	must_draw: bool,
 	levels: Vec<Level>,
 	map: Map,
+	undo_maps: Vec<UndoState>,
 	level: usize,
 	// following are copies of current level's
 	crates: u32,
@@ -219,6 +226,7 @@ impl Game {
 			must_draw: true,
 			levels,
 			map: Vec::new(),
+			undo_maps: Vec::new(),
 			level: 0,
 			crates: 0,
 			stored: 0,
@@ -240,6 +248,7 @@ impl Game {
 			self.must_draw = true;
 			self.level = level;
 			self.map = self.levels[level].map.clone();
+			self.undo_maps = Vec::new();
 			self.crates = self.levels[level].crates;
 			self.stored = self.levels[level].stored;
 			self.w = self.levels[level].w;
@@ -275,10 +284,12 @@ impl Game {
 		if x >= self.w || y >= self.h {
 			return;
 		}
+		let mut map = None;
 		if self.map[y][x] & CRATE == CRATE {
 			let to_x = (x as isize + dx) as usize;
 			let to_y = (y as isize + dy) as usize;
 			if self.can_move(to_x, to_y) {
+				map = Some(self.map.clone());
 				self.map[y][x] &= !CRATE;
 				if self.map[y][x] & STORE == STORE {
 					self.stored -= 1;
@@ -300,6 +311,12 @@ impl Game {
 			do_it = self.can_move(x, y);
 		}
 		if do_it {
+			//println!("Storing undo from {:?}..", (self.px, self.py));
+			self.undo_maps.push(UndoState {
+				map,
+				px: self.px,
+				py: self.py,
+			});
 			self.px = x;
 			self.py = y;
 			self.must_draw = true;
@@ -409,6 +426,19 @@ impl Game {
 				}
 				Keycode::R => {
 					self.set_level(self.level);
+				}
+				Keycode::U => {
+					if let Some(u) = self.undo_maps.pop() {
+						if let Some(map) = u.map {
+							self.map = map;
+						}
+						self.px = u.px;
+						self.py = u.py;
+						self.must_draw = true;
+					//println!("Undoing to {:?}..", (self.px, self.py));
+					} else {
+						//println!("Nothing to undo");
+					}
 				}
 				Keycode::Up => {
 					self.try_move(0, -1);
