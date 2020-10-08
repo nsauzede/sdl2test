@@ -52,36 +52,43 @@ mut:
 	py     int
 }
 
+struct UndoState {
+	map [][]byte
+	px  int
+	py  int
+}
+
 struct Game {
 mut:
-	title      string
-	quit       bool
-	status     Status
-	must_draw  bool
-	levels     []Level
-	lev        Level
-	level      int
+	title       string
+	quit        bool
+	status      Status
+	must_draw   bool
+	levels      []Level
+	lev         Level
+	undo_states []UndoState
+	level       int
 	// following are copies of current level's
-	crates     int
-	stored     int
+	crates      int
+	stored      int
 	// map dims
-	w          int
-	h          int
+	w           int
+	h           int
 	// player pos
-	px         int
-	py         int
+	px          int
+	py          int
 	// block dims
-	bw         int
-	bh         int
+	bw          int
+	bh          int
 	// SDL
-	window     voidptr
-	renderer   voidptr
-	screen     &vsdl2.Surface
-	texture    voidptr
-	width      int
-	height     int
-	block_surf []&vsdl2.Surface
-	block_text []voidptr
+	window      voidptr
+	renderer    voidptr
+	screen      &vsdl2.Surface
+	texture     voidptr
+	width       int
+	height      int
+	block_surf  []&vsdl2.Surface
+	block_text  []voidptr
 }
 
 fn load_levels() []Level {
@@ -195,20 +202,25 @@ fn load_levels() []Level {
 	return levels
 }
 
+fn copy_arr2(src [][]byte) [][]byte {
+	mut dest := [][]byte{}
+	for j in src {
+		mut v := []byte{}
+		for i in j {
+			v << i
+		}
+		dest << v
+	}
+	return dest
+}
+
 fn (mut g Game) set_level(level int) bool {
 	if level < g.levels.len {
 		g.status = .play
 		g.must_draw = true
 		g.level = level
 		g.lev = g.levels[level]
-		g.lev.map = [][]byte{}
-		for j in g.levels[level].map {
-			mut v := []byte{}
-			for i in j {
-				v << i
-			}
-			g.lev.map << v
-		}
+		g.lev.map = copy_arr2(g.levels[level].map)
 		g.crates = g.levels[level].crates
 		g.stored = g.levels[level].stored
 		g.w = g.levels[level].w
@@ -293,10 +305,12 @@ fn (mut g Game) try_move(dx, dy int) {
 	mut do_it := false
 	x := g.px + dx
 	y := g.py + dy
+	mut map := [][]byte{}
 	if g.lev.map[y][x] & crate == crate {
 		to_x := x + dx
 		to_y := y + dy
 		if g.can_move(to_x, to_y) {
+			map = copy_arr2(g.lev.map)
 			g.lev.map[y][x] &= ~crate
 			if g.lev.map[y][x] & store == store {
 				g.stored--
@@ -315,6 +329,11 @@ fn (mut g Game) try_move(dx, dy int) {
 		do_it = g.can_move(x, y)
 	}
 	if do_it {
+		g.undo_states << UndoState{
+			map: map
+			px: g.px
+			py: g.py
+		}
 		g.px = x
 		g.py = y
 		g.must_draw = true
@@ -414,6 +433,17 @@ fn (mut g Game) handle_event_play(ev vsdl2.Event) bool {
 				}
 				C.SDLK_r {
 					g.set_level(g.level)
+				}
+				C.SDLK_u {
+					if g.undo_states.len > 0 {
+						state := g.undo_states.pop()
+						if state.map.len > 0 {
+							g.lev.map = state.map
+						}
+						g.px = state.px
+						g.py = state.py
+						g.must_draw = true
+					}
 				}
 				C.SDLK_UP {
 					g.try_move(0, -1)

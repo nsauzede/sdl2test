@@ -45,6 +45,11 @@ const N_WALL: usize = 6;
 
 type Map = Vec<Vec<u8>>;
 
+enum Status {
+	Play,
+	Win,
+}
+
 struct Level {
 	map: Map,
 	crates: u32,
@@ -53,11 +58,6 @@ struct Level {
 	h: usize,
 	px: usize,
 	py: usize,
-}
-
-enum Status {
-	Play,
-	Win,
 }
 
 struct UndoState {
@@ -72,7 +72,7 @@ struct Game {
 	must_draw: bool,
 	levels: Vec<Level>,
 	map: Map,
-	undo_maps: Vec<UndoState>,
+	undo_states: Vec<UndoState>,
 	level: usize,
 	// following are copies of current level's
 	crates: u32,
@@ -218,6 +218,7 @@ impl Game {
 		}
 		levels
 	}
+
 	fn new(width: usize, height: usize) -> Game {
 		let levels = Game::load_levels();
 		let mut g = Game {
@@ -226,7 +227,7 @@ impl Game {
 			must_draw: true,
 			levels,
 			map: Vec::new(),
-			undo_maps: Vec::new(),
+			undo_states: Vec::new(),
 			level: 0,
 			crates: 0,
 			stored: 0,
@@ -242,13 +243,14 @@ impl Game {
 		g.set_level(0);
 		g
 	}
+
 	fn set_level(&mut self, level: usize) -> bool {
 		if level < self.levels.len() {
 			self.status = Status::Play;
 			self.must_draw = true;
 			self.level = level;
 			self.map = self.levels[level].map.clone();
-			self.undo_maps = Vec::new();
+			self.undo_states = Vec::new();
 			self.crates = self.levels[level].crates;
 			self.stored = self.levels[level].stored;
 			self.w = self.levels[level].w;
@@ -262,6 +264,7 @@ impl Game {
 			false
 		}
 	}
+
 	fn can_move(&self, x: usize, y: usize) -> bool {
 		if x < self.w && y < self.h {
 			let e = self.map[y][x];
@@ -271,6 +274,7 @@ impl Game {
 		}
 		false
 	}
+
 	/// Try to move to x+dx:y+dy and also push to x+2dx:y+2dy
 	fn try_move(&mut self, dx: isize, dy: isize) {
 		let mut do_it = false;
@@ -311,8 +315,7 @@ impl Game {
 			do_it = self.can_move(x, y);
 		}
 		if do_it {
-			//println!("Storing undo from {:?}..", (self.px, self.py));
-			self.undo_maps.push(UndoState {
+			self.undo_states.push(UndoState {
 				map,
 				px: self.px,
 				py: self.py,
@@ -322,6 +325,7 @@ impl Game {
 			self.must_draw = true;
 		}
 	}
+
 	fn draw_map(
 		&mut self,
 		canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
@@ -384,6 +388,53 @@ impl Game {
 			}
 		}
 	}
+
+	fn handle_event_play(&mut self, event: sdl2::event::Event) -> bool {
+		let mut cont = true;
+		match event {
+			Event::Quit { .. } => {
+				self.quit = true;
+				cont = false;
+			}
+			Event::KeyDown {
+				keycode: Some(k), ..
+			} => match k {
+				Keycode::Escape => {
+					self.quit = true;
+					cont = false;
+				}
+				Keycode::R => {
+					self.set_level(self.level);
+				}
+				Keycode::U => {
+					if let Some(state) = self.undo_states.pop() {
+						if let Some(map) = state.map {
+							self.map = map;
+						}
+						self.px = state.px;
+						self.py = state.py;
+						self.must_draw = true;
+					}
+				}
+				Keycode::Up => {
+					self.try_move(0, -1);
+				}
+				Keycode::Down => {
+					self.try_move(0, 1);
+				}
+				Keycode::Left => {
+					self.try_move(-1, 0);
+				}
+				Keycode::Right => {
+					self.try_move(1, 0);
+				}
+				_ => {}
+			},
+			_ => {}
+		}
+		cont
+	}
+
 	fn handle_event_win(&mut self, event: sdl2::event::Event) -> bool {
 		let mut cont = true;
 		match event {
@@ -403,54 +454,6 @@ impl Game {
 					} else {
 						self.quit = true;
 					}
-				}
-				_ => {}
-			},
-			_ => {}
-		}
-		cont
-	}
-	fn handle_event_play(&mut self, event: sdl2::event::Event) -> bool {
-		let mut cont = true;
-		match event {
-			Event::Quit { .. } => {
-				self.quit = true;
-				cont = false;
-			}
-			Event::KeyDown {
-				keycode: Some(k), ..
-			} => match k {
-				Keycode::Escape => {
-					self.quit = true;
-					cont = false;
-				}
-				Keycode::R => {
-					self.set_level(self.level);
-				}
-				Keycode::U => {
-					if let Some(u) = self.undo_maps.pop() {
-						if let Some(map) = u.map {
-							self.map = map;
-						}
-						self.px = u.px;
-						self.py = u.py;
-						self.must_draw = true;
-					//println!("Undoing to {:?}..", (self.px, self.py));
-					} else {
-						//println!("Nothing to undo");
-					}
-				}
-				Keycode::Up => {
-					self.try_move(0, -1);
-				}
-				Keycode::Down => {
-					self.try_move(0, 1);
-				}
-				Keycode::Left => {
-					self.try_move(-1, 0);
-				}
-				Keycode::Right => {
-					self.try_move(1, 0);
 				}
 				_ => {}
 			},
