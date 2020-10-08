@@ -1,14 +1,14 @@
 import nsauzede.vsdl2
+import nsauzede.vsdl2.image as img
 import os
 
 const (
+	width       = 320 * 2
+	height      = 200 * 2
 	empty       = 0x0
 	store       = 0x1
 	crate       = 0x2
-	player      = 0x4
-	wall        = 0x8
-	width       = 320
-	height      = 200
+	wall        = 0x4
 	c_empty     = ` `
 	c_store     = `.`
 	c_stored    = `*`
@@ -18,6 +18,20 @@ const (
 	c_wall      = `#`
 	bpp         = 32
 	levels_file = os.resource_abs_path('../res/levels/levels.txt')
+	i_empty     = os.resource_abs_path('../res/images/empty.png')
+	i_store     = os.resource_abs_path('../res/images/store.png')
+	i_stored    = os.resource_abs_path('../res/images/stored.png')
+	i_crate     = os.resource_abs_path('../res/images/crate.png')
+	i_player    = os.resource_abs_path('../res/images/player.png')
+	i_splayer   = os.resource_abs_path('../res/images/splayer.png')
+	i_wall      = os.resource_abs_path('../res/images/wall.png')
+	n_empty     = 0
+	n_store     = 1
+	n_stored    = 2
+	n_crate     = 3
+	n_player    = 4
+	n_splayer   = 5
+	n_wall      = 6
 )
 
 enum Status {
@@ -40,31 +54,34 @@ mut:
 
 struct Game {
 mut:
-	title     string
-	quit      bool
-	status    Status
-	must_draw bool
-	levels    []Level
-	level     int
+	title      string
+	quit       bool
+	status     Status
+	must_draw  bool
+	levels     []Level
+	lev        Level
+	level      int
 	// following are copies of current level's
-	crates    int
-	stored    int
+	crates     int
+	stored     int
 	// map dims
-	w         int
-	h         int
+	w          int
+	h          int
 	// player pos
-	px        int
-	py        int
+	px         int
+	py         int
 	// block dims
-	bw        int
-	bh        int
+	bw         int
+	bh         int
 	// SDL
-	window    voidptr
-	renderer  voidptr
-	screen    &vsdl2.Surface
-	texture   voidptr
-	width     int
-	height    int
+	window     voidptr
+	renderer   voidptr
+	screen     &vsdl2.Surface
+	texture    voidptr
+	width      int
+	height     int
+	block_surf []&vsdl2.Surface
+	block_text []voidptr
 }
 
 fn load_levels() []Level {
@@ -183,6 +200,15 @@ fn (mut g Game) set_level(level int) bool {
 		g.status = .play
 		g.must_draw = true
 		g.level = level
+		g.lev = g.levels[level]
+		g.lev.map = [][]byte{}
+		for j in g.levels[level].map {
+			mut v := []byte{}
+			for i in j {
+				v << i
+			}
+			g.lev.map << v
+		}
 		g.crates = g.levels[level].crates
 		g.stored = g.levels[level].stored
 		g.w = g.levels[level].w
@@ -197,9 +223,33 @@ fn (mut g Game) set_level(level int) bool {
 	}
 }
 
+fn (mut g Game) load_tex(file string) {
+	surf := img.load(file)
+	if !isnil(surf) {
+		g.block_surf << surf
+		tex := vsdl2.create_texture_from_surface(g.renderer, surf)
+		if !isnil(tex) {
+			g.block_text << tex
+		}
+	}
+}
+
+fn (mut g Game) delete() {
+	for t in g.block_text {
+		if !isnil(t) {
+			vsdl2.destroy_texture(t)
+		}
+	}
+	for s in g.block_surf {
+		if !isnil(s) {
+			vsdl2.free_surface(s)
+		}
+	}
+}
+
 fn new_game(title string) Game {
 	levels := load_levels()
-	mut game := Game{
+	mut g := Game{
 		title: title
 		quit: false
 		status: .play
@@ -209,21 +259,28 @@ fn new_game(title string) Game {
 	}
 	C.SDL_Init(C.SDL_INIT_VIDEO)
 	C.atexit(C.SDL_Quit)
-	vsdl2.create_window_and_renderer(width, height, 0, &game.window, &game.renderer)
-	C.SDL_SetWindowTitle(game.window, game.title.str)
-	game.screen = vsdl2.create_rgb_surface(0, width, height, bpp, 0x00FF0000, 0x0000FF00,
+	vsdl2.create_window_and_renderer(width, height, 0, &g.window, &g.renderer)
+	C.SDL_SetWindowTitle(g.window, g.title.str)
+	g.screen = vsdl2.create_rgb_surface(0, width, height, bpp, 0x00FF0000, 0x0000FF00,
 		0x000000FF, 0xFF000000)
-	game.texture = C.SDL_CreateTexture(game.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING,
+	g.texture = C.SDL_CreateTexture(g.renderer, C.SDL_PIXELFORMAT_ARGB8888, C.SDL_TEXTUREACCESS_STREAMING,
 		width, height)
-	game.width = width
-	game.height = height
-	game.set_level(0)
-	return game
+	g.width = width
+	g.height = height
+	g.set_level(0)
+	g.load_tex(i_empty)
+	g.load_tex(i_store)
+	g.load_tex(i_stored)
+	g.load_tex(i_crate)
+	g.load_tex(i_player)
+	g.load_tex(i_splayer)
+	g.load_tex(i_wall)
+	return g
 }
 
 fn (mut g Game) can_move(x, y int) bool {
 	if x < g.w && y < g.h {
-		e := g.levels[g.level].map[y][x]
+		e := g.lev.map[y][x]
 		if e == empty || e == store {
 			return true
 		}
@@ -236,20 +293,20 @@ fn (mut g Game) try_move(dx, dy int) {
 	mut do_it := false
 	x := g.px + dx
 	y := g.py + dy
-	if g.levels[g.level].map[y][x] & crate == crate {
+	if g.lev.map[y][x] & crate == crate {
 		to_x := x + dx
 		to_y := y + dy
 		if g.can_move(to_x, to_y) {
-			g.levels[g.level].map[y][x] &= ~crate
-			if g.levels[g.level].map[y][x] & store == store {
+			g.lev.map[y][x] &= ~crate
+			if g.lev.map[y][x] & store == store {
 				g.stored--
 			}
-			g.levels[g.level].map[to_y][to_x] |= crate
-			if g.levels[g.level].map[to_y][to_x] & store == store {
+			g.lev.map[to_y][to_x] |= crate
+			if g.lev.map[to_y][to_x] & store == store {
 				g.stored++
 				if g.stored == g.crates {
 					g.status = .win
-					println('You win level ${g.level+1}, $g.title !!! :-)')
+					println('You win level ${g.level+1} ! Press RETURN to proceed..')
 				}
 			}
 			do_it = true
@@ -272,8 +329,9 @@ fn (mut g Game) draw_map() {
 		vsdl2.fill_rect(g.screen, &rect, col)
 		x := (width - g.w * g.bw) / 2
 		y := (height - g.h * g.bh) / 2
-		for j, line in g.levels[g.level].map {
+		for j, line in g.lev.map {
 			for i, e in line {
+				rect = vsdl2.Rect{x + i * g.bw, y + j * g.bh, g.bw, g.bh}
 				col = match e {
 					empty {
 						if g.px == i && g.py == j { vsdl2.Color{byte(255), byte(255), byte(255), byte(0)} } else { vsdl2.Color{byte(66), byte(66), byte(66), byte(0)} }
@@ -294,12 +352,36 @@ fn (mut g Game) draw_map() {
 						vsdl2.Color{byte(0), byte(255), byte(0), byte(0)}
 					}
 				}
-				rect = vsdl2.Rect{x + i * g.bw, y + j * g.bh, g.bw, g.bh}
 				vsdl2.fill_rect(g.screen, &rect, col)
+				tex := match e {
+					empty {
+						if g.px == i && g.py == j { g.block_text[n_player] } else { g.block_text[n_empty] }
+					}
+					store {
+						if g.px == i && g.py == j { g.block_text[n_splayer] } else { g.block_text[n_store] }
+					}
+					crate {
+						g.block_text[n_crate]
+					}
+					wall {
+						g.block_text[n_wall]
+					}
+					crate | store {
+						g.block_text[n_stored]
+					}
+					else {
+						voidptr(0)
+					}
+				}
+				if !isnil(tex) {
+					vsdl2.render_copy(g.renderer, tex, voidptr(0), &rect)
+				}
 			}
 		}
-		C.SDL_UpdateTexture(g.texture, 0, g.screen.pixels, g.screen.pitch)
-		C.SDL_RenderCopy(g.renderer, g.texture, voidptr(0), voidptr(0))
+		if g.block_text.len == 0 {
+			C.SDL_UpdateTexture(g.texture, 0, g.screen.pixels, g.screen.pitch)
+			C.SDL_RenderCopy(g.renderer, g.texture, voidptr(0), voidptr(0))
+		}
 		C.SDL_RenderPresent(g.renderer)
 		g.must_draw = false
 	}
@@ -329,6 +411,9 @@ fn (mut g Game) handle_event_play(ev vsdl2.Event) bool {
 				C.SDLK_ESCAPE {
 					g.quit = true
 					cont = false
+				}
+				C.SDLK_r {
+					g.set_level(g.level)
 				}
 				C.SDLK_UP {
 					g.try_move(0, -1)
@@ -383,10 +468,11 @@ fn (g Game) sleep() {
 }
 
 fn main() {
-	mut game := new_game('クレートさん')
+	mut game := new_game('クレートさん V')
 	for !game.quit {
 		game.handle_events()
 		game.draw_map()
 		game.sleep()
 	}
+	game.delete()
 }
