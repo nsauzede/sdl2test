@@ -8,8 +8,7 @@ const (
 	empty       = 0x0
 	store       = 0x1
 	crate       = 0x2
-	player      = 0x4
-	wall        = 0x8
+	wall        = 0x4
 	c_empty     = ` `
 	c_store     = `.`
 	c_stored    = `*`
