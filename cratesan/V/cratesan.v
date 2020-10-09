@@ -202,25 +202,13 @@ fn load_levels() []Level {
 	return levels
 }
 
-fn copy_arr2(src [][]byte) [][]byte {
-	mut dest := [][]byte{}
-	for j in src {
-		mut v := []byte{}
-		for i in j {
-			v << i
-		}
-		dest << v
-	}
-	return dest
-}
-
 fn (mut g Game) set_level(level int) bool {
 	if level < g.levels.len {
 		g.status = .play
 		g.must_draw = true
 		g.level = level
 		g.lev = g.levels[level]
-		g.lev.map = copy_arr2(g.levels[level].map)
+		g.lev.map = g.levels[level].map.clone()
 		g.crates = g.levels[level].crates
 		g.stored = g.levels[level].stored
 		g.w = g.levels[level].w
@@ -310,7 +298,7 @@ fn (mut g Game) try_move(dx, dy int) {
 		to_x := x + dx
 		to_y := y + dy
 		if g.can_move(to_x, to_y) {
-			map = copy_arr2(g.lev.map)
+			map = g.lev.map.clone()
 			g.lev.map[y][x] &= ~crate
 			if g.lev.map[y][x] & store == store {
 				g.stored--
