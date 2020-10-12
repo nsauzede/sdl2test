@@ -12,6 +12,9 @@ Note that this repo still holds the experiments around SDL2/OpenGL and V (and ot
 Once they stabilize, the enhancements will be reported to the nsauzede.vsdl2 VPM module.
 
 ----
+- cratesan is a Sokoban clone, in Rust and V
+
+<img src='https://github.com/nsauzede/sdl2test/blob/master/cratesan/res/images/cratesan.png'>
 
 - tvintris_v.v is a dual-player (local) version, inspired by ancient game Twintris. It uses published vpm module nsauzede.vsdl2
 
