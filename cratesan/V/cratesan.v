@@ -26,6 +26,8 @@ const (
 	res_dir     = os.resource_abs_path('../res')
 	font_file   = res_dir + '/fonts/RobotoMono-Regular.ttf'
 	levels_file = res_dir + '/levels/levels.txt'
+	base_dir    = os.dir(os.real_path(os.executable()))
+	scores_file = base_dir + '/scores.txt'
 	i_empty     = res_dir + '/images/empty.png'
 	i_store     = res_dir + '/images/store.png'
 	i_stored    = res_dir + '/images/stored.png'
@@ -61,49 +63,71 @@ mut:
 	py     int
 }
 
-struct UndoState {
-	map [][]byte // TODO : make it an option (ie: map ?[][]byte)
-	px  int
-	py  int
+struct State {
+	map    [][]byte // TODO : make it an option (ie: map ?[][]byte)
+	stored int
+	px     int
+	py     int
+	time_s u32
+	pushes int
+	moves  int
+}
+
+struct Score {
+mut:
+	level  int
+	pushes int
+	moves  int
+	time_s u32
+}
+
+struct Snapshot {
+	state       State
+	undo_states []State
+	undos       int
 }
 
 struct Game {
 mut:
-	title        string
-	quit         bool
-	status       Status
-	must_draw    bool
-	levels       []Level
-	lev          Level
-	undo_states  []UndoState
-	level        int
-	moves        int
-	pushes       int
-	total_time_s u32
-	last_ticks   u32
+	title       string
+	quit        bool
+	status      Status
+	must_draw   bool
+	levels      []Level
+	lev         Level
+	undo_states []State
+	undos       int
+	snapshot    []State
+	level       int
+	moves       int
+	pushes      int
+	time_s      u32
+	last_ticks  u32
+	scores      []Score
+	debug       bool
 	// following are copies of current level's
-	crates       int
-	stored       int
+	crates      int
+	stored      int
 	// map dims
-	w            int
-	h            int
+	w           int
+	h           int
 	// player pos
-	px           int
-	py           int
+	px          int
+	py          int
 	// block dims
-	bw           int
-	bh           int
+	bw          int
+	bh          int
 	// SDL
-	window       voidptr
-	renderer     voidptr
-	screen       &vsdl2.Surface
-	texture      voidptr
-	width        int
-	height       int
-	block_surf   []&vsdl2.Surface
-	block_text   []voidptr
+	window      voidptr
+	renderer    voidptr
+	screen      &vsdl2.Surface
+	texture     voidptr
+	width       int
+	height      int
+	block_surf  []&vsdl2.Surface
+	block_text  []voidptr
 	// TTF
-	font         voidptr
+	font        voidptr
 }
 
 fn load_levels() []Level {
@@ -217,6 +241,12 @@ fn load_levels() []Level {
 	return levels
 }
 
+fn (g Game) debug_dump() {
+	if g.debug {
+		println('level=$g.level crates=$g.crates stored=$g.stored moves=$g.moves pushes=$g.pushes undos=$g.undos time=$g.time_s')
+	}
+}
+
 fn (mut g Game) set_level(level int) bool {
 	if level < g.levels.len {
 		g.status = .play
@@ -224,19 +254,21 @@ fn (mut g Game) set_level(level int) bool {
 		g.level = level
 		g.lev = g.levels[level]
 		g.lev.map = g.levels[level].map.clone()
-		g.undo_states = []UndoState{}
+		g.undo_states = []State{}
+		g.undos = 0
 		g.crates = g.levels[level].crates
 		g.stored = g.levels[level].stored
 		g.w = g.levels[level].w
 		g.h = g.levels[level].h
 		g.moves = 0
 		g.pushes = 0
-		g.total_time_s = 0
+		g.time_s = 0
 		g.last_ticks = vsdl2.get_ticks()
 		g.px = g.levels[level].px
 		g.py = g.levels[level].py
 		g.bw = g.width / g.w
 		g.bh = (g.height - text_size * text_ratio) / g.h
+		g.debug_dump()
 		return true
 	} else {
 		return false
@@ -255,6 +287,7 @@ fn (mut g Game) load_tex(file string) {
 }
 
 fn (mut g Game) delete() {
+	save_scores(g.scores)
 	for t in g.block_text {
 		if !isnil(t) {
 			vsdl2.destroy_texture(t)
@@ -270,14 +303,53 @@ fn (mut g Game) delete() {
 	}
 }
 
+fn load_scores() []Score {
+	mut ret := []Score{}
+	s := os.read_file_array<Score>(scores_file)
+	if s.len > 0 {
+		ret = s
+	}
+	return ret
+}
+
+fn (mut g Game) save_score() {
+	mut push_score := true
+	for score in g.scores {
+		if score.level == g.level {
+			push_score = false
+		}
+	}
+	if push_score {
+		s := Score{
+			level: g.level
+			pushes: g.pushes
+			moves: g.moves
+			time_s: g.time_s
+		}
+		g.scores << s
+	}
+}
+
+fn save_scores(scores []Score) {
+	if scores.len > 0 {
+		// println('writing scores=$scores')
+		os.write_file_array(scores_file, scores)
+	} else {
+		os.rm(scores_file)
+	}
+}
+
 fn new_game(title string) Game {
 	levels := load_levels()
+	scores := load_scores()
 	mut g := Game{
 		title: title
 		quit: false
 		status: .play
 		must_draw: true
 		levels: levels
+		scores: scores
+		debug: false
 		screen: 0
 		font: 0
 	}
@@ -294,7 +366,20 @@ fn new_game(title string) Game {
 	g.font = C.TTF_OpenFont(font_file.str, text_size * text_ratio)
 	g.width = width
 	g.height = height
-	g.set_level(0)
+	mut dones := [false].repeat(levels.len)
+	for score in scores {
+		if score.level >= 0 && score.level < levels.len {
+			dones[score.level] = true
+		}
+	}
+	mut level := 0
+	for done in dones {
+		if !done {
+			break
+		}
+		level++
+	}
+	g.set_level(level)
 	g.load_tex(i_empty)
 	g.load_tex(i_store)
 	g.load_tex(i_stored)
@@ -336,6 +421,8 @@ fn (mut g Game) try_move(dx, dy int) {
 				g.stored++
 				if g.stored == g.crates {
 					g.status = .win
+					g.save_score()
+					save_scores(g.scores)
 				}
 			}
 			do_it = true
@@ -344,7 +431,7 @@ fn (mut g Game) try_move(dx, dy int) {
 		do_it = g.can_move(x, y)
 	}
 	if do_it {
-		g.undo_states << UndoState{
+		g.undo_states << State{
 			map: map
 			px: g.px
 			py: g.py
@@ -353,6 +440,7 @@ fn (mut g Game) try_move(dx, dy int) {
 		g.px = x
 		g.py = y
 		g.must_draw = true
+		g.debug_dump()
 	}
 }
 
@@ -375,7 +463,7 @@ fn (mut g Game) draw_map() {
 	curr_ticks := vsdl2.get_ticks()
 	if curr_ticks > g.last_ticks + 1000 {
 		if g.status == .play {
-			g.total_time_s += (curr_ticks - g.last_ticks) / 1000
+			g.time_s += (curr_ticks - g.last_ticks) / 1000
 		}
 		g.last_ticks = curr_ticks
 		g.must_draw = true
@@ -420,18 +508,56 @@ fn (mut g Game) draw_map() {
 				}
 			}
 		}
-		state := match g.status {
+		status := match g.status {
 			.win { 'You win! Press Return..' }
 			.pause { '*PAUSE* Press Space..' }
 			else { '' }
 		}
-		ts := g.total_time_s % 60
-		tm := (g.total_time_s / 60) % 60
-		th := g.total_time_s / 3600
-		g.draw_text(0, g.height - text_size * text_ratio - 4, '${g.level+1:02d}| moves: ${g.moves:04d} pushes: ${g.pushes:04d} time:$th:${tm:02}:${ts:02} $state',
+		ts := g.time_s % 60
+		tm := (g.time_s / 60) % 60
+		th := g.time_s / 3600
+		g.draw_text(0, g.height - text_size * text_ratio - 4, '${g.level+1:02d}| moves: ${g.moves:04d} pushes: ${g.pushes:04d} time:$th:${tm:02}:${ts:02} $status',
 			text_color)
 		C.SDL_RenderPresent(g.renderer)
 		g.must_draw = false
+	}
+}
+
+fn (mut g Game) save_snapshot() {
+}
+
+fn (mut g Game) load_snapshot() {
+}
+
+fn (mut g Game) undo_move() {
+	if g.undo_states.len > 0 {
+		state := g.undo_states.pop()
+		if state.map.len > 0 {
+			g.pushes--
+			g.lev.map = state.map
+			g.stored = 0
+			for line in g.lev.map {
+				for e in line {
+					if e == crate | store {
+						g.stored++
+					}
+				}
+			}
+		}
+		g.moves--
+		g.px = state.px
+		g.py = state.py
+		g.must_draw = true
+		for i, score in g.scores {
+			if score.level == g.level {
+				println('deleting score $i : $score')
+				g.scores.delete(i)
+				// g.scores[i].level = -1
+			}
+		}
+		g.undos++
+		save_scores(g.scores)
+		g.debug_dump()
 	}
 }
 
@@ -439,6 +565,29 @@ fn (mut g Game) handle_events() {
 	ev := vsdl2.Event{}
 	mut cont := true
 	for cont && 0 < vsdl2.poll_event(&ev) {
+		match int(ev.@type) {
+			C.SDL_QUIT {
+				g.quit = true
+				cont = false
+				break
+			}
+			C.SDL_KEYDOWN {
+				key := ev.key.keysym.sym
+				match key {
+					C.SDLK_ESCAPE {
+						g.quit = true
+						cont = false
+						break
+					}
+					C.SDLK_d {
+						g.debug = !g.debug
+						continue
+					}
+					else {}
+				}
+			}
+			else {}
+		}
 		cont = match g.status {
 			.win { g.handle_event_win(ev) }
 			.play { g.handle_event_play(ev) }
@@ -450,17 +599,9 @@ fn (mut g Game) handle_events() {
 fn (mut g Game) handle_event_play(ev vsdl2.Event) bool {
 	mut cont := true
 	match int(ev.@type) {
-		C.SDL_QUIT {
-			g.quit = true
-			cont = false
-		}
 		C.SDL_KEYDOWN {
 			key := ev.key.keysym.sym
 			match key {
-				C.SDLK_ESCAPE {
-					g.quit = true
-					cont = false
-				}
 				C.SDLK_SPACE {
 					g.status = .pause
 					g.must_draw = true
@@ -476,18 +617,13 @@ fn (mut g Game) handle_event_play(ev vsdl2.Event) bool {
 					cont = false
 				}
 				C.SDLK_u {
-					if g.undo_states.len > 0 {
-						state := g.undo_states.pop()
-						if state.map.len > 0 {
-							g.pushes--
-							g.lev.map = state.map
-						}
-						g.moves--
-						g.px = state.px
-						g.py = state.py
-						cont = false
-						g.must_draw = true
-					}
+					g.undo_move()
+				}
+				C.SDLK_s {
+					g.save_snapshot()
+				}
+				C.SDLK_l {
+					g.load_snapshot()
 				}
 				C.SDLK_UP {
 					g.try_move(0, -1)
@@ -512,17 +648,9 @@ fn (mut g Game) handle_event_play(ev vsdl2.Event) bool {
 fn (mut g Game) handle_event_pause(ev vsdl2.Event) bool {
 	mut cont := true
 	match int(ev.@type) {
-		C.SDL_QUIT {
-			g.quit = true
-			cont = false
-		}
 		C.SDL_KEYDOWN {
 			key := ev.key.keysym.sym
 			match key {
-				C.SDLK_ESCAPE {
-					g.quit = true
-					cont = false
-				}
 				C.SDLK_SPACE {
 					g.status = .play
 					g.must_draw = true
@@ -539,17 +667,9 @@ fn (mut g Game) handle_event_pause(ev vsdl2.Event) bool {
 fn (mut g Game) handle_event_win(ev vsdl2.Event) bool {
 	mut cont := true
 	match int(ev.@type) {
-		C.SDL_QUIT {
-			g.quit = true
-			cont = false
-		}
 		C.SDL_KEYDOWN {
 			key := ev.key.keysym.sym
 			match key {
-				C.SDLK_ESCAPE {
-					g.quit = true
-					cont = false
-				}
 				C.SDLK_RETURN {
 					if g.set_level(g.level + 1) {
 					} else {
@@ -557,6 +677,12 @@ fn (mut g Game) handle_event_win(ev vsdl2.Event) bool {
 						g.quit = true
 						cont = false
 					}
+				}
+				C.SDLK_u {
+					g.undo_move()
+					g.status = .play
+					g.must_draw = true
+					cont = false
 				}
 				C.SDLK_r {
 					g.set_level(g.level)
