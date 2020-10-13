@@ -63,16 +63,6 @@ mut:
 	py     int
 }
 
-struct State {
-	map    [][]byte // TODO : make it an option (ie: map ?[][]byte)
-	stored int
-	px     int
-	py     int
-	time_s u32
-	pushes int
-	moves  int
-}
-
 struct Score {
 mut:
 	level  int
@@ -82,9 +72,100 @@ mut:
 }
 
 struct Snapshot {
+mut:
 	state       State
 	undo_states []State
 	undos       int
+}
+
+struct State {
+mut:
+	map    [][]byte // TODO : make it an option (ie: map ?[][]byte)
+	stored int
+	px     int
+	py     int
+	time_s u32
+	pushes int
+	moves  int
+}
+
+fn (g Game) save_state(mut state State) {
+	state.map = g.lev.map.clone()
+	state.stored = g.stored
+	state.px = g.px
+	state.py = g.py
+	state.time_s = g.time_s
+	state.pushes = g.pushes
+	state.moves = g.moves
+	println('saved state moves=$state.moves pushes=$state.pushes time_s=$state.time_s')
+}
+
+fn (mut g Game) test_push_undo(map [][]byte) {
+	g.undo_states << State{
+		map: map
+		px: g.px
+		py: g.py
+	}
+}
+
+fn (mut g Game) restore_state(state State) {
+	if state.map.len > 0 {
+		g.lev.map = state.map
+	}
+	g.pushes = state.pushes
+	g.stored = state.stored
+	g.moves = state.moves
+	g.px = state.px
+	g.py = state.py
+	g.time_s = state.time_s
+	// remove current level score, if win
+	if g.status == .win {
+		for i, score in g.scores {
+			if score.level == g.level {
+				println('deleting score $i : $score')
+				g.scores.delete(i)
+				// g.scores[i].level = -1
+			}
+		}
+	}
+}
+
+fn (mut g Game) save_snapshot() {
+	g.snapshot = []Snapshot{}
+	g.snapshot << Snapshot{
+		undos: g.undos
+		undo_states: g.undo_states.clone()
+	}
+	g.save_state(mut g.snapshot[0].state)
+}
+
+fn (mut g Game) load_snapshot() {
+	if g.snapshot.len > 0 {
+		snap := g.snapshot.pop()
+		g.undos = snap.undos
+		g.undo_states = snap.undo_states
+		g.restore_state(snap.state)
+		g.must_draw = true
+		save_scores(g.scores)
+		g.debug_dump()
+	}
+}
+
+fn (mut g Game) pop_undo() {
+	if g.undo_states.len > 0 {
+		g.undos++
+		state := g.undo_states.pop()
+		g.restore_state(state)
+		g.must_draw = true
+		save_scores(g.scores)
+		g.debug_dump()
+	}
+}
+
+fn (g Game) debug_dump() {
+	if g.debug {
+		println('level=$g.level crates=$g.crates stored=$g.stored moves=$g.moves pushes=$g.pushes undos=$g.undos/$g.undo_states.len time=$g.time_s')
+	}
 }
 
 struct Game {
@@ -97,23 +178,24 @@ mut:
 	lev         Level
 	undo_states []State
 	undos       int
-	snapshot    []State
-	level       int
+	snapshot    []Snapshot
+	// state
 	moves       int
 	pushes      int
 	time_s      u32
+	stored      int
+	// player pos
+	px          int
+	py          int
+	level       int
 	last_ticks  u32
 	scores      []Score
 	debug       bool
 	// following are copies of current level's
 	crates      int
-	stored      int
 	// map dims
 	w           int
 	h           int
-	// player pos
-	px          int
-	py          int
 	// block dims
 	bw          int
 	bh          int
@@ -239,12 +321,6 @@ fn load_levels() []Level {
 		}
 	}
 	return levels
-}
-
-fn (g Game) debug_dump() {
-	if g.debug {
-		println('level=$g.level crates=$g.crates stored=$g.stored moves=$g.moves pushes=$g.pushes undos=$g.undos time=$g.time_s')
-	}
 }
 
 fn (mut g Game) set_level(level int) bool {
@@ -431,11 +507,7 @@ fn (mut g Game) try_move(dx, dy int) {
 		do_it = g.can_move(x, y)
 	}
 	if do_it {
-		g.undo_states << State{
-			map: map
-			px: g.px
-			py: g.py
-		}
+		g.test_push_undo(map)
 		g.moves++
 		g.px = x
 		g.py = y
@@ -523,44 +595,6 @@ fn (mut g Game) draw_map() {
 	}
 }
 
-fn (mut g Game) save_snapshot() {
-}
-
-fn (mut g Game) load_snapshot() {
-}
-
-fn (mut g Game) undo_move() {
-	if g.undo_states.len > 0 {
-		state := g.undo_states.pop()
-		if state.map.len > 0 {
-			g.pushes--
-			g.lev.map = state.map
-			g.stored = 0
-			for line in g.lev.map {
-				for e in line {
-					if e == crate | store {
-						g.stored++
-					}
-				}
-			}
-		}
-		g.moves--
-		g.px = state.px
-		g.py = state.py
-		g.must_draw = true
-		for i, score in g.scores {
-			if score.level == g.level {
-				println('deleting score $i : $score')
-				g.scores.delete(i)
-				// g.scores[i].level = -1
-			}
-		}
-		g.undos++
-		save_scores(g.scores)
-		g.debug_dump()
-	}
-}
-
 fn (mut g Game) handle_events() {
 	ev := vsdl2.Event{}
 	mut cont := true
@@ -581,6 +615,7 @@ fn (mut g Game) handle_events() {
 					}
 					C.SDLK_d {
 						g.debug = !g.debug
+						g.debug_dump()
 						continue
 					}
 					else {}
@@ -617,7 +652,7 @@ fn (mut g Game) handle_event_play(ev vsdl2.Event) bool {
 					cont = false
 				}
 				C.SDLK_u {
-					g.undo_move()
+					g.pop_undo()
 				}
 				C.SDLK_s {
 					g.save_snapshot()
@@ -679,7 +714,7 @@ fn (mut g Game) handle_event_win(ev vsdl2.Event) bool {
 					}
 				}
 				C.SDLK_u {
-					g.undo_move()
+					g.pop_undo()
 					g.status = .play
 					g.must_draw = true
 					cont = false
