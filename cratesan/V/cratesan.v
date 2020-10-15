@@ -89,6 +89,50 @@ mut:
 	moves  int
 }
 
+struct Game {
+mut:
+	title       string
+	quit        bool
+	status      Status
+	must_draw   bool
+	levels      []Level
+	lev         Level
+	undo_states []State
+	undos       int
+	snapshots   []Snapshot
+	// state
+	moves       int
+	pushes      int
+	time_s      u32
+	stored      int
+	// player pos
+	px          int
+	py          int
+	level       int
+	last_ticks  u32
+	scores      []Score
+	debug       bool
+	// following are copies of current level's
+	crates      int
+	// map dims
+	w           int
+	h           int
+	// block dims
+	bw          int
+	bh          int
+	// SDL
+	window      voidptr
+	renderer    voidptr
+	screen      &vsdl2.Surface
+	texture     voidptr
+	width       int
+	height      int
+	block_surf  []&vsdl2.Surface
+	block_text  []voidptr
+	// TTF
+	font        voidptr
+}
+
 fn (g Game) save_state(mut state State, full bool) {
 	mut map := [][]byte{}
 	if full {
@@ -120,7 +164,6 @@ fn (mut g Game) restore_state(state State) {
 			if score.level == g.level {
 				println('deleting score $i : $score')
 				g.scores.delete(i)
-				// g.scores[i].level = -1
 			}
 		}
 	}
@@ -218,50 +261,6 @@ fn (g Game) debug_dump() {
 	if g.debug {
 		println('level=$g.level crates=$g.stored/$g.crates moves=$g.moves pushes=$g.pushes undos=$g.undos/$g.undo_states.len snaps=$g.snapshots.len time=$g.time_s')
 	}
-}
-
-struct Game {
-mut:
-	title       string
-	quit        bool
-	status      Status
-	must_draw   bool
-	levels      []Level
-	lev         Level
-	undo_states []State
-	undos       int
-	snapshots   []Snapshot
-	// state
-	moves       int
-	pushes      int
-	time_s      u32
-	stored      int
-	// player pos
-	px          int
-	py          int
-	level       int
-	last_ticks  u32
-	scores      []Score
-	debug       bool
-	// following are copies of current level's
-	crates      int
-	// map dims
-	w           int
-	h           int
-	// block dims
-	bw          int
-	bh          int
-	// SDL
-	window      voidptr
-	renderer    voidptr
-	screen      &vsdl2.Surface
-	texture     voidptr
-	width       int
-	height      int
-	block_surf  []&vsdl2.Surface
-	block_text  []voidptr
-	// TTF
-	font        voidptr
 }
 
 fn load_levels() []Level {
@@ -460,7 +459,6 @@ fn (mut g Game) save_score() {
 
 fn save_scores(scores []Score) {
 	if scores.len > 0 {
-		// println('writing scores=$scores')
 		os.write_file_array(scores_file, scores)
 	} else {
 		os.rm(scores_file)
