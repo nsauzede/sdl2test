@@ -145,7 +145,6 @@ fn (g Game) save_state(mut state State, full bool) {
 	state.time_s = g.time_s
 	state.pushes = g.pushes
 	state.moves = g.moves
-	g.debug_dump()
 }
 
 fn (mut g Game) restore_state(state State) {
@@ -170,11 +169,13 @@ fn (mut g Game) restore_state(state State) {
 }
 
 fn (mut g Game) save_snapshot() {
+	g.snapshots = []Snapshot{} // limit snapshots depth to 1
 	g.snapshots << Snapshot{
 		undos: g.undos
 		undo_states: g.undo_states.clone()
 	}
 	g.save_state(mut g.snapshots[0].state, true)
+	g.debug_dump()
 }
 
 fn (mut g Game) load_snapshot() {
@@ -185,7 +186,7 @@ fn (mut g Game) load_snapshot() {
 		g.restore_state(snap.state)
 		g.must_draw = true
 		save_scores(g.scores)
-		g.debug_dump()
+		g.save_snapshot() // limit snapshots depth to 1
 	}
 }
 
@@ -255,6 +256,7 @@ fn (mut g Game) try_move(dx, dy int) bool {
 		g.must_draw = true
 		g.debug_dump()
 	}
+	return do_it
 }
 
 fn (g Game) debug_dump() {
