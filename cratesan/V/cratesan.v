@@ -80,7 +80,7 @@ mut:
 
 struct State {
 mut:
-	map    [][]byte // TODO : make it an option (ie: map ?[][]byte)
+	map    [][]byte // TODO : make it an option ? (ie: map ?[][]byte) -- seems broken rn
 	stored int
 	px     int
 	py     int
@@ -89,23 +89,19 @@ mut:
 	moves  int
 }
 
-fn (g Game) save_state(mut state State) {
-	state.map = g.lev.map.clone()
+fn (g Game) save_state(mut state State, full bool) {
+	mut map := [][]byte{}
+	if full {
+		map = g.lev.map.clone()
+	}
+	state.map = map
 	state.stored = g.stored
 	state.px = g.px
 	state.py = g.py
 	state.time_s = g.time_s
 	state.pushes = g.pushes
 	state.moves = g.moves
-	println('saved state moves=$state.moves pushes=$state.pushes time_s=$state.time_s')
-}
-
-fn (mut g Game) test_push_undo(map [][]byte) {
-	g.undo_states << State{
-		map: map
-		px: g.px
-		py: g.py
-	}
+	g.debug_dump()
 }
 
 fn (mut g Game) restore_state(state State) {
@@ -131,17 +127,16 @@ fn (mut g Game) restore_state(state State) {
 }
 
 fn (mut g Game) save_snapshot() {
-	g.snapshot = []Snapshot{}
-	g.snapshot << Snapshot{
+	g.snapshots << Snapshot{
 		undos: g.undos
 		undo_states: g.undo_states.clone()
 	}
-	g.save_state(mut g.snapshot[0].state)
+	g.save_state(mut g.snapshots[0].state, true)
 }
 
 fn (mut g Game) load_snapshot() {
-	if g.snapshot.len > 0 {
-		snap := g.snapshot.pop()
+	if g.snapshots.len > 0 {
+		snap := g.snapshots.pop()
 		g.undos = snap.undos
 		g.undo_states = snap.undo_states
 		g.restore_state(snap.state)
@@ -162,9 +157,66 @@ fn (mut g Game) pop_undo() {
 	}
 }
 
+fn (mut g Game) push_undo(full bool) {
+	mut state := State{}
+	g.save_state(mut state, full)
+	g.undo_states << state
+}
+
+fn (mut g Game) can_move(x, y int) bool {
+	if x < g.w && y < g.h {
+		e := g.lev.map[y][x]
+		if e == empty || e == store {
+			return true
+		}
+	}
+	return false
+}
+
+// Try to move to x+dx:y+dy and also push to x+2dx:y+2dy
+fn (mut g Game) try_move(dx, dy int) bool {
+	mut do_it := false
+	x := g.px + dx
+	y := g.py + dy
+	if g.lev.map[y][x] & crate == crate {
+		to_x := x + dx
+		to_y := y + dy
+		if g.can_move(to_x, to_y) {
+			do_it = true
+			g.push_undo(true)
+			g.pushes++
+			g.lev.map[y][x] &= ~crate
+			if g.lev.map[y][x] & store == store {
+				g.stored--
+			}
+			g.lev.map[to_y][to_x] |= crate
+			if g.lev.map[to_y][to_x] & store == store {
+				g.stored++
+				if g.stored == g.crates {
+					g.status = .win
+					g.save_score()
+					save_scores(g.scores)
+				}
+			}
+		}
+	} else {
+		do_it = g.can_move(x, y)
+		if do_it {
+			g.push_undo(false)
+		}
+	}
+	if do_it {
+		g.moves++
+		g.px = x
+		g.py = y
+		g.must_draw = true
+		g.debug_dump()
+	}
+}
+
 fn (g Game) debug_dump() {
 	if g.debug {
-		println('level=$g.level crates=$g.crates stored=$g.stored moves=$g.moves pushes=$g.pushes undos=$g.undos/$g.undo_states.len time=$g.time_s')
+		println('level=$g.level crates=$g.stored/$g.crates moves=$g.moves pushes=$g.pushes undos=$g.undos/$g.undo_states.len snaps=$g.snapshots.len time=$g.time_s')
 	}
 }
 
@@ -178,7 +230,7 @@ mut:
 	lev         Level
 	undo_states []State
 	undos       int
-	snapshot    []Snapshot
+	snapshots   []Snapshot
 	// state
 	moves       int
 	pushes      int
@@ -464,56 +516,6 @@ fn new_game(title string) Game {
 	g.load_tex(i_splayer)
 	g.load_tex(i_wall)
 	return g
-}
-
-fn (mut g Game) can_move(x, y int) bool {
-	if x < g.w && y < g.h {
-		e := g.lev.map[y][x]
-		if e == empty || e == store {
-			return true
-		}
-	}
-	return false
-}
-
-// Try to move to x+dx:y+dy and also push to x+2dx:y+2dy
-fn (mut g Game) try_move(dx, dy int) {
-	mut do_it := false
-	x := g.px + dx
-	y := g.py + dy
-	mut map := [][]byte{}
-	if g.lev.map[y][x] & crate == crate {
-		to_x := x + dx
-		to_y := y + dy
-		if g.can_move(to_x, to_y) {
-			g.pushes++
-			map = g.lev.map.clone()
-			g.lev.map[y][x] &= ~crate
-			if g.lev.map[y][x] & store == store {
-				g.stored--
-			}
-			g.lev.map[to_y][to_x] |= crate
-			if g.lev.map[to_y][to_x] & store == store {
-				g.stored++
-				if g.stored == g.crates {
-					g.status = .win
-					g.save_score()
-					save_scores(g.scores)
-				}
-			}
-			do_it = true
-		}
-	} else {
-		do_it = g.can_move(x, y)
-	}
-	if do_it {
-		g.test_push_undo(map)
-		g.moves++
-		g.px = x
-		g.py = y
-		g.must_draw = true
-		g.debug_dump()
-	}
 }
 
 fn (g &Game) draw_text(x, y int, text string, tcol vsdl2.Color) {
