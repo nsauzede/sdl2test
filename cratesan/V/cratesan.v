@@ -89,48 +89,48 @@ mut:
 
 struct Game {
 mut:
-	title       string
-	quit        bool
-	status      Status
-	must_draw   bool
-	levels      []Level
-	level       int
-	snapshots   []Snapshot
-	snap        Snapshot
+	title      string
+	quit       bool
+	status     Status
+	must_draw  bool
+	levels     []Level
+	level      int
+	snapshots  []Snapshot
+	snap       Snapshot
 	//
-	undo_states []State
-	undos       int
+	// undo_states []State
+	undos      int
 	// state
-	moves       int
-	pushes      int
-	time_s      u32
-	stored      int
+	moves      int
+	pushes     int
+	time_s     u32
+	stored     int
 	// player pos
-	px          int
-	py          int
+	px         int
+	py         int
 	//
-	last_ticks  u32
-	scores      []Score
-	debug       bool
+	last_ticks u32
+	scores     []Score
+	debug      bool
 	// following are copies of current level's
-	crates      int
+	crates     int
 	// map dims
-	w           int
-	h           int
+	w          int
+	h          int
 	// block dims
-	bw          int
-	bh          int
+	bw         int
+	bh         int
 	// SDL
-	window      voidptr
-	renderer    voidptr
-	screen      &vsdl2.Surface
-	texture     voidptr
-	width       int
-	height      int
-	block_surf  []&vsdl2.Surface
-	block_text  []voidptr
+	window     voidptr
+	renderer   voidptr
+	screen     &vsdl2.Surface
+	texture    voidptr
+	width      int
+	height     int
+	block_surf []&vsdl2.Surface
+	block_text []voidptr
 	// TTF
-	font        voidptr
+	font       voidptr
 }
 
 fn (g Game) save_state(mut state State, full bool) {
@@ -171,7 +171,7 @@ fn (mut g Game) restore_state(state State) {
 fn (mut g Game) save_snapshot() {
 	g.snapshots = []Snapshot{} // limit snapshots depth to 1
 	g.snapshots << Snapshot{
-		undo_states: g.undo_states.clone()
+		undo_states: g.snap.undo_states.clone()
 	}
 	g.save_state(mut g.snapshots[0].state, true)
 	g.debug_dump()
@@ -180,7 +180,7 @@ fn (mut g Game) save_snapshot() {
 fn (mut g Game) load_snapshot() {
 	if g.snapshots.len > 0 {
 		snap := g.snapshots.pop()
-		g.undo_states = snap.undo_states
+		g.snap.undo_states = snap.undo_states
 		g.restore_state(snap.state)
 		g.must_draw = true
 		save_scores(g.scores)
@@ -189,8 +189,8 @@ fn (mut g Game) load_snapshot() {
 }
 
 fn (mut g Game) pop_undo() {
-	if g.undo_states.len > 0 {
-		state := g.undo_states.pop()
+	if g.snap.undo_states.len > 0 {
+		state := g.snap.undo_states.pop()
 		g.restore_state(state)
 		g.must_draw = true
 		save_scores(g.scores)
@@ -202,7 +202,7 @@ fn (mut g Game) pop_undo() {
 fn (mut g Game) push_undo(full bool) {
 	mut state := State{}
 	g.save_state(mut state, full)
-	g.undo_states << state
+	g.snap.undo_states << state
 }
 
 fn (mut g Game) can_move(x, y int) bool {
@@ -259,7 +259,7 @@ fn (mut g Game) try_move(dx, dy int) bool {
 
 fn (g Game) debug_dump() {
 	if g.debug {
-		println('level=$g.level crates=$g.stored/$g.crates moves=$g.moves pushes=$g.pushes undos=$g.undos/$g.undo_states.len snaps=$g.snapshots.len time=$g.time_s')
+		println('level=$g.level crates=$g.stored/$g.crates moves=$g.moves pushes=$g.pushes undos=$g.undos/$g.snap.undo_states.len snaps=$g.snapshots.len time=$g.time_s')
 	}
 }
 
@@ -384,7 +384,7 @@ fn (mut g Game) set_level(level int) bool {
 				map: g.levels[level].map.clone()
 			}
 		}
-		g.undo_states = []State{}
+		g.snap.undo_states = []State{}
 		g.undos = 0
 		g.snapshots = []Snapshot{}
 		g.crates = g.levels[level].crates
