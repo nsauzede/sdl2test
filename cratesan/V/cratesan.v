@@ -51,16 +51,14 @@ enum Status {
 }
 
 struct Level {
+	crates int // number of crates
+	w      int // map dims
+	h      int // map dims
 mut:
-	map    [][]byte
-	crates int
-	stored int
-	// map dims
-	w      int
-	h      int
-	// player pos
-	px     int
-	py     int
+	map    [][]byte // map
+	stored int // number of stored crates
+	px     int // player pos
+	py     int // player pos
 }
 
 struct Score {
@@ -385,6 +383,7 @@ fn (mut g Game) set_level(level int) bool {
 		g.lev.map = g.levels[level].map.clone()
 		g.undo_states = []State{}
 		g.undos = 0
+		g.snapshots = []Snapshot{}
 		g.crates = g.levels[level].crates
 		g.stored = g.levels[level].stored
 		g.w = g.levels[level].w
