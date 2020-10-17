@@ -94,10 +94,12 @@ mut:
 	status      Status
 	must_draw   bool
 	levels      []Level
-	lev         Level
+	level       int
+	snapshots   []Snapshot
+	snap        Snapshot
+	//
 	undo_states []State
 	undos       int
-	snapshots   []Snapshot
 	// state
 	moves       int
 	pushes      int
@@ -106,7 +108,7 @@ mut:
 	// player pos
 	px          int
 	py          int
-	level       int
+	//
 	last_ticks  u32
 	scores      []Score
 	debug       bool
@@ -134,7 +136,7 @@ mut:
 fn (g Game) save_state(mut state State, full bool) {
 	mut map := [][]byte{}
 	if full {
-		map = g.lev.map.clone()
+		map = g.snap.state.map.clone()
 	}
 	state.map = map
 	state.stored = g.stored
@@ -147,7 +149,7 @@ fn (g Game) save_state(mut state State, full bool) {
 
 fn (mut g Game) restore_state(state State) {
 	if state.map.len > 0 {
-		g.lev.map = state.map
+		g.snap.state.map = state.map
 	}
 	g.pushes = state.pushes
 	g.stored = state.stored
@@ -205,7 +207,7 @@ fn (mut g Game) push_undo(full bool) {
 
 fn (mut g Game) can_move(x, y int) bool {
 	if x < g.w && y < g.h {
-		e := g.lev.map[y][x]
+		e := g.snap.state.map[y][x]
 		if e == empty || e == store {
 			return true
 		}
@@ -218,19 +220,19 @@ fn (mut g Game) try_move(dx, dy int) bool {
 	mut do_it := false
 	x := g.px + dx
 	y := g.py + dy
-	if g.lev.map[y][x] & crate == crate {
+	if g.snap.state.map[y][x] & crate == crate {
 		to_x := x + dx
 		to_y := y + dy
 		if g.can_move(to_x, to_y) {
 			do_it = true
 			g.push_undo(true)
 			g.pushes++
-			g.lev.map[y][x] &= ~crate
-			if g.lev.map[y][x] & store == store {
+			g.snap.state.map[y][x] &= ~crate
+			if g.snap.state.map[y][x] & store == store {
 				g.stored--
 			}
-			g.lev.map[to_y][to_x] |= crate
-			if g.lev.map[to_y][to_x] & store == store {
+			g.snap.state.map[to_y][to_x] |= crate
+			if g.snap.state.map[to_y][to_x] & store == store {
 				g.stored++
 				if g.stored == g.crates {
 					g.status = .win
@@ -377,8 +379,11 @@ fn (mut g Game) set_level(level int) bool {
 		g.status = .play
 		g.must_draw = true
 		g.level = level
-		g.lev = g.levels[level]
-		g.lev.map = g.levels[level].map.clone()
+		g.snap = Snapshot{
+			state: State{
+				map: g.levels[level].map.clone()
+			}
+		}
 		g.undo_states = []State{}
 		g.undos = 0
 		g.snapshots = []Snapshot{}
@@ -551,7 +556,7 @@ fn (mut g Game) draw_map() {
 		C.SDL_RenderCopy(g.renderer, g.texture, voidptr(0), voidptr(0))
 		x := (width - g.w * g.bw) / 2
 		y := 0
-		for j, line in g.lev.map {
+		for j, line in g.snap.state.map {
 			for i, e in line {
 				rect = vsdl2.Rect{x + i * g.bw, y + j * g.bh, g.bw, g.bh}
 				tex := match e {
