@@ -73,7 +73,6 @@ struct Snapshot {
 mut:
 	state       State
 	undo_states []State
-	undos       int
 }
 
 struct State {
@@ -85,6 +84,7 @@ mut:
 	time_s u32
 	pushes int
 	moves  int
+	undos  int
 }
 
 struct Game {
@@ -169,7 +169,6 @@ fn (mut g Game) restore_state(state State) {
 fn (mut g Game) save_snapshot() {
 	g.snapshots = []Snapshot{} // limit snapshots depth to 1
 	g.snapshots << Snapshot{
-		undos: g.undos
 		undo_states: g.undo_states.clone()
 	}
 	g.save_state(mut g.snapshots[0].state, true)
@@ -179,7 +178,6 @@ fn (mut g Game) save_snapshot() {
 fn (mut g Game) load_snapshot() {
 	if g.snapshots.len > 0 {
 		snap := g.snapshots.pop()
-		g.undos = snap.undos
 		g.undo_states = snap.undo_states
 		g.restore_state(snap.state)
 		g.must_draw = true
@@ -190,11 +188,11 @@ fn (mut g Game) load_snapshot() {
 
 fn (mut g Game) pop_undo() {
 	if g.undo_states.len > 0 {
-		g.undos++
 		state := g.undo_states.pop()
 		g.restore_state(state)
 		g.must_draw = true
 		save_scores(g.scores)
+		g.undos++
 		g.debug_dump()
 	}
 }
