@@ -52,9 +52,9 @@ enum Status {
 
 struct Level {
 	crates int // number of crates
+mut:
 	w      int // map dims
 	h      int // map dims
-mut:
 	map    [][]byte // map
 	stored int // number of stored crates
 	px     int // player pos
@@ -88,39 +88,22 @@ mut:
 }
 
 struct Game {
-mut:
 	title      string
+mut:
 	quit       bool
 	status     Status
 	must_draw  bool
+	// Game levels
 	levels     []Level
-	level      int
-	snapshots  []Snapshot
-	snap       Snapshot
-	//
-	// undo_states []State
-	undos      int
-	// state
-	moves      int
-	pushes     int
-	time_s     u32
-	stored     int
-	// player pos
-	px         int
-	py         int
-	//
+	level      int // current level
+	snapshots  []Snapshot // saved snapshots (currently only one max)
+	snap       Snapshot // current snapshot : state + undo_states
 	last_ticks u32
 	scores     []Score
 	debug      bool
-	// following are copies of current level's
-	crates     int
-	// map dims
-	w          int
-	h          int
-	// block dims
-	bw         int
-	bh         int
-	// SDL
+	bw         int // block dims
+	bh         int // block dims
+	// SDL stuff
 	window     voidptr
 	renderer   voidptr
 	screen     &vsdl2.Surface
@@ -134,31 +117,23 @@ mut:
 }
 
 fn (g Game) save_state(mut state State, full bool) {
+	unsafe {
+		*state = g.snap.state
+	}
 	mut map := [][]byte{}
 	if full {
 		map = g.snap.state.map.clone()
 	}
 	state.map = map
-	state.stored = g.stored
-	state.px = g.px
-	state.py = g.py
-	state.time_s = g.time_s
-	state.pushes = g.pushes
-	state.moves = g.moves
 }
 
 fn (mut g Game) restore_state(state State) {
-	if state.map.len > 0 {
-		g.snap.state.map = state.map
+	map := g.snap.state.map
+	g.snap.state = state
+	if state.map.len == 0 {
+		g.snap.state.map = map
 	}
-	g.pushes = state.pushes
-	g.stored = state.stored
-	g.moves = state.moves
-	g.px = state.px
-	g.py = state.py
-	g.time_s = state.time_s
-	// remove current level score, if win
-	if g.status == .win {
+	if g.status == .win { // remove current level score, if win
 		for i, score in g.scores {
 			if score.level == g.level {
 				println('deleting score $i : $score')
@@ -194,7 +169,7 @@ fn (mut g Game) pop_undo() {
 		g.restore_state(state)
 		g.must_draw = true
 		save_scores(g.scores)
-		g.undos++
+		g.snap.state.undos++
 		g.debug_dump()
 	}
 }
@@ -206,7 +181,7 @@ fn (mut g Game) push_undo(full bool) {
 }
 
 fn (mut g Game) can_move(x, y int) bool {
-	if x < g.w && y < g.h {
+	if x < g.levels[g.level].w && y < g.levels[g.level].h {
 		e := g.snap.state.map[y][x]
 		if e == empty || e == store {
 			return true
@@ -218,23 +193,23 @@ fn (mut g Game) can_move(x, y int) bool {
 // Try to move to x+dx:y+dy and also push to x+2dx:y+2dy
 fn (mut g Game) try_move(dx, dy int) bool {
 	mut do_it := false
-	x := g.px + dx
-	y := g.py + dy
+	x := g.snap.state.px + dx
+	y := g.snap.state.py + dy
 	if g.snap.state.map[y][x] & crate == crate {
 		to_x := x + dx
 		to_y := y + dy
 		if g.can_move(to_x, to_y) {
 			do_it = true
 			g.push_undo(true)
-			g.pushes++
+			g.snap.state.pushes++
 			g.snap.state.map[y][x] &= ~crate
 			if g.snap.state.map[y][x] & store == store {
-				g.stored--
+				g.snap.state.stored--
 			}
 			g.snap.state.map[to_y][to_x] |= crate
 			if g.snap.state.map[to_y][to_x] & store == store {
-				g.stored++
-				if g.stored == g.crates {
+				g.snap.state.stored++
+				if g.snap.state.stored == g.levels[g.level].crates {
 					g.status = .win
 					g.save_score()
 					save_scores(g.scores)
@@ -248,9 +223,9 @@ fn (mut g Game) try_move(dx, dy int) bool {
 		}
 	}
 	if do_it {
-		g.moves++
-		g.px = x
-		g.py = y
+		g.snap.state.moves++
+		g.snap.state.px = x
+		g.snap.state.py = y
 		g.must_draw = true
 		g.debug_dump()
 	}
@@ -259,7 +234,7 @@ fn (mut g Game) try_move(dx, dy int) bool {
 
 fn (g Game) debug_dump() {
 	if g.debug {
-		println('level=$g.level crates=$g.stored/$g.crates moves=$g.moves pushes=$g.pushes undos=$g.undos/$g.snap.undo_states.len snaps=$g.snapshots.len time=$g.time_s')
+		println('level=$g.level crates=$g.snap.state.stored/$g.levels[g.level].crates moves=$g.snap.state.moves pushes=$g.snap.state.pushes undos=$g.snap.state.undos/$g.snap.undo_states.len snaps=$g.snapshots.len time=$g.snap.state.time_s')
 	}
 }
 
@@ -381,24 +356,23 @@ fn (mut g Game) set_level(level int) bool {
 		g.level = level
 		g.snap = Snapshot{
 			state: State{
-				map: g.levels[level].map.clone()
+				map: g.levels[g.level].map.clone()
 			}
 		}
 		g.snap.undo_states = []State{}
-		g.undos = 0
+		g.snap.state.undos = 0
 		g.snapshots = []Snapshot{}
-		g.crates = g.levels[level].crates
-		g.stored = g.levels[level].stored
-		g.w = g.levels[level].w
-		g.h = g.levels[level].h
-		g.moves = 0
-		g.pushes = 0
-		g.time_s = 0
+		g.snap.state.stored = g.levels[g.level].stored
+		g.levels[g.level].w = g.levels[g.level].w
+		g.levels[g.level].h = g.levels[g.level].h
+		g.snap.state.moves = 0
+		g.snap.state.pushes = 0
+		g.snap.state.time_s = 0
 		g.last_ticks = vsdl2.get_ticks()
-		g.px = g.levels[level].px
-		g.py = g.levels[level].py
-		g.bw = g.width / g.w
-		g.bh = (g.height - text_size * text_ratio) / g.h
+		g.snap.state.px = g.levels[g.level].px
+		g.snap.state.py = g.levels[g.level].py
+		g.bw = g.width / g.levels[g.level].w
+		g.bh = (g.height - text_size * text_ratio) / g.levels[g.level].h
 		g.debug_dump()
 		return true
 	} else {
@@ -453,9 +427,9 @@ fn (mut g Game) save_score() {
 	if push_score {
 		s := Score{
 			level: g.level
-			pushes: g.pushes
-			moves: g.moves
-			time_s: g.time_s
+			pushes: g.snap.state.pushes
+			moves: g.snap.state.moves
+			time_s: g.snap.state.time_s
 		}
 		g.scores << s
 	}
@@ -539,7 +513,7 @@ fn (mut g Game) draw_map() {
 	curr_ticks := vsdl2.get_ticks()
 	if curr_ticks > g.last_ticks + 1000 {
 		if g.status == .play {
-			g.time_s += (curr_ticks - g.last_ticks) / 1000
+			g.snap.state.time_s += (curr_ticks - g.last_ticks) / 1000
 		}
 		g.last_ticks = curr_ticks
 		g.must_draw = true
@@ -554,17 +528,17 @@ fn (mut g Game) draw_map() {
 		vsdl2.fill_rect(g.screen, &rect, white)
 		C.SDL_UpdateTexture(g.texture, 0, g.screen.pixels, g.screen.pitch)
 		C.SDL_RenderCopy(g.renderer, g.texture, voidptr(0), voidptr(0))
-		x := (width - g.w * g.bw) / 2
+		x := (width - g.levels[g.level].w * g.bw) / 2
 		y := 0
 		for j, line in g.snap.state.map {
 			for i, e in line {
 				rect = vsdl2.Rect{x + i * g.bw, y + j * g.bh, g.bw, g.bh}
 				tex := match e {
 					empty {
-						if g.px == i && g.py == j { g.block_text[n_player] } else { g.block_text[n_empty] }
+						if g.snap.state.px == i && g.snap.state.py == j { g.block_text[n_player] } else { g.block_text[n_empty] }
 					}
 					store {
-						if g.px == i && g.py == j { g.block_text[n_splayer] } else { g.block_text[n_store] }
+						if g.snap.state.px == i && g.snap.state.py == j { g.block_text[n_splayer] } else { g.block_text[n_store] }
 					}
 					crate {
 						g.block_text[n_crate]
@@ -589,10 +563,10 @@ fn (mut g Game) draw_map() {
 			.pause { '*PAUSE* Press Space..' }
 			else { '' }
 		}
-		ts := g.time_s % 60
-		tm := (g.time_s / 60) % 60
-		th := g.time_s / 3600
-		g.draw_text(0, g.height - text_size * text_ratio - 4, '${g.level+1:02d}| moves: ${g.moves:04d} pushes: ${g.pushes:04d} time:$th:${tm:02}:${ts:02} $status',
+		ts := g.snap.state.time_s % 60
+		tm := (g.snap.state.time_s / 60) % 60
+		th := g.snap.state.time_s / 3600
+		g.draw_text(0, g.height - text_size * text_ratio - 4, '${g.level+1:02d}| moves: ${g.snap.state.moves:04d} pushes: ${g.snap.state.pushes:04d} time:$th:${tm:02}:${ts:02} $status',
 			text_color)
 		C.SDL_RenderPresent(g.renderer)
 		g.must_draw = false
