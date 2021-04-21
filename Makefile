@@ -8,7 +8,8 @@ TARGET+=main_cpp.exe
 TARGET+=main_c.exe
 TARGET+=mainmix_c.exe
 TARGET+=maingl_c.exe
-TARGET+=main_v.exe
+#TARGET+=main_v.exe
+TARGET+=nsauzede/vsdl2/examples/main_v.exe
 #TARGET+=tetris_v.exe
 #TARGET+=tetrisnomix_v.exe
 #TARGET+=tvintris.exe
@@ -60,7 +61,8 @@ GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
 
 all: SDL_CHECK SUBM_CHECK VMOD_CHECK $(TARGET)
 
-VMOD_CHECK: V_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
+#VMOD_CHECK: V_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
+VMOD_CHECK: V_CHECK VSDL2_CHECK VNK_CHECK
 
 nsauzede/vig/README.md:
 	git submodule deinit --force --all
