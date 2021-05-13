@@ -19,7 +19,7 @@ TARGET+=nsauzede/vsdl2/examples/main_v.exe
 TARGET+=glfnt.exe
 ifndef WIN32
 TARGET+=mainnk_v.exe
-#TARGET+=mainig_v.exe
+TARGET+=mainig_v.exe
 endif
 
 #CFLAGS:=
