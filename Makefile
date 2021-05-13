@@ -116,12 +116,12 @@ $(V):
 
 %ig_v.exe: CFLAGS+=-Insauzede/vig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API= $(SDL_FLAGS)
 %ig_v.exe: LDFLAGS=
-%ig_v.exe: LDLIBS=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.so nsauzede/vig/cimgui.so $(SDL_LIBS) -lGL -lGLEW -lm
+%ig_v.exe: LDLIBS=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/cimgui.cpp.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/imgui/*.cpp.o $(SDL_LIBS) -lGL -lGLEW -lm
 
 mainig.tmp.c: nsauzede/vig/examples/mainig/mainig.v | VIG_CHECK
 	$(V) -o $@ $(VFLAGS) $^
 mainig_v.exe: mainig.tmp.o
-	$(CC) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 $(HOME)/.vmodules/nsauzede/vig/v.mod:
 	$(V) install nsauzede.vig
