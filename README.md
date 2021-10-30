@@ -2,14 +2,12 @@
 Small examples of libSDL2 usage in V, C and C++ languages.
 Historically, the purpose was to evaluate the changes from SDL1 to SDL2.
 
-*UPDATE* for those interested in the V SDL2 wrapper, a separate, cleaned up 'vsdl2' V module has been officially registered on vpm.best : <a href='https://vpm.best/mod/nsauzede.vsdl2'>here</a>
+Note that the V modules wrapping : SDL2, Imgui and Nuklear have been moved to their separate git repo, and are still used/demonstrated here as git sub-modules.
 
-The git repo : <a href='https://github.com/nsauzede/vsdl2'>here</a>
-
-It also contains an updated tvintris example
-
-Note that this repo still holds the experiments around SDL2/OpenGL and V (and others)
-Once they stabilize, the enhancements will be reported to the nsauzede.vsdl2 VPM module.
+You can find their own repos here:
+- [vsdl2 SDL2 V wrapper](https://github.com/nsauzede/vsdl2)
+- [vig ImGui V wrapper](https://github.com/nsauzede/vig)
+- [vnk Nuklear V wrapper](https://github.com/nsauzede/vnk)
 
 ----
 - cratesan is a Sokoban clone, in Rust and V
