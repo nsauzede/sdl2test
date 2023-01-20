@@ -41,6 +41,10 @@ Ubuntu :
 And optionally for extra tests :
 `$ sudo apt install libglfw3-dev libglm-dev libfreetype-dev`
 
+Archlinux:
+`$ sudo pacman -S glew glm`
+And maybe other similar packages as for Ubuntu above?
+
 ClearLinux : (maybe miss libopenssl dev ?)
 `$ sudo swupd bundle-add devpkg-SDL2_ttf devpkg-SDL2_mixer`
 

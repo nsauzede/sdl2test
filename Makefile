@@ -59,6 +59,9 @@ endif
 GLADFLAGS:=-I ../v/thirdparty/ -I ../stb
 GLADLIBS:=../v/thirdparty/glad/glad.o -l dl -lglfw
 
+LDLIBS+=-L. -lgc
+AR:=ar
+
 all: SDL_CHECK SUBM_CHECK VMOD_CHECK $(TARGET)
 
 #VMOD_CHECK: V_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
@@ -69,6 +72,8 @@ nsauzede/vig/README.md:
 	git submodule update --init --recursive
 
 SUBM_CHECK: nsauzede/vig/README.md
+
+GC_CHECK: libgc.a
 
 ifdef WIN32
 GLLIBS:=-lGLEW32 -lopengl32 -lfreetype -lglfw3 -pthread
@@ -83,6 +88,11 @@ glfnt.exe: glfnt.cpp
 %gl_v.exe: LDLIBS+=$(GLLDLIBS)
 %glad.exe: CXXFLAGS+=$(GLADFLAGS)
 %glad.exe: LDLIBS+=$(GLADLIBS)
+
+libgc.o: v/thirdparty/libgc/gc.c
+	$(CC) -c $< -o $@
+libgc.a: libgc.o
+	$(AR) cr $@ $^
 
 include sdl.mak
 ifeq ($(SDL_VER),1)
@@ -108,7 +118,7 @@ CFLAGS+=-pthread
 CXXFLAGS+=-pthread
 LDFLAGS+=-pthread
 
-V_CHECK: $(V)
+V_CHECK: $(V) GC_CHECK
 
 $(V):
 	git clone https://github.com/nsauzede/v
@@ -116,7 +126,7 @@ $(V):
 
 %ig_v.exe: CFLAGS+=-Insauzede/vig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API= $(SDL_FLAGS)
 %ig_v.exe: LDFLAGS=
-%ig_v.exe: LDLIBS=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/cimgui.cpp.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/imgui/*.cpp.o $(SDL_LIBS) -lGL -lGLEW -lm -ldl
+%ig_v.exe: LDLIBS+=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/cimgui.cpp.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/imgui/*.cpp.o $(SDL_LIBS) -lGL -lGLEW -lm -ldl
 
 mainig.tmp.c: nsauzede/vig/examples/mainig/mainig.v | VIG_CHECK
 	$(V) -o $@ $(VFLAGS) $^
@@ -144,7 +154,7 @@ endif
 
 %nk_v.exe: CFLAGS+=-Insauzede/vnk -DNK_INCLUDE_FIXED_TYPES -DNK_INCLUDE_STANDARD_IO -DNK_INCLUDE_STANDARD_VARARGS -DNK_INCLUDE_DEFAULT_ALLOCATOR -DNK_INCLUDE_VERTEX_BUFFER_OUTPUT -DNK_INCLUDE_FONT_BAKING -DNK_INCLUDE_DEFAULT_FONT -DNK_IMPLEMENTATION -DNK_SDL_GL3_IMPLEMENTATION $(SDL_FLAGS)
 %nk_v.exe: LDFLAGS=
-%nk_v.exe: LDLIBS=$(SDL_LIBS) $(NKLDLIBS) -lm
+%nk_v.exe: LDLIBS+=$(SDL_LIBS) $(NKLDLIBS) -lm
 
 $(HOME)/.vmodules/nsauzede/vsdl2/v.mod:
 	$(V) install nsauzede.vsdl2
