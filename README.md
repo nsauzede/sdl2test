@@ -56,14 +56,16 @@ Eg: on Linux:
 ```
 sdl2test$ make
 ```
-Can then run eg: VNK demo:
+Can then run eg: VNK, VIG demo:
 ```
 sdl2test$ ./mainnk.exe
+sdl2test$ ./mainig.exe
 ```
 
 # Misc
 Makefile auto-detects available SDL version (2 or 1)
 
-- vsdl : naive V wrapper for SDL2 binding
+Old notes:
+- vsdl : naive V wrapper for SDL2 binding (obsolete - rather see nsauzede/vsdl2)
 - CSDL : small C++ class to abstract SDL1/2
-- various C and V examples to
+- various C and V examples

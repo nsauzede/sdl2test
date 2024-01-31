@@ -64,7 +64,7 @@ AR:=ar
 
 all: SDL_CHECK SUBM_CHECK VMOD_CHECK $(TARGET)
 
-#VMOD_CHECK: V_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
+VMOD_CHECK: V_CHECK NSAUZEDE_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
 VMOD_CHECK: V_CHECK NSAUZEDE_CHECK VSDL2_CHECK VNK_CHECK
 
 nsauzede/vig/README.md:
@@ -126,7 +126,7 @@ $(V):
 
 %ig_v.exe: CFLAGS+=-Insauzede/vig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API= $(SDL_FLAGS)
 %ig_v.exe: LDFLAGS=
-%ig_v.exe: LDLIBS+=nsauzede/vig/imgui_impl_sdl.o nsauzede/vig/imgui_impl_opengl3.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/cimgui.cpp.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/imgui/*.cpp.o $(SDL_LIBS) -lGL -lGLEW -lm -ldl
+%ig_v.exe: LDLIBS+=nsauzede/vig/imgui_impl_sdl2.o nsauzede/vig/imgui_impl_opengl3.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/cimgui.cpp.o nsauzede/vig/cimgui/bld/CMakeFiles/cimgui.dir/imgui/*.cpp.o $(SDL_LIBS) -lGL -lGLEW -lm -ldl
 
 mainig.tmp.c: nsauzede/vig/examples/mainig/mainig.v | VIG_CHECK
 	$(V) -o $@ $(VFLAGS) $^
