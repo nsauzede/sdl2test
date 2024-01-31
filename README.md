@@ -51,6 +51,15 @@ ClearLinux : (maybe miss libopenssl dev ?)
 Windows/MSYS2 : (maybe miss libopenssl dev ?)
 `$ pacman -S mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer`
 
+# How to build all (including vsdl2, vnk, vig..)
+Eg: on Linux:
+```
+sdl2test$ make
+```
+Can then run eg: VNK demo:
+```
+sdl2test$ ./mainnk.exe
+```
 
 # Misc
 Makefile auto-detects available SDL version (2 or 1)
