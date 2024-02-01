@@ -64,8 +64,7 @@ AR:=ar
 
 all: SDL_CHECK SUBM_CHECK VMOD_CHECK $(TARGET)
 
-VMOD_CHECK: V_CHECK NSAUZEDE_CHECK VSDL2_CHECK VIG_CHECK VNK_CHECK
-VMOD_CHECK: V_CHECK NSAUZEDE_CHECK VSDL2_CHECK VNK_CHECK
+VMOD_CHECK: V_CHECK NSAUZEDE_CHECK VSDL2_CHECK VNK_CHECK VIG_CHECK
 
 nsauzede/vig/README.md:
 	git submodule deinit --force --all
@@ -135,7 +134,7 @@ mainig_v.exe: mainig.tmp.o
 
 NSAUZEDE_CHECK:
 	mkdir -p $(HOME)/.vmodules
-	\rm -Rf $(HOME)/.vmodules/nsauzede
+	rm -Rf $(HOME)/.vmodules/nsauzede
 	ln -sf $(PWD)/nsauzede $(HOME)/.vmodules
 
 $(HOME)/.vmodules/nsauzede/vig/v.mod:
