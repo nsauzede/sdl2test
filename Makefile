@@ -120,7 +120,7 @@ LDFLAGS+=-pthread
 V_CHECK: $(V) GC_CHECK
 
 $(V):
-	git clone https://github.com/nsauzede/v
+	git clone --filter=tree:0 https://github.com/nsauzede/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
 %ig_v.exe: CFLAGS+=-Insauzede/vig -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1 -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS=1 -DIMGUI_IMPL_API= $(SDL_FLAGS)
