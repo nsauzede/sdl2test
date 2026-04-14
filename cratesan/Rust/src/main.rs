@@ -240,7 +240,8 @@ impl<'ttf> Game<'ttf> {
 		height: usize,
 	) -> Game<'ttf> {
 		let levels = Game::load_levels();
-		let ttf_file = root_dir.join("res").join("fonts").join(FONT_FILE);
+		//let ttf_file = root_dir.join("res").join("fonts").join(FONT_FILE);
+		let ttf_file = root_dir.join("..").join("fonts").join(FONT_FILE);
 		let font = ttf_context
 			.load_font(ttf_file, (TEXT_SIZE * TEXT_RATIO) as u16)
 			.expect("Couldn't load the font");
